@@ -63,10 +63,18 @@ function DEV_storageControl() {
 // ==========COMPONENTS============
 function TextBubble(text : string) {
   return (
-    <div className='flex rounded-lg min-w-fit justify-end bg-slate-500 m-0.5'>
-      <p className='flex m-1 justify-end'>
-        {text}
-      </p>
+    <div className='rounded-lg w-fit bg-slate-500 m-0.5 p-1 text-right'>
+      {text}
+    </div>
+  )
+}
+
+function PrevTexts(textBuffer: string[]) {
+  return (
+    <div id="PrevTexts" className="flex flex-col-reverse w-full overflow-y-scroll items-end">
+      {textBuffer.map((text) =>
+        TextBubble(text)
+      )}
     </div>
   )
 }
@@ -74,7 +82,7 @@ function TextBubble(text : string) {
 function InputBox(textBuffer: string[], setTextBuffer: (n:any) => any) {
 
   return (
-    <div className="flex order-first ">
+    <div id="InputBox" className="flex order-first ">
       <input className="h-8 m-0.5 rounded-t-lg outline-none bg-slate-600"
         type="text" placeholder="..."
         id='input_box'
@@ -83,26 +91,14 @@ function InputBox(textBuffer: string[], setTextBuffer: (n:any) => any) {
   )
 }
 
-
-
-function PrevTexts(textBuffer: string[]) {
-  return (
-    <>
-      {textBuffer.map((text) =>
-        TextBubble(text)
-      )}
-    </>
-  )
-}
-
-function TextBoxArea() {
+function TextArea() {
 
   // initTextBuffers(setTextBuffer);
   const [textBuffer, setTextBuffer] = useState(prevTextsBuffer)
 
   return (
 
-    <div className='flex h-[35rem] w-5/6 max-w-md min-w-fit items-center justify-items-end flex-col-reverse rounded-2xl bg-slate-900'>
+    <div id="TextArea" className='flex h-[35rem] w-5/6 max-w-md min-w-fit items-center justify-items-end flex-col-reverse rounded-2xl bg-slate-900'>
       {/* {PrevTexts(textBuffer)} */}
       {PrevTexts(textBuffer)}
       {/* <div className="chat chat-start">
@@ -154,7 +150,7 @@ export default function Home() {
         </div>
       </div>
 
-      <TextBoxArea />
+      <TextArea />
 
 
 
