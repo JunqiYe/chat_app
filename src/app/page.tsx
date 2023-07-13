@@ -11,7 +11,7 @@ let prevTextsBuffer:string[] = []
 // ==========INIT============
 function initTextBuffers() {
 
-  prevTextsBuffer = storage.getPrevTexts(test_userID, 10)
+  prevTextsBuffer = storage.getPrevTexts(test_userID, 15)
   console.log(prevTextsBuffer)
 
   // setTextBuffer(prevTextsBuffer)
@@ -23,7 +23,7 @@ function updateTextBuffers(text: string) {
 
 
 // ==========HANDLER============
-function handleClientSendText(e: React.KeyboardEvent) {
+function handleClientSendText(e: React.KeyboardEvent, textBuffer: string[], setTextBuffer: (n:any)=>any){
   if (e.code == 'Enter') {
     let dom = document.getElementById('input_box') as HTMLInputElement
     var text = ""
@@ -36,6 +36,12 @@ function handleClientSendText(e: React.KeyboardEvent) {
       console.log(text)
       storage.storeText(test_userID, text)
       updateTextBuffers(text)
+      setTextBuffer( // Replace the state
+        [ // with a new array
+        text, // and one new item at the end
+        ...textBuffer // that contains all the old items
+        ]
+      )
     }
   }
 
@@ -65,14 +71,14 @@ function TextBubble(text : string) {
   )
 }
 
-function InputBox() {
+function InputBox(textBuffer: string[], setTextBuffer: (n:any) => any) {
 
   return (
     <div className="flex order-first ">
       <input className="h-8 m-0.5 rounded-t-lg outline-none bg-slate-600"
         type="text" placeholder="..."
         id='input_box'
-        onKeyDown={handleClientSendText} />
+        onKeyDown={(event)=>handleClientSendText(event, textBuffer, setTextBuffer)} />
     </div>
   )
 }
@@ -91,18 +97,18 @@ function PrevTexts(textBuffer: string[]) {
 
 function TextBoxArea() {
 
-  // const [textBuffer, setTextBuffer] = useState([])
   // initTextBuffers(setTextBuffer);
+  const [textBuffer, setTextBuffer] = useState(prevTextsBuffer)
 
   return (
 
     <div className='flex h-[35rem] w-5/6 max-w-md min-w-fit items-center justify-items-end flex-col-reverse rounded-2xl bg-slate-900'>
       {/* {PrevTexts(textBuffer)} */}
-      {PrevTexts(prevTextsBuffer)}
+      {PrevTexts(textBuffer)}
       {/* <div className="chat chat-start">
         <div className="chat-bubble">It's over Anakin, <br/>I have the high ground.</div>
       </div> */}
-      {InputBox()}
+      {InputBox(textBuffer, setTextBuffer)}
     </div>
 
   )
