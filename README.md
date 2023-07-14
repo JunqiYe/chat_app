@@ -40,11 +40,17 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - [x] scolling through text
 - [x] hide text that are out of screen
 
-- [ ] change underling store for sent and received text
-- [ ] display text bubble according to send and received text
+- [x] change underling store for sent and received text
+- [x] display text bubble according to send and received text
 
-- [ ] networking text (TCP vs UDP)
 
+
+### Frontend
 - [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
 
+### Backend
+- [ ] networking text (HTTP)
+
+### bug fixes
+- ~~issue where sending the first text result in two text bubble~~
 

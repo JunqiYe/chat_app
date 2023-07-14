@@ -9,20 +9,20 @@ let test_userID = 'jy98'
 let test_target_userID = 'jy98_clone'
 
 let storage = new ChatStorage()
-let prevTextsBuffer:TextData[] = []
+// let prevTextsBuffer:TextData[] = []
 
 // ==========INIT============
 function initTextBuffers() {
 
-  prevTextsBuffer = storage.getPrevTexts(test_userID, test_target_userID, 30)
-  console.log(prevTextsBuffer)
+  // prevTextsBuffer = storage.getPrevTexts(test_userID, test_target_userID, 30)
+  // console.log("init buffer", prevTextsBuffer)
 
   // setTextBuffer(prevTextsBuffer)
 }
 
-function updateTextBuffers(text: TextData) {
-  prevTextsBuffer.push(text)
-}
+// function updateTextBuffers(text: TextData) {
+//   prevTextsBuffer.push(text)
+// }
 
 
 // ==========HANDLER============
@@ -35,12 +35,11 @@ function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], se
       dom.value = ''
 
       if (text.text.length > 0) {
-        console.log(text)
+        console.log('send ',text)
         storage.storeText(test_userID, test_target_userID,text)
-        updateTextBuffers(text)
         setTextBuffer( // Replace the state
           [ // with a new array
-          text, // and one new item at the end
+          text, // and one new item at the front
           ...textBuffer // that contains all the old items
           ]
         )
@@ -52,6 +51,7 @@ function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], se
 
 function handleClearStorage() {
   storage.removeAll()
+  window.location.reload()
 }
 
 function DEV_storageControl() {
@@ -73,9 +73,6 @@ function UserTitle() {
 }
 
 function TextBubble(text : TextData) {
-
-  const isRecieved = () => {return false}
-
 
   if (text.send) {
     return (
@@ -117,7 +114,7 @@ function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
 function TextArea() {
 
   // initTextBuffers(setTextBuffer);
-  const [textBuffer, setTextBuffer] = useState(prevTextsBuffer)
+  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(test_userID, test_target_userID, 30))
 
   return (
 
@@ -137,7 +134,7 @@ function TextArea() {
 
 
 export default function Home() {
-  initTextBuffers();
+  // initTextBuffers();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

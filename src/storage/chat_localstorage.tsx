@@ -67,7 +67,7 @@ export class ChatStorage implements chatStorageService{
         let rst:TextData[] = []
         let convTextCount = this.getConvCounter(convID)
         while (count > 0 && convTextCount >= 0) {
-            var text = this.getText(userID, convTextCount)
+            var text = this.getText(convID, convTextCount)
             if (text != null) {
                 rst.push(text)
             }
