@@ -3,47 +3,48 @@
 import Image from 'next/image'
 import React, {KeyboardEvent, useState} from 'react';
 import {ChatStorage} from '../storage/chat_localstorage'
+import {TextData} from "../storage/text_data"
 
 let test_userID = 'jy98'
 let test_target_userID = 'jy98_clone'
 
 let storage = new ChatStorage()
-let prevTextsBuffer:string[] = []
+let prevTextsBuffer:TextData[] = []
 
 // ==========INIT============
 function initTextBuffers() {
 
-  prevTextsBuffer = storage.getPrevTexts(test_userID, 30)
+  prevTextsBuffer = storage.getPrevTexts(test_userID, test_target_userID, 30)
   console.log(prevTextsBuffer)
 
   // setTextBuffer(prevTextsBuffer)
 }
 
-function updateTextBuffers(text: string) {
+function updateTextBuffers(text: TextData) {
   prevTextsBuffer.push(text)
 }
 
 
 // ==========HANDLER============
-function handleClientSendText(e: React.KeyboardEvent, textBuffer: string[], setTextBuffer: (n:any)=>any){
+function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], setTextBuffer: (n:any)=>any){
   if (e.code == 'Enter') {
     let dom = document.getElementById('input_box') as HTMLInputElement
-    var text = ""
+    var text = null
     if (dom != null){
-      text = dom.value
+      text = new TextData(dom.value)
       dom.value = ''
-    }
 
-    if (text.length > 0) {
-      console.log(text)
-      storage.storeText(test_userID, text)
-      updateTextBuffers(text)
-      setTextBuffer( // Replace the state
-        [ // with a new array
-        text, // and one new item at the end
-        ...textBuffer // that contains all the old items
-        ]
-      )
+      if (text.text.length > 0) {
+        console.log(text)
+        storage.storeText(test_userID, test_target_userID,text)
+        updateTextBuffers(text)
+        setTextBuffer( // Replace the state
+          [ // with a new array
+          text, // and one new item at the end
+          ...textBuffer // that contains all the old items
+          ]
+        )
+      }
     }
   }
 
@@ -71,27 +72,27 @@ function UserTitle() {
   )
 }
 
-function TextBubble(text : string) {
+function TextBubble(text : TextData) {
 
   const isRecieved = () => {return false}
 
 
-  if (isRecieved()) {
+  if (text.send) {
     return (
-      <div className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
-        {text}
+      <div className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
+        {text.text}
       </div>
     )
   } else {
     return (
-      <div className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 p-1 text-right'>
-        {text}
+      <div className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
+        {text.text}
       </div>
     )
   }
 }
 
-function PrevTexts(textBuffer: string[]) {
+function PrevTexts(textBuffer: TextData[]) {
   return (
     <div id="PrevTexts" className="flex flex-col-reverse w-full h-full overflow-y-scroll">
       {textBuffer.map((text) =>
@@ -101,7 +102,7 @@ function PrevTexts(textBuffer: string[]) {
   )
 }
 
-function InputBox(textBuffer: string[], setTextBuffer: (n:any) => any) {
+function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
 
   return (
     <div id="InputBox" className="flex order-last ">
@@ -140,7 +141,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      {/* <DEV_storageControl /> */}
+      <DEV_storageControl />
 
       <div className="z-10 h-full w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
         {/* <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">

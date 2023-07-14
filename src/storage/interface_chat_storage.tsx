@@ -1,9 +1,9 @@
 export interface chatStorageService {
-    storeText(index: string, text: string): void
+    // storeText(index: string, targetID:string, text: string): void
 
-    getText(userID:string, index: string): string | null
+    // getText(userID:string, index: string): string | null
 
-    removeText(index: string): void
+    // removeText(index: string): void
 
-    removeAll(): void
+    // removeAll(): void
 }
