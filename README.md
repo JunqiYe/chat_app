@@ -39,6 +39,12 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - [x] interactive send
 - [x] scolling through text
 - [x] hide text that are out of screen
+
+- [ ] change underling store for sent and received text
+- [ ] display text bubble according to send and received text
+
 - [ ] networking text (TCP vs UDP)
+
+- [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
 
 
