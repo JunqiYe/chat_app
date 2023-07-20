@@ -64,8 +64,8 @@ export class ChatStorage implements chatStorageService{
         return rst
     }
 
-    getPrevTexts(userID: string | null, targetID: string, count: number): TextData[] {
-        if (userID == null) {
+    getPrevTexts(userID: string | null, targetID: string | null, count: number): TextData[] {
+        if (userID == null || targetID == null) {
             return []
         }
         let convID = this.helper_translateConversationID(userID, targetID)

@@ -9,6 +9,7 @@ import {useRouter} from 'next/navigation'
 
 let userID: string | null
 let target_userID: string | null
+target_userID = null
 let test_target_userID = 'jy98_clone'
 
 const WS_URL = 'ws://localhost:8080/ws';
@@ -106,23 +107,24 @@ function DEV_storageControl() {
 }
 
 // ==========COMPONENTS============
-function DestUserTitle(target_userID: string, setTarget_userID: (n:any) => any) {
+function DestUserTitle(recipientID: string, setRecipientID: (n:any) => any, setTextBuffer: (n:any) => any){
   function handleTargetUserSubmit(event: any) {
-    // setTarget_userID(event.target.value)
+    // setRecipientID(event.target.value)
     if(event.key === 'Enter') {
-      test_target_userID = target_userID
+      target_userID = recipientID
+      setTextBuffer(storage.getPrevTexts(userID, target_userID, 30))
     }
+    // console.log(recipientID)
     console.log(target_userID)
-    console.log(test_target_userID)
   }
 
   function handleTargetUserUpdate(event: any) {
-    setTarget_userID(event.target.value)
+    setRecipientID(event.target.value)
   }
 
   return (
-    <div className='z-10 flex items-center w-full h-[3rem] bg-slate-800 p-1 rounded-t-lg pl-6'>
-      <input className="bg-slate-800" placeholder="Search friends" value={target_userID} onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
+    <div className='z-10 flex items-center w-full h-[3rem] bg-slate-800 p-1 rounded-t-lg px-6'>
+      <input className="bg-slate-800 w-full" placeholder="Search friends" value={recipientID} onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
     </div>
   )
 }
@@ -169,14 +171,14 @@ function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
 function TextArea() {
 
   // initTextBuffers(setTextBuffer);
-  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(userID, test_target_userID, 30))
-  const [target_userID, setTarget_userID] = useState('')
+  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(userID, target_userID, 30))
+  const [userInputRecipient, setUserInputRecipient] = useState('')
 
   return (
 
     <div id="TextArea" className='flex flex-col h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
       {/* {PrevTexts(textBuffer)} */}
-      {DestUserTitle(target_userID, setTarget_userID)}
+      {DestUserTitle(userInputRecipient, setUserInputRecipient, setTextBuffer)}
       {PrevTexts(textBuffer)}
       {/* <div className="chat chat-start">
         <div className="chat-bubble">It's over Anakin, <br/>I have the high ground.</div>
@@ -216,7 +218,7 @@ export default function Home() {
     router.push('/login')
   }
 
-  console.log("userID", userID)
+  console.log("current userID", userID)
  
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
