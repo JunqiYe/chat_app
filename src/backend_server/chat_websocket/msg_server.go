@@ -18,52 +18,63 @@ var upgrader = websocket.Upgrader{
 }
 
 type msgObj struct {
-	FrameType string `json:"type"`
-	ConvID    string `json:"convID"`
-	Counter   uint64 `json:"counter"`
-	SenderID  string `json:"senderID"`
-	MsgData   string `json:"msgData"`
+	FrameType    string `json:"type"`
+	ConvID       string `json:"convID"`
+	Counter      uint64 `json:"counter"`
+	SenderID     string `json:"senderID"`
+	ReceipientID string `json:"receipientID"`
+	MsgData      string `json:"msgData"`
 }
 
 func debugJson(msg msgObj) {
-	log.Printf("{%s}\n{%s}\n{%d}\n{%s}\n{%s}\n", msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.MsgData)
+	log.Printf(`
+	{frametype		- %s}
+	{convID			- %s}
+	{counter		- %d}
+	{SenderID		- %s}
+	{ReceipientID		- %s}
+	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.ReceipientID, msg.MsgData)
 }
 
 // define a reader which will listen for
 // new messages being sent to our WebSocket
 // endpoint
 func reader(hub *Hub, conn *websocket.Conn) {
-	for {
-		// read in a message
-		// messageType, p, err := conn.ReadMessage()
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// print out that message for clarity
-		// log.Println(messageType, string(p))
+	// for {
+	// 	// read in a message
+	// 	// messageType, p, err := conn.ReadMessage()
+	// 	// if err != nil {
+	// 	// 	log.Println(err)
+	// 	// 	return
+	// 	// }
+	// 	// print out that message for clarity
+	// 	// log.Println(messageType, string(p))
 
-		var res msgObj
-		err := conn.ReadJSON(&res)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+	// 	var res msgObj
+	// 	err := conn.ReadJSON(&res)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		return
+	// 	}
 
-		log.Println("websocket reader:")
-		debugJson(res)
-		if res.FrameType == "transmit" {
-			hub.incommingMsg <- res
-		} else {
-			log.Println("new connection:", res.FrameType)
-		}
-		// err = conn.WriteMessage(messageType, p)
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
+	// 	log.Println("websocket reader:")
+	// 	debugJson(res)
 
-	}
+	// 	if res.FrameType == "init" {
+	// 		hub.conversations[res.ConvID] = conn
+	// 	}
+	// 	if res.FrameType == "transmit" {
+	// 		hub.incommingMsg <- res
+	// 	} else {
+	// 		log.Println("new connection:", res.FrameType)
+	// 	}
+	// 	// err = conn.WriteMessage(messageType, p)
+	// 	// if err != nil {
+	// 	// 	log.Println(err)
+	// 	// 	return
+	// 	// }
+
+	// }
 }
 
 func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
@@ -74,14 +85,17 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	log.Println("Client Connected", conn.LocalAddr())
+	log.Println("Client Connected", conn.RemoteAddr())
 	if err != nil {
 		log.Println(err)
 	}
 
 	// err = conn.WriteMessage(1, []byte("Hi Client!"))
 	// conn.ReadMessage()
-	reader(hub, conn)
+	client_H := NewClientHandler(conn, hub)
+	go client_H.readMessage()
+	go client_H.SendMessage()
+	// reader(hub, conn)
 }
 
 func StartWebSocket(hub *Hub) {

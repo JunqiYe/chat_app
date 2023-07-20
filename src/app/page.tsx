@@ -4,7 +4,6 @@ import Image from 'next/image'
 import React, {KeyboardEvent, useState} from 'react';
 import {ChatStorage} from '../storage/chat_localstorage'
 import {TextData} from "../storage/text_data"
-import { redirect } from 'next/dist/server/api-utils';
 import {useRouter} from 'next/navigation'
 
 let userID: string | null
@@ -12,41 +11,11 @@ let target_userID: string | null
 target_userID = null
 let test_target_userID = 'jy98_clone'
 
-const WS_URL = 'ws://localhost:8080/ws';
-// var socket = new WebSocket(WS_URL)
 let storage = new ChatStorage()
-// let prevTextsBuffer:TextData[] = []
 
-function connect() {
-  var ws = new WebSocket(WS_URL);
-  ws.onopen = function() {
-    // subscribe to some channels
-    ws.send(JSON.stringify({
-        type: "init",
-        SenderId: userID
-    }));
-  };
+let socket: WebSocket
 
-  ws.onmessage = function(e) {
-    console.log('Message:', e.data);
-  };
-
-  ws.onclose = function(e) {
-    console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-    setTimeout(function() {
-      connect();
-    }, 1000);
-  };
-
-  ws.onerror = function(err) {
-    console.error('Socket encountered error: ', err.message, 'Closing socket');
-    ws.close();
-  };
-
-  return ws
-}
-
-var socket = connect();
+// var socket = connect();
 
 // ==========INIT============
 function initTextBuffers() {
@@ -73,8 +42,8 @@ function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], se
 
       if (textObj.text.length > 0) {
         console.log('send ',textObj)
-        if (userID != null) {
-          storage.storeText(userID, test_target_userID, textObj, socket)
+        if (userID != null && target_userID != null) {
+          storage.storeText(userID, target_userID, textObj, socket)
           setTextBuffer( // Replace the state
             [ // with a new array
             textObj, // and one new item at the front
@@ -92,12 +61,16 @@ function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], se
 
 }
 
-function handleClearStorage() {
-  storage.removeAll()
-  window.location.reload()
-}
+
 
 function DEV_storageControl() {
+  function handleClearStorage() {
+    storage.removeAll()
+    if (typeof window !== "undefined" && window.location !== undefined) {
+      // Client-side-only code
+      window.location.reload()
+    }
+  }
 
   return (
     <div className='flex justify-normal'>
@@ -131,14 +104,16 @@ function DestUserTitle(recipientID: string, setRecipientID: (n:any) => any, setT
 
 function TextBubble(text : TextData) {
 
-  if (!text.send) {
+  if (!text.receivedFromServer) {
     return (
+      // right
       <div className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
         {text.text}
       </div>
     )
   } else {
     return (
+      // left
       <div className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
         {text.text}
       </div>
@@ -168,10 +143,9 @@ function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
   )
 }
 
-function TextArea() {
+function TextArea(textBuffer: TextData[], setTextBuffer: (n:any) => void) {
 
   // initTextBuffers(setTextBuffer);
-  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(userID, target_userID, 30))
   const [userInputRecipient, setUserInputRecipient] = useState('')
 
   return (
@@ -192,11 +166,8 @@ function TextArea() {
 function HeaderBar() {
   return (
     <div className="z-10 flex flex-row h-full w-full max-w-md items-center justify-between p-4 font-mono text-sm lg:flex">
+        <p>Chat App 💬</p>
         <p>{userID}</p>
-        <p>
-          Chat App
-          💬
-        </p>
     </div>
   )
 }
@@ -210,24 +181,74 @@ export default function Home() {
   //       type: 'userevent'
   //     });
   // }, [sendJsonMessage, readyState]);
+  const WS_URL = 'ws://localhost:8080/ws';
+  // var socket = new WebSocket(WS_URL)
+  // let prevTextsBuffer:TextData[] = []
+  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(userID, target_userID, 30))
 
-  const urlParams = new URLSearchParams(window.location.search);
-  userID = urlParams.get('username')
+
+  function connect() {
+    var ws = new WebSocket(WS_URL);
+    ws.onopen = function() {
+      // subscribe to some channels
+      ws.send(JSON.stringify({
+          type: "init",
+          SenderId: userID
+      }));
+    };
+
+    ws.onmessage = function(e) {
+      console.log('Message:', e.data);
+      var msg = JSON.parse(e.data)
+      var textObj = new TextData(msg.msgData, false, true);
+
+      setTextBuffer( // Replace the state
+      [ // with a new array
+      textObj, // and one new item at the front
+      ...textBuffer // that contains all the old items
+      ]
+      )
+    };
+
+    ws.onclose = function(e) {
+      console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+      setTimeout(function() {
+        connect();
+      }, 1000);
+    };
+
+    ws.onerror = function(err) {
+      console.error('Socket encountered error: ', err, 'Closing socket');
+      ws.close();
+    };
+
+    return ws
+  }
+
+  socket = connect();
+
+
+
+  if (typeof window !== "undefined" && window.location !== undefined) {
+    // Client-side-only code
+    const urlParams = new URLSearchParams(window.location.search);
+    userID = urlParams.get('username')
+  }
   const router = useRouter()
   if (userID == null) {
     router.push('/login')
   }
 
   console.log("current userID", userID)
- 
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <DEV_storageControl />
 
       <HeaderBar />
 
-      <TextArea />
-
+      {/* <TextArea /> */}
+      {TextArea(textBuffer, setTextBuffer)}
     </main>
   )
 }

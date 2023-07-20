@@ -49,8 +49,8 @@ export class ChatStorage implements chatStorageService{
         this.storeConvText(convID, counter, text)
         // localStorage.setItem(convID + ":" + counter, text);
 
-        console.log("text json", text.toJson(convID, userID, counter))
-        socket.send(text.toJson(convID, userID, counter));
+        console.log("text json", text.toJson(convID, userID, targetID,counter))
+        socket.send(text.toJson(convID, userID, targetID, counter));
     }
 
     getText(convID:string, counter: number): TextData | null {

@@ -46,12 +46,18 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 ### Frontend
+- [ ] add select for most recent text
+- [ ] add left panel such that select the chat
 - [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
 - [ ] make text area full screen when screen is small
 - [ ] push notification
 
+
 ### Backend
-- [ ] networking text (web socket) - peer to peer to start
+- [x] networking text (web socket) - peer to peer to start
+- [x] add broadcast
+- [ ] add http request for syncing messages
+
 
 ### bug fixes
 - ~~issue where sending the first text result in two text bubble~~
