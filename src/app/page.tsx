@@ -7,7 +7,8 @@ import {TextData} from "../storage/text_data"
 import { redirect } from 'next/dist/server/api-utils';
 import {useRouter} from 'next/navigation'
 
-let test_userID: string | null
+let userID: string | null
+let target_userID: string | null
 let test_target_userID = 'jy98_clone'
 
 const WS_URL = 'ws://localhost:8080/ws';
@@ -21,7 +22,7 @@ function connect() {
     // subscribe to some channels
     ws.send(JSON.stringify({
         type: "init",
-        SenderId: test_userID
+        SenderId: userID
     }));
   };
 
@@ -49,7 +50,7 @@ var socket = connect();
 // ==========INIT============
 function initTextBuffers() {
 
-  // prevTextsBuffer = storage.getPrevTexts(test_userID, test_target_userID, 30)
+  // prevTextsBuffer = storage.getPrevTexts(userID, test_target_userID, 30)
   // console.log("init buffer", prevTextsBuffer)
 
   // setTextBuffer(prevTextsBuffer)
@@ -71,8 +72,8 @@ function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], se
 
       if (textObj.text.length > 0) {
         console.log('send ',textObj)
-        if (test_userID != null) {
-          storage.storeText(test_userID, test_target_userID, textObj, socket)
+        if (userID != null) {
+          storage.storeText(userID, test_target_userID, textObj, socket)
           setTextBuffer( // Replace the state
             [ // with a new array
             textObj, // and one new item at the front
@@ -105,17 +106,30 @@ function DEV_storageControl() {
 }
 
 // ==========COMPONENTS============
-function UserTitle() {
+function DestUserTitle(target_userID: string, setTarget_userID: (n:any) => any) {
+  function handleTargetUserSubmit(event: any) {
+    // setTarget_userID(event.target.value)
+    if(event.key === 'Enter') {
+      test_target_userID = target_userID
+    }
+    console.log(target_userID)
+    console.log(test_target_userID)
+  }
+
+  function handleTargetUserUpdate(event: any) {
+    setTarget_userID(event.target.value)
+  }
+
   return (
-    <span className='z-10 flex items-center w-full h-[3rem] bg-slate-800 p-1 rounded-t-lg pl-6'>
-      {test_userID}
-    </span>
+    <div className='z-10 flex items-center w-full h-[3rem] bg-slate-800 p-1 rounded-t-lg pl-6'>
+      <input className="bg-slate-800" placeholder="Search friends" value={target_userID} onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
+    </div>
   )
 }
 
 function TextBubble(text : TextData) {
 
-  if (text.send) {
+  if (!text.send) {
     return (
       <div className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
         {text.text}
@@ -155,13 +169,14 @@ function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
 function TextArea() {
 
   // initTextBuffers(setTextBuffer);
-  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(test_userID, test_target_userID, 30))
+  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(userID, test_target_userID, 30))
+  const [target_userID, setTarget_userID] = useState('')
 
   return (
 
-    <div id="TextArea" className='flex flex-col h-[45rem] w-5/6 max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
+    <div id="TextArea" className='flex flex-col h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
       {/* {PrevTexts(textBuffer)} */}
-      {UserTitle()}
+      {DestUserTitle(target_userID, setTarget_userID)}
       {PrevTexts(textBuffer)}
       {/* <div className="chat chat-start">
         <div className="chat-bubble">It's over Anakin, <br/>I have the high ground.</div>
@@ -172,7 +187,17 @@ function TextArea() {
   )
 }
 
-
+function HeaderBar() {
+  return (
+    <div className="z-10 flex flex-row h-full w-full max-w-md items-center justify-between p-4 font-mono text-sm lg:flex">
+        <p>{userID}</p>
+        <p>
+          Chat App
+          💬
+        </p>
+    </div>
+  )
+}
 
 export default function Home() {
   // redirect('/login')
@@ -184,145 +209,23 @@ export default function Home() {
   //     });
   // }, [sendJsonMessage, readyState]);
 
-  // return (
-    // <>
-    //   <Navbar color="light" light>
-    //     <NavbarBrand href="/">Real-time document editor</NavbarBrand>
-    //   </Navbar>
-    //   <div className="container-fluid">
-    //     {username ? <EditorSection/>
-    //         : <LoginSection onLogin={setUsername}/> }
-    //   </div>
-    // </>
-  // );
   const urlParams = new URLSearchParams(window.location.search);
-  test_userID = urlParams.get('username')
+  userID = urlParams.get('username')
   const router = useRouter()
-  if (test_userID == null) {
-    console.log('is null')
+  if (userID == null) {
     router.push('/login')
   }
 
-  console.log("userID", test_userID)
+  console.log("userID", userID)
  
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <DEV_storageControl />
-      <div className="z-10 h-full w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        {/* <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed top-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div> */}
-        <div className="flex h-24 w-full items-center justify-end">
-          <p>
-            Chat App
-            💬
-          </p>
-        </div>
-      </div>
+
+      <HeaderBar />
 
       <TextArea />
 
-
-
-      {/* <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div> */}
     </main>
   )
 }
