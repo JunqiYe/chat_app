@@ -4,8 +4,10 @@ import Image from 'next/image'
 import React, {KeyboardEvent, useState} from 'react';
 import {ChatStorage} from '../storage/chat_localstorage'
 import {TextData} from "../storage/text_data"
+import { redirect } from 'next/dist/server/api-utils';
+import {useRouter} from 'next/navigation'
 
-let test_userID = 'jy98'
+let test_userID: string | null
 let test_target_userID = 'jy98_clone'
 
 const WS_URL = 'ws://localhost:8080/ws';
@@ -69,13 +71,15 @@ function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], se
 
       if (textObj.text.length > 0) {
         console.log('send ',textObj)
-        storage.storeText(test_userID, test_target_userID, textObj, socket)
-        setTextBuffer( // Replace the state
-          [ // with a new array
-          textObj, // and one new item at the front
-          ...textBuffer // that contains all the old items
-          ]
-        )
+        if (test_userID != null) {
+          storage.storeText(test_userID, test_target_userID, textObj, socket)
+          setTextBuffer( // Replace the state
+            [ // with a new array
+            textObj, // and one new item at the front
+            ...textBuffer // that contains all the old items
+            ]
+          )
+        }
         // socket.send(textObj.text);
 
         // socket.send(textObj.toJson());
@@ -171,6 +175,7 @@ function TextArea() {
 
 
 export default function Home() {
+  // redirect('/login')
   // initTextBuffers();
   // useEffect(() => {
   //     sendJsonMessage({
@@ -190,12 +195,19 @@ export default function Home() {
     //   </div>
     // </>
   // );
+  const urlParams = new URLSearchParams(window.location.search);
+  test_userID = urlParams.get('username')
+  const router = useRouter()
+  if (test_userID == null) {
+    console.log('is null')
+    router.push('/login')
+  }
 
-  
+  console.log("userID", test_userID)
+ 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <DEV_storageControl />
-
       <div className="z-10 h-full w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
         {/* <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           Get started by editing&nbsp;
