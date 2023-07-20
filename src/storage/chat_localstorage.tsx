@@ -35,7 +35,7 @@ export class ChatStorage implements chatStorageService{
         localStorage.setItem(this.helper_translateConversationCounter(convID, counter), text.toString());
     }
 
-    storeText(userID: string, targetID:string, text: TextData) {
+    storeText(userID: string, targetID:string, text: TextData, socket: WebSocket) {
         let convID = this.helper_translateConversationID(userID, targetID)
 
         var counter = this.getConvCounter(convID)
@@ -48,6 +48,9 @@ export class ChatStorage implements chatStorageService{
 
         this.storeConvText(convID, counter, text)
         // localStorage.setItem(convID + ":" + counter, text);
+
+        console.log("text json", text.toJson(convID, userID, counter))
+        socket.send(text.toJson(convID, userID, counter));
     }
 
     getText(convID:string, counter: number): TextData | null {

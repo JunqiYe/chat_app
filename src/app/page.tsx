@@ -8,8 +8,41 @@ import {TextData} from "../storage/text_data"
 let test_userID = 'jy98'
 let test_target_userID = 'jy98_clone'
 
+const WS_URL = 'ws://localhost:8080/ws';
+// var socket = new WebSocket(WS_URL)
 let storage = new ChatStorage()
 // let prevTextsBuffer:TextData[] = []
+
+function connect() {
+  var ws = new WebSocket(WS_URL);
+  ws.onopen = function() {
+    // subscribe to some channels
+    ws.send(JSON.stringify({
+        type: "init",
+        SenderId: test_userID
+    }));
+  };
+
+  ws.onmessage = function(e) {
+    console.log('Message:', e.data);
+  };
+
+  ws.onclose = function(e) {
+    console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+    setTimeout(function() {
+      connect();
+    }, 1000);
+  };
+
+  ws.onerror = function(err) {
+    console.error('Socket encountered error: ', err.message, 'Closing socket');
+    ws.close();
+  };
+
+  return ws
+}
+
+var socket = connect();
 
 // ==========INIT============
 function initTextBuffers() {
@@ -29,20 +62,24 @@ function initTextBuffers() {
 function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], setTextBuffer: (n:any)=>any){
   if (e.code == 'Enter') {
     let dom = document.getElementById('input_box') as HTMLInputElement
-    var text = null
+    var textObj = null
     if (dom != null){
-      text = new TextData(dom.value)
+      textObj = new TextData(dom.value)
       dom.value = ''
 
-      if (text.text.length > 0) {
-        console.log('send ',text)
-        storage.storeText(test_userID, test_target_userID,text)
+      if (textObj.text.length > 0) {
+        console.log('send ',textObj)
+        storage.storeText(test_userID, test_target_userID, textObj, socket)
         setTextBuffer( // Replace the state
           [ // with a new array
-          text, // and one new item at the front
+          textObj, // and one new item at the front
           ...textBuffer // that contains all the old items
           ]
         )
+        // socket.send(textObj.text);
+
+        // socket.send(textObj.toJson());
+
       }
     }
   }
@@ -103,7 +140,7 @@ function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
 
   return (
     <div id="InputBox" className="flex order-last ">
-      <input className="h-8 mt-3 rounded-t-lg outline-none bg-slate-600"
+      <input className="h-8 mt-3 pl-2 rounded-t-lg outline-none bg-slate-600"
         type="text" placeholder="..."
         id='input_box'
         onKeyDown={(event)=>handleClientSendText(event, textBuffer, setTextBuffer)} />
@@ -135,7 +172,26 @@ function TextArea() {
 
 export default function Home() {
   // initTextBuffers();
+  // useEffect(() => {
+  //     sendJsonMessage({
+  //       username,
+  //       type: 'userevent'
+  //     });
+  // }, [sendJsonMessage, readyState]);
 
+  // return (
+    // <>
+    //   <Navbar color="light" light>
+    //     <NavbarBrand href="/">Real-time document editor</NavbarBrand>
+    //   </Navbar>
+    //   <div className="container-fluid">
+    //     {username ? <EditorSection/>
+    //         : <LoginSection onLogin={setUsername}/> }
+    //   </div>
+    // </>
+  // );
+
+  
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <DEV_storageControl />

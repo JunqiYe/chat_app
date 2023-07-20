@@ -2,6 +2,8 @@ export class TextData {
     send: boolean = false;
     text: string;
     timestamp: Number
+    // convID: Number
+
 
     private delimiter: string = "|"
 
@@ -28,5 +30,16 @@ export class TextData {
         } else {
             return "received" + this.delimiter + this.timestamp + this.delimiter + this.text
         }
+    }
+
+    toJson(convID: string, senderID: string, counter: Number): string {
+        return (JSON.stringify({
+            type: "transmit",
+            ConvID: convID,
+            Counter: counter,
+            SenderID: senderID,
+            MsgData: this.text
+          })
+        )
     }
 }

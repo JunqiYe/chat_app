@@ -47,9 +47,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ### Frontend
 - [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
+- [ ] make text area full screen when screen is small
+- [ ] push notification
 
 ### Backend
-- [ ] networking text (HTTP)
+- [ ] networking text (web socket) - peer to peer to start
 
 ### bug fixes
 - ~~issue where sending the first text result in two text bubble~~
