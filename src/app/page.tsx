@@ -2,8 +2,8 @@
 
 import Image from 'next/image'
 import React, {KeyboardEvent, useState} from 'react';
-import {ChatStorage} from '../storage/chat_localstorage'
-import {TextData} from "../storage/text_data"
+import {ChatStorage} from './storage/chat_localstorage'
+import {TextData} from "./storage/text_data"
 import {useRouter} from 'next/navigation'
 
 let userID: string | null
