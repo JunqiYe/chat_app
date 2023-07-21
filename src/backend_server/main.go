@@ -14,15 +14,6 @@ const (
 )
 
 func main() {
-	// s := &websocket.Server{
-	// 	Type:        SERVER_TYPE,
-	// 	Host:        SERVER_HOST,
-	// 	Port:        SERVER_PORT,
-	// 	Initialized: false,
-	// 	msgs:        make([]string, 0),
-	// }
-
-	// log.Fatal(s.ListenAndServe())
 	currDir, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("Could not get current working directory: %v", err)

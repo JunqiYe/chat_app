@@ -58,5 +58,7 @@ func NewStorage(baseDir string) *msg_storage {
 
 func (s *msg_storage) StoreMsg(msg msgObj) {
 	// s.store = append(s.store, msg)
+	log.Println("ew message stored", msg.ConvID, msg.MsgData)
+
 	updateDB(s.db, msg)
 }

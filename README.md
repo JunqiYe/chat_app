@@ -57,6 +57,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - [x] networking text (web socket) - peer to peer to start
 - [x] add broadcast
 - [ ] add http request for syncing messages
+- [ ] using JWT for signing messages
 
 
 ### bug fixes
