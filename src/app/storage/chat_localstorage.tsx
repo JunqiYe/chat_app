@@ -1,5 +1,6 @@
 import {chatStorageService} from "./interface_chat_storage"
 import {TextData} from "./text_data"
+import {socket} from "./../page"
 
 export class ChatStorage implements chatStorageService{
     convDelimiter: string = "->"
@@ -35,7 +36,7 @@ export class ChatStorage implements chatStorageService{
         localStorage.setItem(this.helper_translateConversationCounter(convID, counter), text.toString());
     }
 
-    storeText(userID: string, targetID:string, text: TextData, socket: WebSocket) {
+    storeText(userID: string, targetID:string, text: TextData) {
         let convID = this.helper_translateConversationID(userID, targetID)
 
         var counter = this.getConvCounter(convID)
