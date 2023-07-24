@@ -18,12 +18,12 @@ var upgrader = websocket.Upgrader{
 }
 
 type msgObj struct {
-	FrameType    string `json:"type"`
-	ConvID       string `json:"convID"`
-	Counter      uint64 `json:"counter"`
-	SenderID     string `json:"senderID"`
-	ReceipientID string `json:"receipientID"`
-	MsgData      string `json:"msgData"`
+	FrameType   string `json:"type"`
+	ConvID      string `json:"convID"`
+	Counter     uint64 `json:"counter"`
+	SenderID    string `json:"senderID"`
+	RecipientID string `json:"recipientID"`
+	MsgData     string `json:"msgData"`
 }
 
 func debugJson(msg msgObj) {
@@ -31,9 +31,9 @@ func debugJson(msg msgObj) {
 	{frametype		- %s}
 	{convID			- %s}
 	{counter		- %d}
-	{SenderID		- %s}
-	{ReceipientID		- %s}
-	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.ReceipientID, msg.MsgData)
+	{senderID		- %s}
+	{recipientID		- %s}
+	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.RecipientID, msg.MsgData)
 }
 
 func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {

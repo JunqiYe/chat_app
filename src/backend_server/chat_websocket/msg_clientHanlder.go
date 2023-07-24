@@ -69,6 +69,6 @@ func (c *ClientHandler) sendMessage() {
 			return
 		}
 
-		log.Print("dispatched msg to :", dispatchMsg.ReceipientID)
+		log.Print("dispatched msg to :", dispatchMsg.RecipientID)
 	}
 }

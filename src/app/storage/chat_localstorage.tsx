@@ -1,13 +1,7 @@
 import {chatStorageService} from "./interface_chat_storage"
 import {TextData} from "./text_data"
-import {socket} from "./../page"
 
 export class ChatStorage implements chatStorageService{
-    convDelimiter: string = "->"
-
-    private helper_translateConversationID(userID: string, targetID: string): string {
-        return userID+this.convDelimiter+targetID
-    }
 
     private helper_translateConversationCounter(convID: string, counter: number): string {
         return convID + ":" + String(counter)
@@ -18,60 +12,57 @@ export class ChatStorage implements chatStorageService{
         return 0
     }
 
-    private getConvCounter(convID: string) : number {
+    getConvCounter(convID: string) : number {
         return Number(localStorage.getItem(convID));
     }
 
-    private updateConvCounter(convID : string, counter: number) {
+    updateConvCounter(convID : string, counter: number) {
         localStorage.setItem(convID, String(counter));
     }
 
-    private getConvText(convID: string) : TextData {
-        return new TextData("")
-        // return Number(localStorage.getItem(convID));
+    // private getConvText(convID: string) : TextData {
+    //     return 
+    //     // return Number(localStorage.getItem(convID));
+    // }
+
+
+    private parseRawStorageData(rawData: string): TextData{
+        let json = JSON.parse(rawData)
+
+        return new TextData(json.senderId, json.recipientId, json.convID, json.counter, json.msgData, json.receivedFromServer)
     }
 
-    private storeConvText(convID : string, counter: number, text: TextData) {
-        // localStorage.setItem(convID, String(counter));
-        localStorage.setItem(this.helper_translateConversationCounter(convID, counter), text.toString());
-    }
 
-    storeText(userID: string, targetID:string, text: TextData) {
-        let convID = this.helper_translateConversationID(userID, targetID)
+    storeText(text: TextData) {
+        // let convID = this.helper_translateConversationID(userID, targetID)
 
-        var counter = this.getConvCounter(convID)
+        var counter = this.getConvCounter(text.convID)
         if (Number.isNaN(counter)) {
-            counter = this.initConversation(convID)
+            counter = this.initConversation(text.convID)
         }
 
         counter = counter + 1
-        this.updateConvCounter(convID, counter)
+        this.updateConvCounter(text.convID, counter)
 
-        this.storeConvText(convID, counter, text)
-        // localStorage.setItem(convID + ":" + counter, text);
-
-        console.log("text json", text.toJson(convID, userID, targetID,counter))
-        socket.send(text.toJson(convID, userID, targetID, counter));
+        localStorage.setItem(
+            this.helper_translateConversationCounter(text.convID, text.counter),
+            text.toJson());
     }
 
     getText(convID:string, counter: number): TextData | null {
-        let rst = null
+        let msg = null
         let rawData = localStorage.getItem(this.helper_translateConversationCounter(convID, counter));
 
         if (rawData != null) {
-            rst = new TextData(rawData, true)
+            msg = this.parseRawStorageData(rawData)
         }
 
-        return rst
+        return msg
     }
 
-    getPrevTexts(userID: string | null, targetID: string | null, count: number): TextData[] {
-        if (userID == null || targetID == null) {
-            return []
-        }
-        let convID = this.helper_translateConversationID(userID, targetID)
-
+    getPrevTexts(convID: string, count: number): TextData[] {
         let rst:TextData[] = []
+
         let convTextCount = this.getConvCounter(convID)
         while (count > 0 && convTextCount >= 0) {
             var text = this.getText(convID, convTextCount)

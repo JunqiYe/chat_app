@@ -2,20 +2,21 @@
 
 import Image from 'next/image'
 import React, {KeyboardEvent, useState, useEffect, useMemo} from 'react';
-import {ChatStorage} from './storage/chat_localstorage'
-import {TextData} from "./storage/text_data"
-import {useRouter} from 'next/navigation'
-import {webScoketConnect} from './websocket/websocket_client'
-
+import { ChatStorage } from './storage/chat_localstorage'
+import { TextData } from "./storage/text_data"
+import { useRouter } from 'next/navigation'
+import { webSocketConnect } from './websocket/websocket_client'
+import { MessageHandler } from './msgHandler/handler'
 
 export var userID: string | null = null
 export var target_userID: string | null = null
 export function updateUserID(newID: string) {
   userID = newID
 }
-export var socket: WebSocket 
 
+var handler: MessageHandler | undefined= undefined
 var storage: ChatStorage = new ChatStorage()
+
 
 function DEV_storageControl() {
   function handleClearStorage() {
@@ -34,16 +35,19 @@ function DEV_storageControl() {
 }
 
 // ==========COMPONENTS============
-function RecipientUserTitle(setTextBuffer: (n:any) => any){
-  const [userInputRecipient, setUserInputRecipient] = useState('')
+function RecipientUserTitle(handler: MessageHandler){
+  const [userInputRecipient, setUserInputRecipient] = useState("")
 
+  // TODO: check if convID exists, if not, request server for convID
   function handleTargetUserSubmit(event: any) {
     if(event.key === 'Enter') {
       target_userID = userInputRecipient
-      setTextBuffer(storage.getPrevTexts(userID, target_userID, 30))
+      let convID = handler.getCurrentConvID(target_userID)
+      var temp = storage.getPrevTexts(convID, 30)
+      handler.setTextBuffer(temp)
+
+      console.log(target_userID)
     }
-    // console.log(userInputRecipient)
-    console.log(target_userID)
   }
 
   function handleTargetUserUpdate(event: any) {
@@ -58,6 +62,9 @@ function RecipientUserTitle(setTextBuffer: (n:any) => any){
 }
 
 function TextBubble(text : TextData) {
+  {/* <div className="chat chat-start">
+    <div className="chat-bubble">It's over Anakin, <br/>I have the high ground.</div>
+  </div> */}
 
   if (!text.receivedFromServer) {
     return (
@@ -76,33 +83,25 @@ function TextBubble(text : TextData) {
   }
 }
 
-function PrevTexts(textBuffer: TextData[]) {
+function PrevTexts(handler: MessageHandler) {
   return (
     <div id="PrevTexts" className="flex flex-col-reverse w-full h-full overflow-y-scroll">
-      {textBuffer.map((text) =>
+      {handler.textBuffer.map((text) =>
         TextBubble(text)
       )}
     </div>
   )
 }
 
-function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
-  function handleClientSendText(e: React.KeyboardEvent, textBuffer: TextData[], setTextBuffer: (n:any)=>any){
+function InputBox(handler: MessageHandler) {
+  function handleClientPressSend(e: React.KeyboardEvent, handler: MessageHandler){
     if (e.code == 'Enter') {
       let dom = document.getElementById('input_box') as HTMLInputElement
-      var textObj = null
-      if (dom != null){
-        textObj = new TextData(dom.value)
-        dom.value = ''
-
-        if (textObj.text.length > 0) {
-          console.log('send ',textObj)
-          if (userID != null && target_userID != null) {
-            storage.storeText(userID, target_userID, textObj)
-
-            setTextBuffer([textObj, ...textBuffer])
-          }
+      if (dom != null && userID != null && target_userID != null){
+        if (dom.value.length > 0) {
+            handler.clientSendMessage(target_userID, dom.value)
         }
+        dom.value = ''
       }
     }
   }
@@ -112,7 +111,7 @@ function InputBox(textBuffer: TextData[], setTextBuffer: (n:any) => any) {
       <input className="h-8 mt-3 pl-2 rounded-t-lg outline-none bg-slate-600"
         type="text" placeholder="..."
         id='input_box'
-        onKeyDown={(event)=>handleClientSendText(event, textBuffer, setTextBuffer)} />
+        onKeyDown={(event)=>handleClientPressSend(event, handler)} />
     </div>
   )
 }
@@ -126,18 +125,14 @@ function HeaderBar() {
   )
 }
 
-function TextArea(textBuffer: TextData[], setTextBuffer: (n:any) => void) {
+function TextArea(handler: MessageHandler) {
 
   return (
 
     <div id="TextArea" className='flex flex-col h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
-      {/* {PrevTexts(textBuffer)} */}
-      {RecipientUserTitle(setTextBuffer)}
-      {PrevTexts(textBuffer)}
-      {/* <div className="chat chat-start">
-        <div className="chat-bubble">It's over Anakin, <br/>I have the high ground.</div>
-      </div> */}
-      {InputBox(textBuffer, setTextBuffer)}
+      {RecipientUserTitle(handler)}
+      {PrevTexts(handler)}
+      {InputBox(handler)}
     </div>
 
   )
@@ -146,12 +141,7 @@ function TextArea(textBuffer: TextData[], setTextBuffer: (n:any) => void) {
 export default function Home() {
   const WS_URL = 'ws://localhost:8080/ws';
 
-  const [textBuffer, setTextBuffer] = useState(storage.getPrevTexts(userID, target_userID, 30))
-
-  var tempsocket = webScoketConnect(WS_URL, textBuffer, setTextBuffer);
-  if (tempsocket != null) {
-    socket = tempsocket
-  }
+  const [textBuffer, setTextBuffer] = useState([])
 
   const router = useRouter()
   useEffect(() => {
@@ -162,21 +152,37 @@ export default function Home() {
 
   if (userID == null) {
     return (
-      <div className='place-items-center items-center justify-center'>
+      <div className='flex h-screen items-center justify-center'>
         Loading...
       </div>
     )
   }
 
+  let socket = webSocketConnect(WS_URL)
+  if (socket == null) {
+    handler = undefined;
+  } else {
+    handler = new MessageHandler(socket, storage, textBuffer, setTextBuffer);
+  }
 
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <DEV_storageControl />
 
-      <HeaderBar />
 
-      {/* <TextArea /> */}
-      {TextArea(textBuffer, setTextBuffer)}
-    </main>
-  )
+  if (handler == undefined) {
+    return (
+      <main>
+        <p> failed to connect to server, waiting to reconnect </p>
+      </main>
+    )
+  } else {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+        <DEV_storageControl />
+
+        <HeaderBar />
+
+        {TextArea(handler)}
+      </main>
+    )
+  }
+
 }

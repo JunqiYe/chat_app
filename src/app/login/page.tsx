@@ -14,14 +14,14 @@ export default function Login() {
 
     useEffect(() => {
         const form = document.querySelector('form')
-        if (form != null) {
-            form.addEventListener('submit', event => {
+        if (form == null) {throw new Error("cannot find form element")}
+
+        form.addEventListener('submit', event => {
             // submit event detected
-                event.preventDefault()
-                updateUserID(username)
-                router.push('/')
-            })
-        }
+            event.preventDefault()
+            updateUserID(username)
+            router.push('/')
+        })
     })
 
     return (

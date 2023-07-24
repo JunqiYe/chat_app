@@ -54,6 +54,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 ### Backend
+- [ ] server should asssign convID instead of client
 - [x] networking text (web socket) - peer to peer to start
 - [x] add broadcast
 - [ ] add http request for syncing messages
@@ -61,5 +62,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 ### bug fixes
+- counter is broken/not working
 - ~~issue where sending the first text result in two text bubble~~
 

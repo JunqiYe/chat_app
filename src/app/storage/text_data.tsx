@@ -1,47 +1,45 @@
 export class TextData {
-    receivedFromServer: boolean = false;
-    text: string;
-    timestamp: Number
-    // convID: Number
+    readonly userID: string
+    readonly recipientID: string
+    readonly convID: string
+    readonly counter: number
+    readonly timestamp: number
+    readonly receivedFromServer: boolean = false;
+    readonly text: string;
+
+    readonly delimiter: string = "|"
 
 
-    private delimiter: string = "|"
+    constructor(userID: string,
+                recipientID: string,
+                convID: string,
+                counter: number,
+                rawText: string,
+                fromServer?:boolean) {
 
-    constructor(rawText: string, fromStore = false, fromServer = false) {
-        this.receivedFromServer = fromServer
-        if (fromStore) {
-            let parsedText = rawText.split("|", 3);
+        this.userID = userID
+        this.recipientID = recipientID
+        this.convID = convID
+        this.counter = counter
 
-            if (parsedText[0] === "send") {
-                this.receivedFromServer = true
-            }
-            this.timestamp = Number(parsedText[1])
-            this.text = parsedText[2];
-        } else {
-            this.text = rawText
-            // this.receivedFromServer = true
-            this.timestamp = Date.now();
+        if (fromServer) {
+            this.receivedFromServer = fromServer
         }
-
+        this.timestamp = Date.now();
+        this.text = rawText
     }
 
-    toString(): string {
-        if (this.receivedFromServer) {
-            return "send" + this.delimiter + this.timestamp + this.delimiter + this.text
-        } else {
-            return "received" + this.delimiter + this.timestamp + this.delimiter + this.text
-        }
-    }
-
-    toJson(convID: string, senderID: string, receipientID:string, counter: Number): string {
+    toJson(): string {
         return (JSON.stringify({
             type: "transmit",
-            convID: convID,
-            counter: counter,
-            senderID: senderID,
-            receipientID: receipientID,
-            msgData: this.text
+            convID: this.convID,
+            counter: this.counter,
+            senderID: this.userID,
+            recipientID: this.recipientID,
+            msgData: this.text,
+            receivedFromServer: this.receivedFromServer
           })
         )
     }
+
 }

@@ -35,7 +35,7 @@ func (h *Hub) HubRun() {
 		case msg := <-h.incommingMsg:
 			h.storage.StoreMsg(msg)
 
-			channel, ok := h.conversations[msg.ReceipientID]
+			channel, ok := h.conversations[msg.RecipientID]
 			if ok {
 				log.Println("receipient located")
 				channel.receive <- msg
