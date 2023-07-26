@@ -1,24 +1,34 @@
 'use client'
 
 import Image from 'next/image'
-import React, {KeyboardEvent, useState, useEffect, useMemo} from 'react';
-import { ChatStorage } from './storage/chat_localstorage'
-import { TextData } from "./storage/text_data"
-import { useRouter } from 'next/navigation'
-import { webSocketConnect } from './websocket/websocket_client'
-import { MessageHandler } from './msgHandler/handler'
+import React, {KeyboardEvent, useState, useEffect, useMemo, createContext} from 'react';
+import { ChatStorage } from './lib/storage/chat_localstorage'
 
+import { HeaderBar } from './components/header'
+import { RecipientUserTitle } from './components/recipientInput';
+import { PrevTexts } from './components/prevTexts';
+import { InputBox } from './components/inputBox';
+import Login  from './components/login';
+import { userIDContext, prevMsgContext } from './components/context';
+import { TextData } from './lib/storage/text_data';
+
+// export var userIDContext = createContext("test")
+
+export var worker : Worker | null = null
 export var userID: string | null = null
 export var target_userID: string | null = null
-export function updateUserID(newID: string) {
-  userID = newID
-}
+// export function updateUserID(newID: string) {
+//   userID = newID
+// }
+// export function updateTargetUserID(newID: string) {
+//   target_userID = newID
+// }
 
-var handler: MessageHandler | undefined= undefined
-var storage: ChatStorage = new ChatStorage()
 
 
 function DEV_storageControl() {
+  var storage: ChatStorage = new ChatStorage()
+
   function handleClearStorage() {
     storage.removeAll()
     if (typeof window !== "undefined" && window.location !== undefined) {
@@ -34,155 +44,103 @@ function DEV_storageControl() {
   )
 }
 
+function isIDValid(id: string) : boolean {
+  if (id.length < 4) return false
+
+  return true
+}
+
 // ==========COMPONENTS============
-function RecipientUserTitle(handler: MessageHandler){
-  const [userInputRecipient, setUserInputRecipient] = useState("")
+function TextArea() {
+  const [msgBuffer, setMsgBuffer] = useState<TextData[]>([])
 
-  // TODO: check if convID exists, if not, request server for convID
-  function handleTargetUserSubmit(event: any) {
-    if(event.key === 'Enter') {
-      target_userID = userInputRecipient
-      let convID = handler.getCurrentConvID(target_userID)
-      var temp = storage.getPrevTexts(convID, 30)
-      handler.setTextBuffer(temp)
-
-      console.log(target_userID)
-    }
-  }
-
-  function handleTargetUserUpdate(event: any) {
-    setUserInputRecipient(event.target.value)
-  }
+  // setMsgBuffer([new TextData("", "", "", 0, ""), ...msgBuffer])
+  // const msgBufferCtx = {
+  //   msgBuffer: msgBuffer,
+  //   setMsgBuffer: setMsgBuffer
+  // }
 
   return (
-    <div className='z-10 flex items-center w-full h-[3rem] bg-slate-800 p-1 rounded-t-lg px-6'>
-      <input className="bg-slate-800 w-full" placeholder="Search friends" value={userInputRecipient} onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
-    </div>
-  )
-}
-
-function TextBubble(text : TextData) {
-  {/* <div className="chat chat-start">
-    <div className="chat-bubble">It's over Anakin, <br/>I have the high ground.</div>
-  </div> */}
-
-  if (!text.receivedFromServer) {
-    return (
-      // right
-      <div className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
-        {text.text}
-      </div>
-    )
-  } else {
-    return (
-      // left
-      <div className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
-        {text.text}
-      </div>
-    )
-  }
-}
-
-function PrevTexts(handler: MessageHandler) {
-  return (
-    <div id="PrevTexts" className="flex flex-col-reverse w-full h-full overflow-y-scroll">
-      {handler.textBuffer.map((text) =>
-        TextBubble(text)
-      )}
-    </div>
-  )
-}
-
-function InputBox(handler: MessageHandler) {
-  function handleClientPressSend(e: React.KeyboardEvent, handler: MessageHandler){
-    if (e.code == 'Enter') {
-      let dom = document.getElementById('input_box') as HTMLInputElement
-      if (dom != null && userID != null && target_userID != null){
-        if (dom.value.length > 0) {
-            handler.clientSendMessage(target_userID, dom.value)
-        }
-        dom.value = ''
-      }
-    }
-  }
-
-  return (
-    <div id="InputBox" className="flex order-last ">
-      <input className="h-8 mt-3 pl-2 rounded-t-lg outline-none bg-slate-600"
-        type="text" placeholder="..."
-        id='input_box'
-        onKeyDown={(event)=>handleClientPressSend(event, handler)} />
-    </div>
-  )
-}
-
-function HeaderBar() {
-  return (
-    <div className="z-10 flex flex-row h-full w-full max-w-md items-center justify-between p-4 font-mono text-sm lg:flex">
-        <p>Chat App 💬</p>
-        <p>{userID}</p>
-    </div>
-  )
-}
-
-function TextArea(handler: MessageHandler) {
-
-  return (
-
+    <prevMsgContext.Provider value = {{prevMsg: msgBuffer, setPrevMsg:setMsgBuffer}}>
     <div id="TextArea" className='flex flex-col h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
-      {RecipientUserTitle(handler)}
-      {PrevTexts(handler)}
-      {InputBox(handler)}
+      {RecipientUserTitle()}
+      <PrevTexts prevMsg={msgBuffer} />
+      <InputBox prevMsg={msgBuffer} setPrevMsg={setMsgBuffer} />
     </div>
+    </prevMsgContext.Provider>
+  )
+}
+
+function MsgScreen() {
+  return (
+    <>
+    <DEV_storageControl />
+
+    {HeaderBar()}
+
+    {TextArea()}
+    </>
 
   )
 }
 
 export default function Home() {
-  const WS_URL = 'ws://localhost:8080/ws';
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [testuserID, settestuserID] = useState<string>("")
+  const [recipientID, setrecipientID] = useState<string>("")
 
-  const [textBuffer, setTextBuffer] = useState([])
-
-  const router = useRouter()
   useEffect(() => {
-    if (userID == null) {
-      router.push('/login')
+    if (loggedIn) {
+      userID = testuserID
+      worker = new Worker(
+        new URL("./worker/webworker.tsx", import.meta.url)
+      );
+
+      console.log("[MAIN]: new worker,", worker)
+      worker.postMessage({
+        connectionStatus: "init",
+      });
     }
-  })
 
-  if (userID == null) {
+    return () => {
+      if (worker != null) {
+        worker!.terminate();
+      }
+    }
+  },[loggedIn, testuserID])
+
+
+
+  // if (userID == null) {
+  //   return (
+  //     <div className='flex h-screen items-center justify-center'>
+  //       Loading...
+  //     </div>
+  //   )
+  // }
+
+  // if (handler == undefined) {
+  //   return (
+  //     <div>
+  //       <p> failed to connect to server, waiting to reconnect </p>
+  //     </div>
+  //   )
+  // } else {
+
+
+
     return (
-      <div className='flex h-screen items-center justify-center'>
-        Loading...
-      </div>
-    )
-  }
+      <userIDContext.Provider value={{signedIn: loggedIn, setSignIn: setLoggedIn, userID: testuserID, setUserID: settestuserID, recipientID: recipientID, setRecipientID: setrecipientID}}>
 
-  let socket = webSocketConnect(WS_URL)
-  if (socket == null) {
-    handler = undefined;
-  } else {
-    handler = new MessageHandler(socket, storage, textBuffer, setTextBuffer);
-  }
-
-
-
-  if (handler == undefined) {
-    return (
-      <main>
-        <p> failed to connect to server, waiting to reconnect </p>
-      </main>
-    )
-  } else {
-    return (
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <DEV_storageControl />
 
-        <HeaderBar />
+        {/* {!loggedIn ? <Login onLogin={(status) => {setLoggedIn(status)}}/> : <Area />} */}
+        {!loggedIn ? <Login /> : <MsgScreen />}
 
-        {TextArea(handler)}
       </main>
+
+      </userIDContext.Provider>
     )
-  }
+  // }
 
 }

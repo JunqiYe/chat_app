@@ -1,7 +1,7 @@
 import { webSocketConnect } from "../websocket/websocket_client";
 import { ChatStorage } from "../storage/chat_localstorage";
 import { TextData } from "../storage/text_data";
-import { userID } from "../page";
+import { userID } from "../../page";
 
 // handles receiving and sending messages
 // put incomming and outgoing message in storage
