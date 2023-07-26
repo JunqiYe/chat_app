@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { MessageHandler } from "../msgHandler/handler"
-import { TextData } from "../storage/text_data"
+import { prevMsgContext } from "./context"
+import { useContext, useState } from "react"
+import { TextData } from "../lib/storage/text_data"
 
 function TextBubble(text : TextData) {
     {/* <div className="chat chat-start">
@@ -24,12 +24,15 @@ function TextBubble(text : TextData) {
     }
   }
 
-export  function PrevTexts() {
-    const [textBuffer, setTextBuffer] = useState([])
 
+export interface PrevTextProps {
+  prevMsg: TextData[]
+}
+export  function PrevTexts(props: PrevTextProps) {
+  var {prevMsg} = useContext(prevMsgContext)
     return (
       <div id="PrevTexts" className="flex flex-col-reverse w-full h-full overflow-y-scroll">
-        {textBuffer.map((text) =>
+        {props.prevMsg.map((text: TextData) =>
           TextBubble(text)
         )}
       </div>

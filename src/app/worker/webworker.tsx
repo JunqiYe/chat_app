@@ -1,6 +1,6 @@
-import { webSocketConnect } from "../websocket/websocket_client"
-import { MessageHandler } from "../msgHandler/handler"
-import { ChatStorage }  from "../storage/chat_localstorage"
+import { webSocketConnect } from "../lib/websocket/websocket_client"
+import { MessageHandler } from "../lib/msgHandler/handler"
+import { ChatStorage }  from "../lib/storage/chat_localstorage"
 
 // worker.postMessage(input.value);
 // onmessage

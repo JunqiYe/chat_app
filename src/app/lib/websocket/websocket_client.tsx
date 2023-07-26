@@ -1,5 +1,5 @@
-import {TextData} from "./../storage/text_data"
-import {userID} from "./../page"
+import {TextData} from "../storage/text_data"
+import {userID} from "../../page"
 
 export function webSocketConnect(ws_url: string): WebSocket {
     var ws = new WebSocket(ws_url);

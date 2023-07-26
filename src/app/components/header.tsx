@@ -1,6 +1,6 @@
 // import { userIDContext } from "../page"
 // import { useContext } from "react"
-import { userIDContext } from "../ctx"
+import { userIDContext } from "./context"
 
 export function HeaderBar() {
     return (

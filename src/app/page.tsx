@@ -2,14 +2,15 @@
 
 import Image from 'next/image'
 import React, {KeyboardEvent, useState, useEffect, useMemo, createContext} from 'react';
-import { ChatStorage } from './storage/chat_localstorage'
+import { ChatStorage } from './lib/storage/chat_localstorage'
 
 import { HeaderBar } from './components/header'
 import { RecipientUserTitle } from './components/recipientInput';
 import { PrevTexts } from './components/prevTexts';
 import { InputBox } from './components/inputBox';
 import Login  from './components/login';
-import { userIDContext } from './ctx';
+import { userIDContext, prevMsgContext } from './components/context';
+import { TextData } from './lib/storage/text_data';
 
 // export var userIDContext = createContext("test")
 
@@ -43,40 +44,59 @@ function DEV_storageControl() {
   )
 }
 
+function isIDValid(id: string) : boolean {
+  if (id.length < 4) return false
+
+  return true
+}
+
 // ==========COMPONENTS============
 function TextArea() {
+  const [msgBuffer, setMsgBuffer] = useState<TextData[]>([])
+
+  // setMsgBuffer([new TextData("", "", "", 0, ""), ...msgBuffer])
+  // const msgBufferCtx = {
+  //   msgBuffer: msgBuffer,
+  //   setMsgBuffer: setMsgBuffer
+  // }
 
   return (
+    <prevMsgContext.Provider value = {{prevMsg: msgBuffer, setPrevMsg:setMsgBuffer}}>
     <div id="TextArea" className='flex flex-col h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
       {RecipientUserTitle()}
-      {/* {PrevTexts()} */}
-      {InputBox()}
+      <PrevTexts prevMsg={msgBuffer} />
+      <InputBox prevMsg={msgBuffer} setPrevMsg={setMsgBuffer} />
     </div>
+    </prevMsgContext.Provider>
   )
 }
 
+function MsgScreen() {
+  return (
+    <>
+    <DEV_storageControl />
+
+    {HeaderBar()}
+
+    {TextArea()}
+    </>
+
+  )
+}
 
 export default function Home() {
-  const [testuserID, settestuserID] = useState<string>()
-
-
-  // const router = useRouter()
-  // useEffect(() => {
-  //   // if (userID == null) {
-  //   //   router.push('/login')
-  //   // }
-
-
-  // })
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [testuserID, settestuserID] = useState<string>("")
+  const [recipientID, setrecipientID] = useState<string>("")
 
   useEffect(() => {
-    if (testuserID != undefined) {
+    if (loggedIn) {
       userID = testuserID
       worker = new Worker(
         new URL("./worker/webworker.tsx", import.meta.url)
       );
 
-      console.log("new worker,", worker)
+      console.log("[MAIN]: new worker,", worker)
       worker.postMessage({
         connectionStatus: "init",
       });
@@ -87,15 +107,7 @@ export default function Home() {
         worker!.terminate();
       }
     }
-  },[testuserID])
-
-
-  if (testuserID == undefined) {
-    return (
-      Login(settestuserID)
-    )
-  }
-
+  },[loggedIn, testuserID])
 
 
 
@@ -109,22 +121,25 @@ export default function Home() {
 
   // if (handler == undefined) {
   //   return (
-  //     <main>
+  //     <div>
   //       <p> failed to connect to server, waiting to reconnect </p>
-  //     </main>
+  //     </div>
   //   )
   // } else {
 
+
+
     return (
+      <userIDContext.Provider value={{signedIn: loggedIn, setSignIn: setLoggedIn, userID: testuserID, setUserID: settestuserID, recipientID: recipientID, setRecipientID: setrecipientID}}>
+
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <DEV_storageControl />
 
-        <userIDContext.Provider value={{userID:testuserID, recipientID: ""}}>
-          {HeaderBar()}
-        </userIDContext.Provider>
+        {/* {!loggedIn ? <Login onLogin={(status) => {setLoggedIn(status)}}/> : <Area />} */}
+        {!loggedIn ? <Login /> : <MsgScreen />}
 
-        {TextArea()}
       </main>
+
+      </userIDContext.Provider>
     )
   // }
 

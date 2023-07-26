@@ -1,42 +1,36 @@
 'use client'
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { userIDContext } from './context';
 
-export default function Login(setUsername: (n: string) => void) {
+interface loginStatus {
+    // onLogin: (status: boolean) => void;
+}
+
+export default function Login(props: loginStatus){
     var [input, setInput] = useState("")
+    const ctx = useContext(userIDContext)
 
     function handleUsernameChange(event: any) {
         setInput(event.target.value)
     }
 
-    // useEffect(() => {
-    //     const form = document.querySelector('form')
-    //     if (form == null) {throw new Error("cannot find form element")}
+    function handleSignInSubmit(event: any) {
+        event.preventDefault()
 
-    //     form.addEventListener('submit', event => {
-    //         // submit event detected
-    //         event.preventDefault()
-    //         // updateUserID(username)
-    //         // setUsername(input)
-    //         // signal to worker to create
+        // props.onLogin(true)
 
-    //         // router.push('/')
-    //     })
-    // },[])
+        ctx.setUserID(input)
+        ctx.setSignIn(true)
 
-    function handleSignIn(event: any) {
-        // event.preventDefault()
-        setUsername(input)
-        event.target.value = ''
-        
     }
 
     return (
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <div className="flex flex-col w-full h-full items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                 <div className='p-6 w-5/6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700'>
                     <h1 className='mb-3 space-y-4 md:space-y-6'>Chat App</h1>
                     <form className="space-y-4 md:space-y-6"
                         id='username_div'
-                        onSubmit={handleSignIn}
+                        onSubmit={handleSignInSubmit}
                         // action={"/"}
                         >
                     <div>
@@ -46,7 +40,7 @@ export default function Login(setUsername: (n: string) => void) {
                     </div>
                     <button className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                         type="submit"
-                        onClick={handleSignIn}
+                        onClick={handleSignInSubmit}
                         >Login</button>
                     </form>
                 </div>
