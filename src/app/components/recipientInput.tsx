@@ -1,5 +1,7 @@
 import { useState, useEffect, useContext } from "react"
 import { userIDContext } from "./context"
+import { workerNewRecipient } from "../lib/webwoker/webworker_main"
+
 
 export function RecipientUserTitle(){
   const ctx = useContext(userIDContext)
@@ -10,6 +12,7 @@ export function RecipientUserTitle(){
     if(event.key === 'Enter') {
       // TOOD update recipient id
       ctx.setRecipientID(userInputRecipient)
+      workerNewRecipient(userInputRecipient)
     }
   }
 

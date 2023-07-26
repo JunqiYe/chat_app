@@ -1,7 +1,8 @@
 import { useContext } from "react"
-import { MessageHandler } from "../lib/msgHandler/handler"
 import { prevMsgContext, userIDContext } from "./context"
 import { TextData } from "../lib/storage/text_data"
+import { workerSendNewMsg } from "../lib/webwoker/webworker_main"
+
 
 export interface InputBoxProps {
   prevMsg: TextData[],
@@ -16,14 +17,10 @@ export function InputBox(props: InputBoxProps) {
         let dom = document.getElementById('input_box') as HTMLInputElement
         if (dom != null && userID != null && recipientID != null){
           if (dom.value.length > 0) {
-            // TODO: send message to worker, allow worker to append to prevMsg state/context 
-            // clientSendMessage(target_userID, dom.value)
+            // TODO: send message to worker, allow worker to append to prevMsg state/context
             console.log("new message", dom.value);
-            var temp = new TextData(userID, recipientID, "", 0, dom.value)
-            props.setPrevMsg([
-              temp,
-              ...props.prevMsg
-            ])
+
+            workerSendNewMsg(dom.value)
           }
           dom.value = ''
         }

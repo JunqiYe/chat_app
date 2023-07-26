@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import React, {KeyboardEvent, useState, useEffect, useMemo, createContext} from 'react';
+import React, {KeyboardEvent, useState, useEffect, useMemo, createContext, useContext} from 'react';
 import { ChatStorage } from './lib/storage/chat_localstorage'
 
 import { HeaderBar } from './components/header'
@@ -11,10 +11,10 @@ import { InputBox } from './components/inputBox';
 import Login  from './components/login';
 import { userIDContext, prevMsgContext } from './components/context';
 import { TextData } from './lib/storage/text_data';
+import { newWorker, worker, workerSendInit, workerTerminate } from './lib/webwoker/webworker_main';
 
 // export var userIDContext = createContext("test")
 
-export var worker : Worker | null = null
 export var userID: string | null = null
 export var target_userID: string | null = null
 // export function updateUserID(newID: string) {
@@ -50,15 +50,33 @@ function isIDValid(id: string) : boolean {
   return true
 }
 
+
+
 // ==========COMPONENTS============
 function TextArea() {
   const [msgBuffer, setMsgBuffer] = useState<TextData[]>([])
-
+  const ctx = useContext(userIDContext)
   // setMsgBuffer([new TextData("", "", "", 0, ""), ...msgBuffer])
   // const msgBufferCtx = {
   //   msgBuffer: msgBuffer,
   //   setMsgBuffer: setMsgBuffer
   // }
+  useEffect(() =>{
+    if (worker != null) {
+      worker.addEventListener("message", (e: MessageEvent) =>{
+        const workerData = e.data;
+        switch (workerData.connectionStatus) {
+          case "add msg":
+            console.log("[MAIN] received message:" + workerData.data);
+            // setMsgBuffer([workerData.data, ...msgBuffer])
+            var msgObj = new TextData(ctx.userID, ctx.recipientID, workerData.convID, workerData.counter, workerData.data )
+            setMsgBuffer([msgObj, ...msgBuffer])
+            break;
+        }
+      })
+    }
+
+  })
 
   return (
     <prevMsgContext.Provider value = {{prevMsg: msgBuffer, setPrevMsg:setMsgBuffer}}>
@@ -91,21 +109,12 @@ export default function Home() {
 
   useEffect(() => {
     if (loggedIn) {
-      userID = testuserID
-      worker = new Worker(
-        new URL("./worker/webworker.tsx", import.meta.url)
-      );
-
-      console.log("[MAIN]: new worker,", worker)
-      worker.postMessage({
-        connectionStatus: "init",
-      });
+      newWorker()
+      workerSendInit(testuserID)
     }
 
     return () => {
-      if (worker != null) {
-        worker!.terminate();
-      }
+      workerTerminate()
     }
   },[loggedIn, testuserID])
 
