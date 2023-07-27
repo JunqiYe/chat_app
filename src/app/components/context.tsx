@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import { TextData } from "../lib/storage/text_data";
 
 
-export const userIDContext = createContext({
+export const mainAppContext = createContext({
     signedIn: false,
     setSignIn: (n: any) => {},
     userID:"",
@@ -18,8 +18,8 @@ export const prevMsgContext = createContext<any>({
     setPrevMsg: (n: any) => {},
 })
 
-// export function useUserIDContext() {
-//     return useContext(userIDContext)
+// export function usemainAppContext() {
+//     return useContext(mainAppContext)
 // }
 
 // export function usePrevMsgContext() {

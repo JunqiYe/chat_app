@@ -4,7 +4,7 @@ import Image from 'next/image'
 import React, {KeyboardEvent, useState, useEffect, useMemo, createContext, useContext} from 'react';
 import { ChatStorage } from './lib/storage/chat_localstorage'
 
-import { userIDContext, prevMsgContext } from './components/context';
+import { mainAppContext, prevMsgContext } from './components/context';
 import { TextData } from './lib/storage/text_data';
 import { newWorker, worker, workerSendInit, workerTerminate } from './lib/webwoker/webworker_main';
 import TextArea from './components/textAera';
@@ -13,6 +13,7 @@ import Login  from './components/login';
 // import { WS_URL } from './lib/webwoker/webworker_thread';
 import { MessageHandler } from './lib/msgHandler/handler';
 import Conversations from './components/convSelector';
+import ConversationsSelect from './components/convSelector';
 export const WS_URL = 'ws://localhost:8080/ws';
 
 
@@ -93,7 +94,7 @@ export default function Home() {
 
 
     return (
-      <userIDContext.Provider value={{
+      <mainAppContext.Provider value={{
         signedIn: loggedIn,
         setSignIn: setLoggedIn,
         userID: userID,
@@ -115,7 +116,7 @@ export default function Home() {
             <HeaderBar />
           </div>
           <div className='flex flex-row'>
-            <Conversations />
+            <ConversationsSelect />
             <TextArea />
           </div>
          </div>
@@ -123,7 +124,7 @@ export default function Home() {
 
       </main>
 
-      </userIDContext.Provider>
+      </mainAppContext.Provider>
     )
   // }
 

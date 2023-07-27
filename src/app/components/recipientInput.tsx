@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react"
-import { userIDContext } from "./context"
+import { mainAppContext } from "./context"
 import { workerNewRecipient } from "../lib/webwoker/webworker_main"
 import { handler } from "../page"
 
@@ -9,7 +9,7 @@ interface RecipientUserTitleProps {
   setConvIDs: (convIDs: string[]) => void
 }
 export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUserTitleProps) {
-  const ctx = useContext(userIDContext)
+  const ctx = useContext(mainAppContext)
   const [userInputRecipient, setUserInputRecipient] = useState("")
 
   // TODO: check if convID exists, if not, request server for convID
@@ -32,7 +32,9 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
         )
 
       // workerNewRecipient(userInputRecipient)
+      event.target.value = ''
     }
+
   }
 
   function handleTargetUserUpdate(event: any) {

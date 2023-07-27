@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
+import { mainAppContext } from "./context";
 
 interface ConvIDBoxProps {
     key: string;
     convID: string;
 }
 function ConvIDBox({convID}: ConvIDBoxProps) {
+    const ctx = useContext(mainAppContext);
     return (
-        <div className=" bg-sky-500 hover:bg-sky-700" onClick={()=>{console.log(convID)}}>
+        <div className=" bg-sky-500 hover:bg-sky-700"
+            onClick={()=>{
+                ctx.setConvID(convID)
+                console.log(convID)
+            }}>
+
             {convID.split('-')[1]}
         </div>
     )
@@ -29,7 +36,7 @@ function ConvSelector({convIDs}: ConvSelectorProps) {
 }
 
 
-export default function Conversations() {
+export default function ConversationsSelect() {
     const [allConvID, setAllConvID] = useState<string[]>([])
 
     return (

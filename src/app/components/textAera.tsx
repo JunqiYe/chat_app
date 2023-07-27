@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { TextData } from "../lib/storage/text_data";
-import { prevMsgContext, userIDContext } from "./context";
+import { prevMsgContext, mainAppContext } from "./context";
 import { worker } from "../lib/webwoker/webworker_main";
 import RecipientUserTitle  from "./recipientInput";
 import PrevTexts from "./prevTexts";
@@ -8,7 +8,7 @@ import InputBox from "./inputBox";
 
 export default function TextArea() {
     const [msgBuffer, setMsgBuffer] = useState<TextData[]>([])
-    const ctx = useContext(userIDContext)
+    const ctx = useContext(mainAppContext)
     // setMsgBuffer([new TextData("", "", "", 0, ""), ...msgBuffer])
     // const msgBufferCtx = {
     //   msgBuffer: msgBuffer,
@@ -34,6 +34,9 @@ export default function TextArea() {
     return (
       <prevMsgContext.Provider value = {{prevMsg: msgBuffer, setPrevMsg:setMsgBuffer}}>
       <div id="TextArea" className='flex flex-col basis-2/3 h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
+        <div className=" items-start">
+            {ctx.convID.split('-')[1]}
+        </div>
         <PrevTexts prevMsg={msgBuffer} />
         <InputBox prevMsg={msgBuffer} setPrevMsg={setMsgBuffer} />
       </div>

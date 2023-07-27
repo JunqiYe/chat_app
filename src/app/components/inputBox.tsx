@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import { prevMsgContext, userIDContext } from "./context"
+import { prevMsgContext, mainAppContext } from "./context"
 import { TextData } from "../lib/storage/text_data"
 import { workerSendNewMsg } from "../lib/webwoker/webworker_main"
 import { handler } from "../page"
@@ -12,7 +12,7 @@ interface InputBoxProps {
 
 export default function InputBox(props: InputBoxProps) {
     // var {prevMsg, setPrevMsg} = useContext(prevMsgContext)
-    var {userID, recipientID}= useContext(userIDContext)
+    var {userID, recipientID}= useContext(mainAppContext)
 
     function handleClientPressSend(e: React.KeyboardEvent){
       if (e.code == 'Enter') {

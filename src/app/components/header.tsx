@@ -1,16 +1,16 @@
-// import { userIDContext } from "../page"
+// import { mainAppContext } from "../page"
 // import { useContext } from "react"
-import { userIDContext } from "./context"
+import { mainAppContext } from "./context"
 
 export default function HeaderBar() {
     return (
         <div className="z-10 flex flex-row h-full w-full max-w-md items-center justify-between p-4 font-mono text-sm lg:flex">
             <p>Chat App 💬</p>
-            <userIDContext.Consumer>
+            <mainAppContext.Consumer>
                 {(value) =>
                     <p>{value.userID}</p>
                 }
-            </userIDContext.Consumer>
+            </mainAppContext.Consumer>
         </div>
     )
   }

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useContext } from 'react';
-import { userIDContext } from './context';
+import { mainAppContext } from './context';
 
 interface loginStatus {
     // onLogin: (status: boolean) => void;
@@ -8,7 +8,7 @@ interface loginStatus {
 
 export default function Login(props: loginStatus){
     var [input, setInput] = useState("")
-    const ctx = useContext(userIDContext)
+    const ctx = useContext(mainAppContext)
 
     function handleUsernameChange(event: any) {
         setInput(event.target.value)
