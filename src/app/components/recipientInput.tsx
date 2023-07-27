@@ -4,7 +4,11 @@ import { workerNewRecipient } from "../lib/webwoker/webworker_main"
 import { handler } from "../page"
 
 
-export default function RecipientUserTitle(){
+interface RecipientUserTitleProps {
+  convIDs: string[]
+  setConvIDs: (convIDs: string[]) => void
+}
+export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUserTitleProps) {
   const ctx = useContext(userIDContext)
   const [userInputRecipient, setUserInputRecipient] = useState("")
 
@@ -20,6 +24,7 @@ export default function RecipientUserTitle(){
           (id) => {
           handler.currentConvID = id;
           ctx.setConvID(id)
+          setConvIDs([...convIDs, id])
           },
           (err) => {
             throw new Error(err)

@@ -33,8 +33,7 @@ export default function TextArea() {
 
     return (
       <prevMsgContext.Provider value = {{prevMsg: msgBuffer, setPrevMsg:setMsgBuffer}}>
-      <div id="TextArea" className='flex flex-col h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
-        <RecipientUserTitle />
+      <div id="TextArea" className='flex flex-col basis-2/3 h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
         <PrevTexts prevMsg={msgBuffer} />
         <InputBox prevMsg={msgBuffer} setPrevMsg={setMsgBuffer} />
       </div>

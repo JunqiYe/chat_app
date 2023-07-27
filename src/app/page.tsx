@@ -12,6 +12,7 @@ import HeaderBar from './components/header'
 import Login  from './components/login';
 // import { WS_URL } from './lib/webwoker/webworker_thread';
 import { MessageHandler } from './lib/msgHandler/handler';
+import Conversations from './components/convSelector';
 export const WS_URL = 'ws://localhost:8080/ws';
 
 
@@ -108,11 +109,16 @@ export default function Home() {
         {!loggedIn ?
         <Login />
          :
-         <>
-         <DEV_storageControl />
-         <HeaderBar />
-         <TextArea />
-         </>
+         <div>
+          <div>
+            <DEV_storageControl />
+            <HeaderBar />
+          </div>
+          <div className='flex flex-row'>
+            <Conversations />
+            <TextArea />
+          </div>
+         </div>
          }
 
       </main>
