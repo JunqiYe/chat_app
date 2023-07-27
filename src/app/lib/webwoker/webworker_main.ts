@@ -18,25 +18,24 @@ export function workerSendInit(userID: string) {
     });
 }
 
+export function workerNewRecipient(recipientID: string) {
+  if (worker == null) throw new Error('worker not initialized')
+
+  worker.postMessage({
+    connectionStatus: "newRecipient",
+    recipientID: recipientID
+  })
+}
+
 export function workerSendNewMsg(msg: string) {
     if (worker == null) throw new Error('worker not initialized')
 
     console.log("[main] send new message:" + msg)
     worker.postMessage({
-      connectionStatus: "outbound",
+      connectionStatus: "newOutboundMsg",
       data: msg
     })
 }
-
-export function workerNewRecipient(recipientID: string) {
-    if (worker == null) throw new Error('worker not initialized')
-
-    worker.postMessage({
-      connectionStatus: "new recipient",
-      recipientID: recipientID
-    })
-}
-
 
 export function workerTerminate() {
     // if (worker == null) throw new Error('worker not initialized')

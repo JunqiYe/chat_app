@@ -1,58 +1,61 @@
-import { MessageHandler } from "../msgHandler/handler"
-import { ChatStorage }  from "../storage/chat_localstorage"
+// import { MessageHandler } from "../msgHandler/handler"
+// import { ChatStorage }  from "../storage/chat_localstorage"
 
-// worker.postMessage(input.value);
-// onmessage
+// // worker.postMessage(input.value);
+// // onmessage
 
-const WS_URL = 'ws://localhost:8080/ws';
-var storage = new ChatStorage()
-var handler: MessageHandler
+// export const WS_URL = 'ws://localhost:8080/ws';
+// var handler: MessageHandler
 
-const userMsgInfo = {
-  userID: null,
-  recipientID: null
-}
+// export const userMsgInfo = {
+//   userID: null,
+//   recipientID: null,
+//   convID: null
+// }
 
-function createSocket() {
-    console.log('createSocket')
-    var socket = new WebSocket(WS_URL)
-    handler = new MessageHandler(socket, storage, [], ()=>{});
-}
+// function createSocket() {
+//     console.log('createSocket')
+//     var socket = new WebSocket(WS_URL)
+//     var storage = new ChatStorage()
+//     handler = new MessageHandler(socket, storage);
+// }
 
-// convID and counter generated here
+// // convID and counter generated here
 
-self.onmessage = function (e) {
-    const workerData = e.data;
-    console.log("[WORKER] Web worker onmessage established", workerData.connectionStatus);
-    switch (workerData.connectionStatus) {
-      case "init":
-        userMsgInfo.userID = workerData.userID
-        createSocket();
-        break;
+// self.onmessage = function (e) {
+//     const workerData = e.data;
+//     console.log("[WORKER] Web worker onmessage established", workerData.connectionStatus);
+//     switch (workerData.connectionStatus) {
+//       case "init":
+//         userMsgInfo.userID = workerData.userID
+//         createSocket();
+//         break;
 
-      case "new recipient":
-        userMsgInfo.recipientID = workerData.recipientID
-        break
+//       case "newRecipient":
+//         userMsgInfo.recipientID = workerData.recipientID
+//         // handler.clientGetConvID()
+//         break
 
-      case "outbound":
-        // send over websocket
-        // put in storage
-        console.log("[WORKER] : new outbound msg, data: " + workerData.data.toString());
+//       case "newOutboundMsg":
+//         console.log("[WORKER] : new newOutboundMsg msg, data: " + workerData.data.toString());
+//         // send over websocket
+//         handler.clientSendMessage(workerData.data)
+//         // put in storage
 
-        self.postMessage({
-          connectionStatus: "add msg",
-          convID: "",
-          counter: 0,
-          data: workerData.data
-        })
+//         self.postMessage({
+//           connectionStatus: "add msg",
+//           convID: "",
+//           counter: 0,
+//           data: workerData.data
+//         })
 
-        break
+//         break
 
-      case "stop":
-        handler.websocket.close();
-        break;
+//       case "stop":
+//         handler.websocket.close();
+//         break;
 
-      default:
+//       default:
 
-    }
-  }
+//     }
+//   }

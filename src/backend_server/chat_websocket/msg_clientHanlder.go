@@ -51,9 +51,16 @@ func (c *ClientHandler) readMessage() {
 		case "init":
 			c.userID = res.SenderID
 			c.hub.register <- c
+			break
+		case "request convID":
+			res.ConvID = checkConvIDExist(res.SenderID, res.RecipientID)
+			res.FrameType = "response convID"
+			c.conn.WriteJSON(res)
+			break
 		case "transmit":
 			c.hub.incommingMsg <- res
 			log.Print("msg send to hub")
+			break
 		}
 
 	}

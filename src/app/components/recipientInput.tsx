@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react"
 import { userIDContext } from "./context"
 import { workerNewRecipient } from "../lib/webwoker/webworker_main"
+import { handler } from "../page"
 
 
-export function RecipientUserTitle(){
+export default function RecipientUserTitle(){
   const ctx = useContext(userIDContext)
   const [userInputRecipient, setUserInputRecipient] = useState("")
 
@@ -12,7 +13,20 @@ export function RecipientUserTitle(){
     if(event.key === 'Enter') {
       // TOOD update recipient id
       ctx.setRecipientID(userInputRecipient)
-      workerNewRecipient(userInputRecipient)
+      handler.currentRecipientID = userInputRecipient
+
+      handler.clientGetConvID()
+        .then(
+          (id) => {
+          handler.currentConvID = id;
+          ctx.setConvID(id)
+          },
+          (err) => {
+            throw new Error(err)
+          }
+        )
+
+      // workerNewRecipient(userInputRecipient)
     }
   }
 

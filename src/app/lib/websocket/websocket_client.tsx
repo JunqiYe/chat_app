@@ -1,5 +1,5 @@
 import {TextData} from "../storage/text_data"
-import {userID} from "../../page"
+import { userMsgInfo } from "../webwoker/webworker_thread";
 
 export function webSocketConnect(ws_url: string): WebSocket {
     var ws = new WebSocket(ws_url);
@@ -8,7 +8,7 @@ export function webSocketConnect(ws_url: string): WebSocket {
       // subscribe to some channels
       ws.send(JSON.stringify({
           type: "init",
-          SenderId: userID
+          SenderId: userMsgInfo.userID
       }));
     };
 

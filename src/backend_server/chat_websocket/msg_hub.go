@@ -33,9 +33,11 @@ func (h *Hub) HubRun() {
 			delete(h.conversations, handler.userID)
 
 		case msg := <-h.incommingMsg:
-			h.storage.StoreMsg(msg)
+			if msg.FrameType == "transmit" {
+				h.storage.StoreMsg(msg)
+			}
 
-			channel, ok := h.conversations[msg.RecipientID]
+			channel, ok := h.conversations[msg.ConvID]
 			if ok {
 				log.Println("receipient located")
 				channel.receive <- msg

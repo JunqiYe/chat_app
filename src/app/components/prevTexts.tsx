@@ -29,10 +29,10 @@ function TextBubble({text} : TextBubbleProps) {
   }
 
 
-export interface PrevTextProps {
+interface PrevTextProps {
   prevMsg: TextData[]
 }
-export  function PrevTexts(props: PrevTextProps) {
+export default function PrevTexts(props: PrevTextProps) {
   // var {prevMsg} = useContext(prevMsgContext)
 
     return (

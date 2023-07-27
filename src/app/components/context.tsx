@@ -8,7 +8,9 @@ export const userIDContext = createContext({
     userID:"",
     setUserID: (n: any) => {},
     recipientID:"",
-    setRecipientID: (n: any) => {}
+    setRecipientID: (n: any) => {},
+    convID:"",
+    setConvID: (n: any) => {}
 })
 
 export const prevMsgContext = createContext<any>({
