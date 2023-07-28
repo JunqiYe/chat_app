@@ -64,6 +64,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ### bug fixes
 - make sure ctx and handler value are updated at the same time
 - ~~research event.target, seems like values are crossing between elements, i.e. form values are getting set to recipients input~~
-- counter is broken/not working
+- ~~counter is broken/not working~~
 - ~~issue where sending the first text result in two text bubble~~
 

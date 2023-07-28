@@ -3,39 +3,41 @@ package chat_websocket
 import "log"
 
 type Hub struct {
-	storage             *msg_storage
-	incommingMsg        chan msgObj
-	conversations       map[string]map[string]bool // conversationID -> clientsID
-	userBase            map[string]*ClientHandler
-	createConversations chan msgObj
-	register            chan *ClientHandler
-	unregister          chan *ClientHandler
+	storage                  *msg_storage
+	incommingMsg             chan msgObj
+	conversations            map[string]map[string]bool // conversationID -> clientsID
+	conversation_msg_counter map[string]uint64          // conversation
+	userBase                 map[string]*ClientHandler
+	createConversations      chan msgObj
+	register                 chan *ClientHandler
+	unregister               chan *ClientHandler
 }
 
 func NewHub(storage *msg_storage) *Hub {
 	return &Hub{
-		storage:             storage,
-		incommingMsg:        make(chan msgObj),
-		conversations:       make(map[string]map[string]bool),
-		userBase:            make(map[string]*ClientHandler),
-		createConversations: make(chan msgObj),
-		register:            make(chan *ClientHandler),
-		unregister:          make(chan *ClientHandler),
+		storage:                  storage,
+		incommingMsg:             make(chan msgObj),
+		conversations:            make(map[string]map[string]bool),
+		conversation_msg_counter: make(map[string]uint64),
+		userBase:                 make(map[string]*ClientHandler),
+		createConversations:      make(chan msgObj),
+		register:                 make(chan *ClientHandler),
+		unregister:               make(chan *ClientHandler),
 	}
 }
 
 // check if convID exists in converation map, otherwise init the and return convid
-func (h *Hub) checkConvIDExist(senderID string, recipientID string) string {
+func (h *Hub) checkConvIDExist(senderID string, recipientID string) (string, bool) {
 	primary := convertConvID(senderID, recipientID)
 	secondary := convertConvID(recipientID, senderID)
 
 	if _, ok := h.conversations[primary]; ok {
-		return primary
+		return primary, true
 	} else if _, ok := h.conversations[secondary]; ok {
-		return secondary
+		return secondary, true
 	} else {
 		h.conversations[primary] = make(map[string]bool)
-		return primary
+		return primary, false
 	}
 }
 
@@ -52,15 +54,20 @@ func (h *Hub) HubRun() {
 			delete(h.userBase, handler.userID)
 
 		case msg := <-h.createConversations:
+			conversationID, exists := h.checkConvIDExist(msg.SenderID, msg.RecipientID)
 
-			conversationID := h.checkConvIDExist(msg.SenderID, msg.RecipientID)
+			if !exists {
+				// init server side conversation
+				h.conversations[conversationID][msg.SenderID] = true
+				h.conversations[conversationID][msg.RecipientID] = true
+				h.conversation_msg_counter[conversationID] = 0
+			}
 
-			h.conversations[conversationID][msg.SenderID] = true
-			h.conversations[conversationID][msg.RecipientID] = true
-
+			// update response packet
 			msg.ConvID = conversationID
 			msg.FrameType = "response convID"
 
+			// send response back to sender
 			h.userBase[msg.SenderID].receive <- msg
 
 		case msg := <-h.incommingMsg:
@@ -71,10 +78,16 @@ func (h *Hub) HubRun() {
 			users, ok := h.conversations[msg.ConvID]
 
 			if ok {
-				for key, _ := range users {
-					// if key == msg.RecipientID {
+				// update conversation message counter
+				h.conversation_msg_counter[msg.ConvID]++
+				msg.Counter = h.conversation_msg_counter[msg.ConvID]
+
+				for user := range users {
+					// if user == msg.RecipientID {
 					log.Println("receipient located")
-					recipientHandler, ok := h.userBase[key]
+
+					// get the handler for this specific user
+					recipientHandler, ok := h.userBase[user]
 					if ok {
 						recipientHandler.receive <- msg
 					}

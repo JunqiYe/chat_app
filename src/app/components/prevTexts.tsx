@@ -42,7 +42,7 @@ export default function PrevTexts(props: PrevTextProps) {
       <div id="PrevTexts" className="flex flex-col-reverse w-full h-full overflow-y-scroll">
         { msgs != undefined ?
           msgs.map((text: TextData) => (
-            <TextBubble key={text.convID + '_' + Math.random()} text={text} /> // TODO: temp fix, update count on server
+            <TextBubble key={text.convID + '_' + text.counter} text={text} />
           ))
           :
           <></>
