@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react"
 import { mainAppContext } from "./context"
-import { workerNewRecipient } from "../lib/webwoker/webworker_main"
 import { handler } from "../page"
 import { Recipients } from "./convSelector"
+import { isIDValid } from "../lib/ID_helper"
 
 
 interface RecipientUserTitleProps {
@@ -16,9 +16,15 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
   // TODO: check if convID exists, if not, request server for convID
   function handleTargetUserSubmit(event: any) {
     if(event.key === 'Enter') {
-      // TOOD find within array if recipient exites and switch to it
-      ctx.setRecipientID(userInputRecipient)
+
+      // check recipient user input
+      if (!isIDValid(userInputRecipient)) {
+        alert("Please enter a valid username, use letters, numbers, _ or !")
+        return
+      }
+
       event.target.value = ''
+      ctx.setRecipientID(userInputRecipient)
 
 
       var matchedConv = convIDs.find(obj => obj.recipient == userInputRecipient)
@@ -40,7 +46,7 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
             recipient: userInputRecipient,
             conversation: id
           }
-          
+
           setConvIDs([...convIDs, newRecipient])
           },
           (err) => {

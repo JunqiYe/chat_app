@@ -1,7 +1,3 @@
-import {TextData} from "../storage/text_data"
-import { mainAppContext } from "@/app/components/context";
-// import { userMsgInfo } from "../webwoker/webworker_thread";
-
 export function webSocketConnect(ws_url: string): WebSocket {
     var ws = new WebSocket(ws_url);
     // ws.onopen = function() {

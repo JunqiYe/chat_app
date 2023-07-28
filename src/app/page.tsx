@@ -5,24 +5,13 @@ import React, {KeyboardEvent, useState, useEffect, useMemo, createContext, useCo
 import { ChatStorage } from './lib/storage/chat_localstorage'
 
 import { mainAppContext, prevMsgContext } from './components/context';
-import { TextData } from './lib/storage/text_data';
-import { newWorker, worker, workerSendInit, workerTerminate } from './lib/webwoker/webworker_main';
 import TextArea from './components/textAera';
 import HeaderBar from './components/header'
 import Login  from './components/login';
-// import { WS_URL } from './lib/webwoker/webworker_thread';
 import { MessageHandler } from './lib/msgHandler/handler';
-import Conversations from './components/convSelector';
 import ConversationsSelect from './components/convSelector';
 export const WS_URL = 'ws://localhost:8080/ws';
 
-
-// export function updateUserID(newID: string) {
-//   userID = newID
-// }
-// export function updateTargetUserID(newID: string) {
-//   target_userID = newID
-// }
 
 
 function DEV_storageControl() {
@@ -43,11 +32,6 @@ function DEV_storageControl() {
   )
 }
 
-function isIDValid(id: string) : boolean {
-  if (id.length < 4) return false
-
-  return true
-}
 
 export var handler : MessageHandler
 
