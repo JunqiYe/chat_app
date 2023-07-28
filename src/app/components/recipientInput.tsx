@@ -2,11 +2,12 @@ import { useState, useEffect, useContext } from "react"
 import { mainAppContext } from "./context"
 import { workerNewRecipient } from "../lib/webwoker/webworker_main"
 import { handler } from "../page"
+import { Recipients } from "./convSelector"
 
 
 interface RecipientUserTitleProps {
-  convIDs: string[]
-  setConvIDs: (convIDs: string[]) => void
+  convIDs: Recipients[]
+  setConvIDs: (convIDs: Recipients[]) => void
 }
 export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUserTitleProps) {
   const ctx = useContext(mainAppContext)
@@ -15,8 +16,19 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
   // TODO: check if convID exists, if not, request server for convID
   function handleTargetUserSubmit(event: any) {
     if(event.key === 'Enter') {
-      // TOOD update recipient id
+      // TOOD find within array if recipient exites and switch to it
       ctx.setRecipientID(userInputRecipient)
+      event.target.value = ''
+
+
+      var matchedConv = convIDs.find(obj => obj.recipient == userInputRecipient)
+      if (matchedConv != undefined) {
+        ctx.setConvID(matchedConv.conversation);
+
+        return
+      }
+
+
       handler.currentRecipientID = userInputRecipient
 
       handler.clientGetConvID()
@@ -24,7 +36,12 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
           (id) => {
           handler.currentConvID = id;
           ctx.setConvID(id)
-          setConvIDs([...convIDs, id])
+          var newRecipient: Recipients = {
+            recipient: userInputRecipient,
+            conversation: id
+          }
+          
+          setConvIDs([...convIDs, newRecipient])
           },
           (err) => {
             throw new Error(err)
@@ -32,7 +49,6 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
         )
 
       // workerNewRecipient(userInputRecipient)
-      event.target.value = ''
     }
 
   }

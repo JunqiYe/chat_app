@@ -47,14 +47,14 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ### Frontend
 - [ ] add select for most recent text
-- [ ] add left panel such that select the chat
+- [x] add left panel such that select the chat
 - [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
 - [ ] make text area full screen when screen is small
 - [ ] push notification
 
 
 ### Backend
-- [ ] server should asssign convID instead of client
+- [x] server should asssign convID instead of client
 - [x] networking text (web socket) - peer to peer to start
 - [x] add broadcast
 - [ ] add http request for syncing messages
@@ -62,7 +62,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 ### bug fixes
-- research event.target, seems like values are crossing between elements, i.e. form values are getting set to recipients input
+- make sure ctx and handler value are updated at the same time
+- ~~research event.target, seems like values are crossing between elements, i.e. form values are getting set to recipients input~~
 - counter is broken/not working
 - ~~issue where sending the first text result in two text bubble~~
 

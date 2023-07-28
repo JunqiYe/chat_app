@@ -1,6 +1,6 @@
 .PHONY: server
 server:
-	go run main.go ./data
+	go run -race main.go ./data
 
 # go run cmd/fetch/main.go -req ./cmd/fetch/samples/input.txt -resp ./cmd/fetch/samples/output.txt localhost:8080
 # .PHONY: gohttpd

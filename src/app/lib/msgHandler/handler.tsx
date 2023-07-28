@@ -21,17 +21,19 @@ export class MessageHandler {
     websocket: WebSocket;
     storage: ChatStorage;
 
-
-    constructor(websocket: WebSocket, storage: ChatStorage) {
-        console.log("new connection")
-        this.websocket = websocket;
-        this.storage = storage;
-
-        // this.websocket.onmessage = this.clientReceiveMessage
-        this.websocket.addEventListener("message", (event) => {
-            this.clientReceiveMessage(event)
-        });
+    // send userID information to server when connecting
+    private initConnection() {
+        if (this.currentUserID == null) throw new Error("userID not specified when connecting to server");
+        // console.log(this.websocket)
+        var id = this.currentUserID
+        this.websocket.onopen = function() {
+            this.send(JSON.stringify({
+                type: "init",
+                SenderId: id
+            }))
+        }
     }
+
 
     private sendMsg(msg: TextData) {
         console.log("msg json", msg.toJson())
@@ -43,10 +45,27 @@ export class MessageHandler {
         this.storage.storeText(data)
     }
 
+    constructor(userID: string, websocket: WebSocket, storage: ChatStorage) {
+        console.log("new connection")
+        this.websocket = websocket;
+        this.storage = storage;
+        this.currentUserID = userID;
+
+        this.initConnection()
+
+        // this.websocket.onmessage = this.clientReceiveMessage
+        this.websocket.addEventListener("message", (event) => {
+            this.clientReceiveMessage(event)
+        });
+    }
+
+
     clientGetHistory(target_userID: string) {
         throw new Error("not implemented")
     }
 
+    // happens whenever user types in a recipients
+    // if no conversation, creates a new conversation
     clientGetConvID(): Promise<string>  {
         console.log("[handler]: request convID from server")
 
@@ -57,12 +76,12 @@ export class MessageHandler {
                 recipientID: this.currentRecipientID,
             }))
 
-            this.websocket.onmessage = (message) => {
+            this.websocket.addEventListener("message", (message) => {
                 var data = JSON.parse(message.data)
                 if (data.type === "response convID") {
                     resolve(data.convID)
                 }
-            }
+            })
 
             setTimeout(() => {
                 reject("failed to get convID!");
@@ -74,6 +93,7 @@ export class MessageHandler {
         })
     }
 
+    // whenever user press enter on input box
     clientSendMessage(data: string) {
         // if (userMsgInfo.userID == null || userMsgInfo.recipientID == null) {
         //      throw new Error("Invalid user or recipient")
@@ -97,17 +117,19 @@ export class MessageHandler {
         this.sendMsg(msg)
     }
 
+    // client received message from server, can be any conversation and sender
+    // should add message to corresponding conversation
     clientReceiveMessage(e: MessageEvent) {
         // create new TextData object
         var data = JSON.parse(e.data)
         console.log('receive message:', data);
 
         switch (data.type) {
-            case "responseConvID":
-                this.currentConvID = data.ConvID
+            case "transmit":
+                var msg = new TextData(data.senderID, data.recipientID, data.convID, data.counter, data.msgData)
+
                 break
             default:
-                var msg = new TextData(data.senderID, data.recipientID, data.convID, data.counter, data.msgData)
 
                 // store in storage
                 // this.localStoreText(msg)

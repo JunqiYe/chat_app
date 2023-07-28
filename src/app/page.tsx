@@ -62,8 +62,7 @@ export default function Home() {
     if (loggedIn) {
       var socket = new WebSocket(WS_URL)
       var storage = new ChatStorage()
-      handler = new MessageHandler(socket, storage);
-      handler.currentUserID = userID
+      handler = new MessageHandler(userID, socket, storage);
       // newWorker()
       // workerSendInit(userID)
     }
@@ -72,26 +71,6 @@ export default function Home() {
       // workerTerminate()
     }
   },[loggedIn, userID])
-
-
-
-  // if (userID == null) {
-  //   return (
-  //     <div className='flex h-screen items-center justify-center'>
-  //       Loading...
-  //     </div>
-  //   )
-  // }
-
-  // if (handler == undefined) {
-  //   return (
-  //     <div>
-  //       <p> failed to connect to server, waiting to reconnect </p>
-  //     </div>
-  //   )
-  // } else {
-
-
 
     return (
       <mainAppContext.Provider value={{

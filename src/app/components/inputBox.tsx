@@ -6,7 +6,7 @@ import { handler } from "../page"
 
 
 interface InputBoxProps {
-  prevMsg: TextData[],
+  prevMsg: Map<string, TextData[]>,
   setPrevMsg: (n:any) => void
 }
 

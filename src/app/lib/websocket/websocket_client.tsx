@@ -1,16 +1,16 @@
 import {TextData} from "../storage/text_data"
-import { userMsgInfo } from "../webwoker/webworker_thread";
+import { mainAppContext } from "@/app/components/context";
+// import { userMsgInfo } from "../webwoker/webworker_thread";
 
 export function webSocketConnect(ws_url: string): WebSocket {
     var ws = new WebSocket(ws_url);
-
-    ws.onopen = function() {
-      // subscribe to some channels
-      ws.send(JSON.stringify({
-          type: "init",
-          SenderId: userMsgInfo.userID
-      }));
-    };
+    // ws.onopen = function() {
+    //   // subscribe to some channels
+    //   ws.send(JSON.stringify({
+    //       type: "init",
+    //       SenderId: userID
+    //   }));
+    // };
 
     // ws.onmessage = function(e) {
     //   console.log('Message:', e.data);

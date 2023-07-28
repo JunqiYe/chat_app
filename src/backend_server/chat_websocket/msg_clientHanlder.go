@@ -7,6 +7,25 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type msgObj struct {
+	FrameType   string `json:"type"`
+	ConvID      string `json:"convID"`
+	Counter     uint64 `json:"counter"`
+	SenderID    string `json:"senderID"`
+	RecipientID string `json:"recipientID"`
+	MsgData     string `json:"msgData"`
+}
+
+func debugJson(msg msgObj) {
+	log.Printf(`
+	{frametype		- %s}
+	{convID			- %s}
+	{counter		- %d}
+	{senderID		- %s}
+	{recipientID		- %s}
+	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.RecipientID, msg.MsgData)
+}
+
 type ClientHandler struct {
 	conn         *websocket.Conn
 	hub          *Hub
@@ -52,14 +71,14 @@ func (c *ClientHandler) readMessage() {
 			c.userID = res.SenderID
 			c.hub.register <- c
 			break
+
 		case "request convID":
-			res.ConvID = checkConvIDExist(res.SenderID, res.RecipientID)
-			res.FrameType = "response convID"
-			c.conn.WriteJSON(res)
+			c.hub.createConversations <- res
 			break
+
 		case "transmit":
-			c.hub.incommingMsg <- res
 			log.Print("msg send to hub")
+			c.hub.incommingMsg <- res
 			break
 		}
 

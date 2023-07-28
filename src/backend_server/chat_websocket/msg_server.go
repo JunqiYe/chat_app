@@ -17,25 +17,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type msgObj struct {
-	FrameType   string `json:"type"`
-	ConvID      string `json:"convID"`
-	Counter     uint64 `json:"counter"`
-	SenderID    string `json:"senderID"`
-	RecipientID string `json:"recipientID"`
-	MsgData     string `json:"msgData"`
-}
-
-func debugJson(msg msgObj) {
-	log.Printf(`
-	{frametype		- %s}
-	{convID			- %s}
-	{counter		- %d}
-	{senderID		- %s}
-	{recipientID		- %s}
-	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.RecipientID, msg.MsgData)
-}
-
 func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	// upgrade this connection to a WebSocket
 	// connection
