@@ -67,21 +67,20 @@ export default function Home() {
         convID: convID,
         setConvID: setconvID}}>
 
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <main className="flex h-screen w-screen items-center justify-center p-0 md:p-16">
 
         {/* {!loggedIn ? <Login onLogin={(status) => {setLoggedIn(status)}}/> : <Area />} */}
         {!loggedIn ?
-        <Login />
+          <Login />
          :
-         <div>
-          <div>
-            <DEV_storageControl />
-            <HeaderBar />
-          </div>
-          <div className='flex flex-row'>
-            <ConversationsSelect />
-            <TextArea />
-          </div>
+         <div className='flex flex-col h-full w-full max-w-3xl justify-center items-center'>
+           <HeaderBar />
+            {/* <DEV_storageControl /> */}
+
+            <div id="main area" className='flex flex-none flex-row basis-11/12 w-full rounded-2xl bg-slate-900'>
+                <ConversationsSelect />
+                <TextArea />
+            </div>
          </div>
          }
 

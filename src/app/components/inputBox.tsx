@@ -30,7 +30,7 @@ export default function InputBox(props: InputBoxProps) {
 
     return (
       <div id="InputBox" className="flex order-last ">
-        <input className="h-8 mt-3 pl-2 rounded-t-lg outline-none bg-slate-600"
+        <input className="h-8 mt-6 pl-2 rounded-t-lg outline-none bg-slate-600"
           type="text" placeholder="..."
           id='input_box'
           onKeyDown={(event)=>handleClientPressSend(event)} />

@@ -64,8 +64,8 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
   }
 
   return (
-    <div className='z-10 flex items-center w-full h-[3rem] bg-slate-800 p-1 rounded-t-lg px-6'>
-      <input className="bg-slate-800 w-full" placeholder="Search friends"  onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
+    <div className=''>
+      <input className="z-10 flex items-center w-full h-[3rem] bg-zinc-500 rounded-tl-lg pl-3 focus:ring-4 focus:outline-none focus:ring-highlight  placeholder-gray-200  " type='text' placeholder="Search friends"  onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
     </div>
   )
 }

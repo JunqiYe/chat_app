@@ -32,30 +32,12 @@ export default function TextArea() {
           }
         })
       }
-
-      // if (handler != null) {
-        
-        // worker.addEventListener("message", (e: MessageEvent) =>{
-        //   const workerData = e.data;
-        //   switch (workerData.connectionStatus) {
-        //     case "add msg":
-        //       console.log("[MAIN] received message:" + workerData.data);
-        //       // setMsgBuffer([workerData.data, ...msgBuffer])
-        //       var msgObj = new TextData(ctx.userID, ctx.recipientID, workerData.convID, workerData.counter, workerData.data )
-        //     //   setMsgBuffer([msgObj, ...msgBuffer])
-        //       var buffer = msgBuffer.get(ctx.convID)
-        //       setMsgBuffer(map => new Map(map.set(ctx.convID, [msgObj, ...buffer!])))
-        //       break;
-        //   }
-        // })
-      // }
-
     })
 
     return (
       <prevMsgContext.Provider value = {{prevMsg: msgBuffer, setPrevMsg:setMsgBuffer}}>
-      <div id="TextArea" className='flex flex-col basis-2/3 h-[45rem] w-full max-w-md min-w-fit items-center justify-items-end rounded-2xl bg-slate-900'>
-        <div className=" items-start">
+      <div id="TextArea" className='grow flex flex-col min-w-fit items-center justify-items-end '>
+        <div className="flex items-center justify-start p-6 w-full h-[3rem] rounded-tr-lg bg-slate-500">
             {ctx.recipientID}
         </div>
         <PrevTexts prevMsg={msgBuffer} />

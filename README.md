@@ -35,7 +35,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 ## todos
-- [ ] update front end
+- [x] update front end
 - [ ] add storage back into the app
 - [ ] on connect, fetch new messages
 - [ ] store user login credential for easy login 
