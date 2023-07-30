@@ -74,7 +74,7 @@ func StartWebSocket(hub *Hub) {
 	})
 
 	// handles the http request
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/convID", func(w http.ResponseWriter, r *http.Request) {
 		httpEndpoint(hub, w, r)
 	})
 

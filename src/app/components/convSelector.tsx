@@ -59,7 +59,7 @@ export default function ConversationsSelect() {
     const ctx = useContext(mainAppContext)
     useEffect(() => {
 
-        fetch("http://localhost:8080/?userID=" + ctx.userID)
+        fetch("http://localhost:8080/api/convID?userID=" + ctx.userID)
         .then(function(response) {
             return response.json();
         })
