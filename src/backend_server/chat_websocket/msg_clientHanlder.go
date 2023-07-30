@@ -32,17 +32,17 @@ type ClientHandler struct {
 	userID       string
 	convID       string
 	receipientID string
-	receive      chan msgObj // msg received from other user
+	dispatchBuf  chan msgObj // msg received from other user
 }
 
-func NewClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
+func NewWebSocketClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
 	return &ClientHandler{
 		conn:         conn,
 		hub:          hub,
 		userID:       "",
 		receipientID: "",
 		convID:       "",
-		receive:      make(chan msgObj, 100),
+		dispatchBuf:  make(chan msgObj, 100),
 	}
 }
 
@@ -87,7 +87,7 @@ func (c *ClientHandler) readMessage() {
 
 func (c *ClientHandler) sendMessage() {
 	for {
-		dispatchMsg := <-c.receive
+		dispatchMsg := <-c.dispatchBuf
 
 		err := c.conn.WriteJSON(dispatchMsg)
 		if err != nil {

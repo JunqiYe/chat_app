@@ -36,7 +36,7 @@ interface ConvSelectorProps {
 function ConvSelector({convIDs}: ConvSelectorProps) {
 
     return (
-        <div className="overflow-y-scroll rounded-bl-lg">
+        <div className="overflow-y-scroll no-scrollbar rounded-bl-lg">
             {convIDs.map((rec: Recipients) => (
                 <ConvIDBox key={rec.conversation} recipient={rec}/>
             ))}

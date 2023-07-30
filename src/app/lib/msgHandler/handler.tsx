@@ -26,12 +26,12 @@ export class MessageHandler {
         if (this.currentUserID == null) throw new Error("userID not specified when connecting to server");
         // console.log(this.websocket)
         var id = this.currentUserID
-        this.websocket.onopen = function() {
+        this.websocket.addEventListener("open", function() {
             this.send(JSON.stringify({
                 type: "init",
                 SenderId: id
             }))
-        }
+        })
     }
 
 

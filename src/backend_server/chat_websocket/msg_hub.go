@@ -61,6 +61,9 @@ func (h *Hub) HubRun() {
 				h.conversations[conversationID][msg.SenderID] = true
 				h.conversations[conversationID][msg.RecipientID] = true
 				h.conversation_msg_counter[conversationID] = 0
+
+				h.storage.storeConvID(conversationID, msg.SenderID)
+				h.storage.storeConvID(conversationID, msg.RecipientID)
 			}
 
 			// update response packet
@@ -68,7 +71,7 @@ func (h *Hub) HubRun() {
 			msg.FrameType = "response convID"
 
 			// send response back to sender
-			h.userBase[msg.SenderID].receive <- msg
+			h.userBase[msg.SenderID].dispatchBuf <- msg
 
 		case msg := <-h.incommingMsg:
 			if msg.FrameType == "transmit" {
@@ -89,7 +92,7 @@ func (h *Hub) HubRun() {
 					// get the handler for this specific user
 					recipientHandler, ok := h.userBase[user]
 					if ok {
-						recipientHandler.receive <- msg
+						recipientHandler.dispatchBuf <- msg
 					}
 					// }
 				}

@@ -36,7 +36,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## todos
 - [x] update front end
-- [ ] add storage back into the app
+- [ ] add storage back into the server
+- [ ] add collaspable side bar for mobile
 - [ ] on connect, fetch new messages
 - [ ] store user login credential for easy login 
 - [ ] add push notifications [resources](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)

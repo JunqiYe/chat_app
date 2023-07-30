@@ -39,7 +39,7 @@ export default function PrevTexts(props: PrevTextProps) {
   let msgs = props.prevMsg.get(ctx.convID)
 
     return (
-      <div id="PrevTexts" className="flex flex-col-reverse w-full h-full max-h-full overflow-y-scroll">
+      <div id="PrevTexts" className="flex flex-col-reverse w-full h-full max-h-full overflow-y-scroll no-scrollbar">
         { msgs != undefined ?
           msgs.map((text: TextData) => (
             <TextBubble key={text.convID + '_' + text.counter} text={text} />

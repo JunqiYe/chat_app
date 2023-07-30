@@ -77,7 +77,7 @@ export default function Home() {
            <HeaderBar />
             {/* <DEV_storageControl /> */}
 
-            <div id="main area" className='flex flex-none flex-row basis-11/12 w-full rounded-2xl bg-slate-900'>
+            <div id="main area" className='flex flex-initial flex-row basis-11/12 w-full rounded-2xl bg-slate-900'>
                 <ConversationsSelect />
                 <TextArea />
             </div>
