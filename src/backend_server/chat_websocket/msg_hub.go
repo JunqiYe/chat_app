@@ -14,7 +14,7 @@ type Hub struct {
 }
 
 func NewHub(storage *msg_storage) *Hub {
-	return &Hub{
+	hub := &Hub{
 		storage:                  storage,
 		incommingMsg:             make(chan msgObj),
 		conversations:            make(map[string]map[string]bool),
@@ -23,6 +23,21 @@ func NewHub(storage *msg_storage) *Hub {
 		createConversations:      make(chan msgObj),
 		register:                 make(chan *ClientHandler),
 		unregister:               make(chan *ClientHandler),
+	}
+
+	hub.initConversationsMap()
+
+	return hub
+}
+
+func (hub *Hub) initConversationsMap() {
+	pairs := hub.storage.getAllConvIDUserIDPair()
+	for _, pair := range pairs {
+		if _, ok := hub.conversations[pair.ConvID]; !ok {
+			hub.conversations[pair.ConvID] = make(map[string]bool)
+		}
+
+		hub.conversations[pair.ConvID][pair.RecipientID] = true
 	}
 }
 
@@ -62,8 +77,8 @@ func (h *Hub) HubRun() {
 				h.conversations[conversationID][msg.RecipientID] = true
 				h.conversation_msg_counter[conversationID] = 0
 
-				h.storage.storeConvID(conversationID, msg.SenderID)
-				h.storage.storeConvID(conversationID, msg.RecipientID)
+				h.storage.storeConvID(conversationID, msg.SenderID, msg.RecipientID)
+				// h.storage.storeConvID(conversationID, msg.RecipientID, msg.SenderID)
 			}
 
 			// update response packet

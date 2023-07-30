@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
 import { mainAppContext } from "./context";
 import { handler } from "../page";
@@ -56,6 +56,31 @@ export default function ConversationsSelect() {
     // }
     // const [allConvID, setAllConvID] = useState<Recipients[]>([temp1, temp2])
     const [allConvID, setAllConvID] = useState<Recipients[]>([])
+    const ctx = useContext(mainAppContext)
+    useEffect(() => {
+
+        fetch("http://localhost:8080/?userID=" + ctx.userID)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            console.log("received data ",data)
+
+                var another = data.ConvIDs.map((obj: { ConvID: string; RecipientID: string; }) => {
+                    var temp : Recipients = {
+                        conversation : obj.ConvID,
+                        recipient : obj.RecipientID
+                    }
+
+                    return temp
+                })
+
+                setAllConvID(another)
+            })
+            .catch(function(err) {
+                console.log(err)
+            })
+    }, [ctx.userID])
 
     return (
         <div id="left column" className="flex flex-col w-3/12 bg-slate-800 rounded-l-lg border-r-2 border-gray-600">

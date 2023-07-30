@@ -23,19 +23,17 @@ const createMsgTable string = `CREATE TABLE IF NOT EXISTS indexes(
 
 const createConIDTable string = `CREATE TABLE IF NOT EXISTS conversationID(
 	convID TEXT,
-	userID TEXT
+	senderID TEXT,
+	recipientID TEXT
 );`
 
 const insertMsg string = `insert into indexes (convID, counter, senderID, msg) VALUES (?,?,?,?);`
-const insertConvID string = `insert into conversationID (convID, userID) VALUES (?,?);`
+const insertConvID string = `insert into conversationID (convID, senderID, recipientID) VALUES (?,?,?);`
 const getAllUserID string = `
-	select distinct userID
+	select distinct senderID
 	from conversationID
 	where convID = ?;`
-const getAllConvIDs string = `
-	select distinct convID
-	from conversationID
-	where userID = ?;`
+
 const deleteFile string = `delete from indexes where fileName == ?;`
 
 const DEFAULT_MSGDB_FILENAME string = `msg.db`
@@ -81,12 +79,12 @@ func (s *msg_storage) StoreMsg(msg msgObj) {
 	updateDB(s.msgDB, msg)
 }
 
-func (s *msg_storage) storeConvID(convID string, userID string) {
+func (s *msg_storage) storeConvID(convID string, userID string, recipientID string) {
 	statement, err := s.convDB.Prepare(insertConvID)
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(convID, userID)
+	statement.Exec(convID, userID, recipientID)
 }
 
 func (s *msg_storage) getAllUserFromConvID(convID string) []string {
@@ -105,20 +103,58 @@ func (s *msg_storage) getAllUserFromConvID(convID string) []string {
 	return userIDs
 }
 
-func (s *msg_storage) getAllConvIDsFromUserID(userID string) []string {
-	userIDs := make([]string, 0)
+const getAllConvIDs string = `
+	select convID, CASE
+		when senderID != ? then senderID
+		when recipientID != ? then recipientID
+		END as id
+	from conversationID
+	where senderID = ? or recipientID = ?;
+`
 
-	rows, err := s.convDB.Query(getAllConvIDs, userID)
+func (s *msg_storage) getAllConvIDsFromUserID(userID string) []converstationInfo {
+	userIDs := make([]converstationInfo, 0)
+
+	rows, err := s.convDB.Query(getAllConvIDs, userID, userID, userID, userID)
 	if err != nil {
 		log.Panicln(err.Error())
 		return userIDs
 	}
 
-	var id string = ""
+	// var ids []converstationInfo
 	for rows.Next() {
-		rows.Scan(&id)
+		var id converstationInfo
+		rows.Scan(&id.ConvID, &id.RecipientID)
+
+		log.Println(id)
 		userIDs = append(userIDs, id)
 	}
 
 	return userIDs
+}
+
+const getAllConvIDUserIDPair string = `
+	SELECT DISTINCT *
+	FROM (
+		SELECT convID, senderID as ID·
+		FROM conversationID
+		UNION
+		SELECT convID, recipientID as ID
+		FROM conversationID);
+`
+
+func (s *msg_storage) getAllConvIDUserIDPair() []converstationInfo {
+	rows, err := s.convDB.Query(getAllConvIDUserIDPair)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+
+	var ids []converstationInfo = []converstationInfo{}
+	for rows.Next() {
+		var id converstationInfo
+		rows.Scan(&id.ConvID, &id.RecipientID)
+		ids = append(ids, id)
+	}
+
+	return ids
 }

@@ -5,21 +5,26 @@ import (
 	"log"
 )
 
-type convIDResponse struct {
-	UserID  string
-	ConvIDs []string
+type converstationInfo struct {
+	ConvID      string `json:"ConvID"`
+	RecipientID string `json:"RecipientID"`
 }
 
-func marshalDataToSend(userID string, convIDs []string) []byte {
-	// get convIDs from storage
+type convIDResponse struct {
+	UserID  string              `json:"UserID"`
+	ConvIDs []converstationInfo `json:"ConvIDs"`
+}
 
+func marshalDataToSend(userID string, convIDs []converstationInfo) []byte {
 	// marshal data into json
-	// place holder value
-	// convIDs := []string{"convid1", "convid2"}
-	data := convIDResponse{UserID: userID, ConvIDs: convIDs}
+	data := convIDResponse{UserID: userID}
+	for _, obj := range convIDs {
+		data.ConvIDs = append(data.ConvIDs, obj)
+	}
 
 	// convert json to []byte
 	b, err := json.Marshal(data)
+	log.Println(b)
 	if err != nil {
 		log.Println(err)
 	}

@@ -1,7 +1,5 @@
-import { webSocketConnect } from "../websocket/websocket_client";
 import { ChatStorage } from "../storage/chat_localstorage";
 import { TextData } from "../storage/text_data";
-// import { userMsgInfo } from "../webwoker/webworker_thread";
 
 interface serverMessage {
     type: string;

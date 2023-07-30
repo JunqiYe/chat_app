@@ -48,7 +48,9 @@ func httpEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println("query", userID)
 		if userID != "" {
 			ids := hub.storage.getAllConvIDsFromUserID(userID)
+			log.Println("ids :", ids)
 			w.Header().Add("Content-Type", "application/json")
+			w.Header().Add("Access-Control-Allow-Origin", "*")
 			w.Write(marshalDataToSend(userID, ids))
 		}
 
