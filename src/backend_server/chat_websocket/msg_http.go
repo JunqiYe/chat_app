@@ -94,20 +94,17 @@ func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			hub.storage.storeConvID(conversationID, senderID, recipientID)
 		}
 
-		type temp struct {
+		type convIDResponse struct {
 			ConvID string `json:"convID"`
 		}
-		temp2 := temp{}
-		temp2.ConvID = conversationID
-		log.Println(temp2)
-		b, err := json.Marshal(temp2)
+		res := convIDResponse{}
+		res.ConvID = conversationID
+
+		b, err := json.Marshal(res)
 		if err != nil {
 			log.Println(err)
 		}
 		w.Write(b)
-
-		// w.Header().Add()
-		// w.WriteHeader(http.StatusCreated)
 
 		break
 	default:

@@ -8,7 +8,6 @@ type Hub struct {
 	conversations            map[string]map[string]bool // conversationID -> clientsID
 	conversation_msg_counter map[string]uint64          // conversation
 	userBase                 map[string]*ClientHandler
-	createConversations      chan msgObj
 	register                 chan *ClientHandler
 	unregister               chan *ClientHandler
 }
@@ -20,7 +19,6 @@ func NewHub(storage *msg_storage) *Hub {
 		conversations:            make(map[string]map[string]bool),
 		conversation_msg_counter: make(map[string]uint64),
 		userBase:                 make(map[string]*ClientHandler),
-		createConversations:      make(chan msgObj),
 		register:                 make(chan *ClientHandler),
 		unregister:               make(chan *ClientHandler),
 	}
@@ -67,26 +65,6 @@ func (h *Hub) HubRun() {
 
 		case handler := <-h.unregister:
 			delete(h.userBase, handler.userID)
-
-		case msg := <-h.createConversations:
-			conversationID, exists := h.checkConvIDExist(msg.SenderID, msg.RecipientID)
-
-			if !exists {
-				// init server side conversation
-				h.conversations[conversationID][msg.SenderID] = true
-				h.conversations[conversationID][msg.RecipientID] = true
-				h.conversation_msg_counter[conversationID] = 0
-
-				h.storage.storeConvID(conversationID, msg.SenderID, msg.RecipientID)
-				// h.storage.storeConvID(conversationID, msg.RecipientID, msg.SenderID)
-			}
-
-			// update response packet
-			msg.ConvID = conversationID
-			msg.FrameType = "response convID"
-
-			// send response back to sender
-			h.userBase[msg.SenderID].dispatchBuf <- msg
 
 		case msg := <-h.incommingMsg:
 			if msg.FrameType == "transmit" {

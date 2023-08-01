@@ -37,26 +37,6 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
         return
       }
 
-
-
-      // POST request here
-      // handler.clientGetConvID()
-      //   .then(
-      //     (id) => {
-      //     handler.currentConvID = id;
-      //     ctx.setConvID(id)
-      //     var newRecipient: Recipients = {
-      //       recipient: userInputRecipient,
-      //       conversation: id
-      //     }
-
-      //     setConvIDs([...convIDs, newRecipient])
-      //     },
-      //     (err) => {
-      //       throw new Error(err)
-      //     }
-      //   )
-
       // input does not exist, check with server to get convID
       fetch("http://localhost:8080/api/convID?" +
         new URLSearchParams({senderID: ctx.userID, recipientID: userInputRecipient}),

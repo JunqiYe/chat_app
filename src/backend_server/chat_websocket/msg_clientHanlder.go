@@ -72,10 +72,6 @@ func (c *ClientHandler) readMessage() {
 			c.hub.register <- c
 			break
 
-		case "request convID":
-			c.hub.createConversations <- res
-			break
-
 		case "transmit":
 			log.Print("msg send to hub")
 			c.hub.incommingMsg <- res
