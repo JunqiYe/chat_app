@@ -25,9 +25,12 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
 
       event.target.value = ''
       ctx.setRecipientID(userInputRecipient)
+      handler.currentRecipientID = userInputRecipient
 
-
+      // find if the input is within the recipient lis
       var matchedConv = convIDs.find(obj => obj.recipient == userInputRecipient)
+      
+      // input exists, terminate early
       if (matchedConv != undefined) {
         ctx.setConvID(matchedConv.conversation);
 
@@ -35,27 +38,57 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
       }
 
 
-      handler.currentRecipientID = userInputRecipient
 
       // POST request here
-      handler.clientGetConvID()
-        .then(
-          (id) => {
-          handler.currentConvID = id;
-          ctx.setConvID(id)
-          var newRecipient: Recipients = {
-            recipient: userInputRecipient,
-            conversation: id
-          }
+      // handler.clientGetConvID()
+      //   .then(
+      //     (id) => {
+      //     handler.currentConvID = id;
+      //     ctx.setConvID(id)
+      //     var newRecipient: Recipients = {
+      //       recipient: userInputRecipient,
+      //       conversation: id
+      //     }
 
-          setConvIDs([...convIDs, newRecipient])
+      //     setConvIDs([...convIDs, newRecipient])
+      //     },
+      //     (err) => {
+      //       throw new Error(err)
+      //     }
+      //   )
+
+      // input does not exist, check with server to get convID
+      fetch("http://localhost:8080/api/convID?" +
+        new URLSearchParams({senderID: ctx.userID, recipientID: userInputRecipient}),
+        {
+          method: "POST",
+          // mode:"cors",
+          cache: "no-cache",
+          headers:{
+            // "Content-Type": "application/json",
           },
-          (err) => {
-            throw new Error(err)
-          }
-        )
+          // body: JSON.stringify(data)
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+          // update context, handler, and react states
+          console.log("post received data ", data.convID)
+          ctx.convID = data.convID
+          handler.currentConvID = data.convID
 
-      // workerNewRecipient(userInputRecipient)
+          // create new recipient object
+          var temp1: Recipients = {
+              recipient: userInputRecipient,
+              conversation: data.convID
+            }
+
+          setConvIDs([...convIDs, temp1])
+        })
+        .catch(function(err) {
+          console.log(err)
+        })
     }
 
   }
