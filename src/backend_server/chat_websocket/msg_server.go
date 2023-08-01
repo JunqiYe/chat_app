@@ -38,33 +38,6 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	go client_H.sendMessage()
 }
 
-func httpEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	log.Println("new http request:", r.URL)
-
-	switch r.Method {
-	case "GET":
-		q := r.URL.Query()
-		userID := q.Get("userID")
-		log.Println("query", userID)
-		if userID != "" {
-			ids := hub.storage.getAllConvIDsFromUserID(userID)
-			log.Println("ids :", ids)
-			w.Header().Add("Content-Type", "application/json")
-			w.Header().Add("Access-Control-Allow-Origin", "*")
-			w.Write(marshalDataToSend(userID, ids))
-		}
-
-		break
-	case "POST":
-		break
-
-	default:
-		w.WriteHeader(http.StatusBadRequest)
-
-	}
-
-}
-
 func StartWebSocket(hub *Hub) {
 	log.Println("Starting WebSocket server...")
 
@@ -75,7 +48,11 @@ func StartWebSocket(hub *Hub) {
 
 	// handles the http request
 	http.HandleFunc("/api/convID", func(w http.ResponseWriter, r *http.Request) {
-		httpEndpoint(hub, w, r)
+		httpConvIDAPIEndpoint(hub, w, r)
+	})
+
+	http.HandleFunc("/api/chatHist", func(w http.ResponseWriter, r *http.Request) {
+		httpChatHistAPIEndpoint(hub, w, r)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

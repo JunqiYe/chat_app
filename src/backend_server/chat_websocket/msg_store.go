@@ -158,3 +158,26 @@ func (s *msg_storage) getAllConvIDUserIDPair() []converstationInfo {
 
 	return ids
 }
+
+const getHistFromConvID string = `
+	select convID, counter, senderID, msg
+	from indexes
+	where convID = ?
+	order by counter desc
+`
+
+func (s *msg_storage) getHistFromConvID(convID string) []msgObj {
+	rows, err := s.convDB.Query(getHistFromConvID, convID)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+
+	var ids []msgObj = []msgObj{}
+	for rows.Next() {
+		var id msgObj
+		rows.Scan(&id.ConvID, &id.Counter, &id.SenderID, &id.MsgData)
+		ids = append(ids, id)
+	}
+
+	return ids
+}

@@ -13,7 +13,7 @@ interface serverMessage {
 // put incomming and outgoing message in storage
 // send and receive message through websocket
 export class MessageHandler {
-    currentUserID : string | null = null;
+    currentUserID : string | null = null; // single source of truth?
     currentRecipientID : string | null = null;
     currentConvID : string | null = null;
     websocket: WebSocket;
