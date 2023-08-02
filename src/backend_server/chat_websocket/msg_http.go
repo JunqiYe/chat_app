@@ -123,7 +123,7 @@ func httpChatHistAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		convID := q.Get("convID")
 		log.Println("query", convID)
 		if convID != "" {
-			msgs := hub.storage.getHistFromConvID(convID)
+			msgs := hub.storage.getHistFromConvID_V2(convID)
 			log.Println(msgs)
 
 			w.Header().Add("Content-Type", "application/json")

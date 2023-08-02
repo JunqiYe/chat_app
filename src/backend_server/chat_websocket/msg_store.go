@@ -21,13 +21,19 @@ const createMsgTable string = `CREATE TABLE IF NOT EXISTS indexes(
 	msg TEXT
 );`
 
+const createMsgTable_V2 string = `CREATE TABLE IF NOT EXISTS msgHist(
+	convID TEXT,
+	senderID TEXT,
+	timestamp INT,
+	msg TEXT
+);`
+
 const createConIDTable string = `CREATE TABLE IF NOT EXISTS conversationID(
 	convID TEXT,
 	senderID TEXT,
 	recipientID TEXT
 );`
 
-const insertMsg string = `insert into indexes (convID, counter, senderID, msg) VALUES (?,?,?,?);`
 const insertConvID string = `insert into conversationID (convID, senderID, recipientID) VALUES (?,?,?);`
 const getAllUserID string = `
 	select distinct senderID
@@ -42,7 +48,7 @@ const DEFAULT_MSGDB_FILENAME string = `msg.db`
 func NewStorage(baseDir string) *msg_storage {
 	return &msg_storage{
 		store:  make([]msgObj, 0),
-		msgDB:  createLocalDB(baseDir, createMsgTable),
+		msgDB:  createLocalDB(baseDir, createMsgTable_V2),
 		convDB: createLocalDB(baseDir, createConIDTable),
 	}
 }
@@ -64,12 +70,17 @@ func createLocalDB(baseDir string, query string) *sql.DB {
 	return database
 }
 
+const insertMsg string = `
+	insert into msgHist (convID, senderID, timestamp, msg)
+	VALUES (?,?,?,?);
+	`
+
 func updateDB(db *sql.DB, msg msgObj) {
 	statement, err := db.Prepare(insertMsg)
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(msg.ConvID, msg.Counter, msg.SenderID, msg.MsgData)
+	statement.Exec(msg.ConvID, msg.SenderID, msg.TimeStamp, msg.MsgData)
 }
 
 func (s *msg_storage) StoreMsg(msg msgObj) {
@@ -176,6 +187,29 @@ func (s *msg_storage) getHistFromConvID(convID string) []msgObj {
 	for rows.Next() {
 		var id msgObj
 		rows.Scan(&id.ConvID, &id.Counter, &id.SenderID, &id.MsgData)
+		ids = append(ids, id)
+	}
+
+	return ids
+}
+
+const getHistFromConvID_V2 string = `
+	select convID, senderID, timestamp, msg
+	from msgHist
+	where convID = ?
+	order by timestamp desc
+`
+
+func (s *msg_storage) getHistFromConvID_V2(convID string) []msgObj {
+	rows, err := s.convDB.Query(getHistFromConvID_V2, convID)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+
+	var ids []msgObj = []msgObj{}
+	for rows.Next() {
+		var id msgObj
+		rows.Scan(&id.ConvID, &id.SenderID, &id.TimeStamp, &id.MsgData)
 		ids = append(ids, id)
 	}
 

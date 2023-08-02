@@ -71,8 +71,8 @@ func (h *Hub) HubRun() {
 				h.storage.StoreMsg(msg)
 			}
 
+			// check if there are users connected currently that are in this conversation
 			users, ok := h.conversations[msg.ConvID]
-
 			if ok {
 				// update conversation message counter
 				h.conversation_msg_counter[msg.ConvID]++

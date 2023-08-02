@@ -37,7 +37,8 @@ export class TextData {
             senderID: this.userID,
             recipientID: this.recipientID,
             msgData: this.text,
-            receivedFromServer: this.receivedFromServer
+            receivedFromServer: this.receivedFromServer,
+            timestamp: this.timestamp
           })
         )
     }
