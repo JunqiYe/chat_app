@@ -33,10 +33,10 @@ function TextBubble({text} : TextBubbleProps) {
 interface PrevTextProps {
   prevMsg: Map<string, TextData[]>
 }
-export default function PrevTexts(props: PrevTextProps) {
+export default function PrevTexts() {
   // var {prevMsg} = useContext(prevMsgContext)
   const ctx = useContext(mainAppContext)
-  let msgs = props.prevMsg.get(ctx.convID)
+  let msgs = ctx.prevMsg.get(ctx.convID)
 
     return (
       <div id="PrevTexts" className="flex flex-col-reverse w-full h-full max-h-full overflow-y-scroll no-scrollbar">

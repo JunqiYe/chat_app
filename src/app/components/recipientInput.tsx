@@ -29,11 +29,11 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
 
       // find if the input is within the recipient lis
       var matchedConv = convIDs.find(obj => obj.recipient == userInputRecipient)
-      
+
       // input exists, terminate early
       if (matchedConv != undefined) {
         ctx.setConvID(matchedConv.conversation);
-
+        handler.currentConvID = matchedConv.recipient
         return
       }
 

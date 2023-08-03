@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
 import { mainAppContext } from "./context";
 import { handler } from "../page";
+import { TextData } from "../lib/storage/text_data";
 
 export interface Recipients {
     recipient: string;
@@ -22,6 +23,47 @@ function ConvIDBox({recipient}: ConvIDBoxProps) {
                 ctx.setRecipientID(recipient.recipient)
                 handler.currentRecipientID = recipient.recipient
                 // console.log(convID)
+
+                if (!ctx.prevMsg.has(recipient.conversation)) {
+
+                    fetch("http://localhost:8080/api/chatHist?" +
+                    new URLSearchParams({convID: recipient.conversation}),
+                    {
+                        method: "GET",
+                        // mode:"cors",
+                        cache: "no-cache",
+                        headers:{
+                        // "Content-Type": "application/json",
+                        },
+                        // body: JSON.stringify(data)
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        // update context, handler, and react states
+                        console.log("get hist received data ", data)
+                        var hist :TextData[] = []
+
+                        data.msgs.forEach(function(msg:any) {
+                            var msg_obj = new TextData(msg.senderID, msg.recipientID, msg.convID, 0, msg.msgData, false, msg.timestamp)
+                            hist.push(msg_obj)
+
+                        })
+                        // for (var i = 0; i < data.msg.length; i++) {
+                        // }
+
+                        console.log("history", hist)
+                        ctx.setPrevMsg(
+                            function(map:Map<String, TextData[]>) {
+                                return new Map(map.set(recipient.conversation, hist))
+                            }
+                        )
+                    })
+                    .catch(function(err) {
+                        console.log(err)
+                    })
+                }
             }}>
 
             {recipient.recipient}

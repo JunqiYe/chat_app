@@ -24,6 +24,7 @@ const createMsgTable string = `CREATE TABLE IF NOT EXISTS indexes(
 const createMsgTable_V2 string = `CREATE TABLE IF NOT EXISTS msgHist(
 	convID TEXT,
 	senderID TEXT,
+	recipientID TEXT,
 	timestamp INT,
 	msg TEXT
 );`
@@ -71,8 +72,8 @@ func createLocalDB(baseDir string, query string) *sql.DB {
 }
 
 const insertMsg string = `
-	insert into msgHist (convID, senderID, timestamp, msg)
-	VALUES (?,?,?,?);
+	insert into msgHist (convID, senderID, recipientID, timestamp, msg)
+	VALUES (?,?,?,?,?);
 	`
 
 func updateDB(db *sql.DB, msg msgObj) {
@@ -80,7 +81,7 @@ func updateDB(db *sql.DB, msg msgObj) {
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(msg.ConvID, msg.SenderID, msg.TimeStamp, msg.MsgData)
+	statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.TimeStamp, msg.MsgData)
 }
 
 func (s *msg_storage) StoreMsg(msg msgObj) {
@@ -194,7 +195,7 @@ func (s *msg_storage) getHistFromConvID(convID string) []msgObj {
 }
 
 const getHistFromConvID_V2 string = `
-	select convID, senderID, timestamp, msg
+	select convID, senderID, recipientID, timestamp, msg
 	from msgHist
 	where convID = ?
 	order by timestamp desc
@@ -209,7 +210,7 @@ func (s *msg_storage) getHistFromConvID_V2(convID string) []msgObj {
 	var ids []msgObj = []msgObj{}
 	for rows.Next() {
 		var id msgObj
-		rows.Scan(&id.ConvID, &id.SenderID, &id.TimeStamp, &id.MsgData)
+		rows.Scan(&id.ConvID, &id.SenderID, &id.RecipientID, &id.TimeStamp, &id.MsgData)
 		ids = append(ids, id)
 	}
 

@@ -9,14 +9,14 @@ interface InputBoxProps {
   setPrevMsg: (n:any) => void
 }
 
-export default function InputBox(props: InputBoxProps) {
+export default function InputBox() {
     // var {prevMsg, setPrevMsg} = useContext(prevMsgContext)
-    var {userID, recipientID}= useContext(mainAppContext)
+    var ctx = useContext(mainAppContext)
 
     function handleClientPressSend(e: React.KeyboardEvent){
       if (e.code == 'Enter') {
         let dom = document.getElementById('input_box') as HTMLInputElement
-        if (dom != null && userID != null && recipientID != null){
+        if (dom != null && ctx.userID != null && ctx.recipientID != null){
           if (dom.value.length > 0) {
             console.log("new message", dom.value);
 

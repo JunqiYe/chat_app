@@ -15,7 +15,8 @@ export class TextData {
                 convID: string,
                 counter: number,
                 rawText: string,
-                fromServer?:boolean) {
+                fromServer?:boolean,
+                timestamp?: number) {
 
         this.userID = userID
         this.recipientID = recipientID
@@ -25,7 +26,13 @@ export class TextData {
         if (fromServer) {
             this.receivedFromServer = fromServer
         }
-        this.timestamp = Date.now();
+
+        if (timestamp == undefined) {
+            this.timestamp = Date.now();
+        } else {
+            this.timestamp = timestamp
+        }
+
         this.text = rawText
     }
 

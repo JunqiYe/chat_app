@@ -10,6 +10,7 @@ import HeaderBar from './components/header'
 import Login  from './components/login';
 import { MessageHandler } from './lib/msgHandler/handler';
 import ConversationsSelect from './components/convSelector';
+import { TextData } from './lib/storage/text_data';
 export const WS_URL = 'ws://localhost:8080/ws';
 
 
@@ -41,6 +42,7 @@ export default function Home() {
   const [userID, setUserID] = useState<string>("")
   const [recipientID, setrecipientID] = useState<string>("")
   const [convID, setconvID] = useState<string>("")
+  const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
 
   useEffect(() => {
     if (loggedIn) {
@@ -65,7 +67,10 @@ export default function Home() {
         recipientID: recipientID,
         setRecipientID: setrecipientID,
         convID: convID,
-        setConvID: setconvID}}>
+        setConvID: setconvID,
+        prevMsg: msgBuffer,
+        setPrevMsg: setMsgBuffer
+        }}>
 
       <main className="flex h-screen w-screen items-center justify-center p-0 md:p-16">
 
