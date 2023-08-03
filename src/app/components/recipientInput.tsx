@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react"
 import { mainAppContext } from "./context"
-import { handler } from "../page"
+import { SERVER_ADDRESS, SERVER_PORT, handler } from "../page"
 import { Recipients } from "./convSelector"
 import { isIDValid } from "../lib/ID_helper"
 
@@ -14,7 +14,7 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
   const [userInputRecipient, setUserInputRecipient] = useState("")
 
   // TODO: check if convID exists, if not, request server for convID
-  function handleTargetUserSubmit(event: any) {
+  function handleTargetUserSubmit(event: React.KeyboardEvent) {
     if(event.key === 'Enter') {
 
       // check recipient user input
@@ -23,7 +23,8 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
         return
       }
 
-      event.target.value = ''
+      let dom = document.getElementById('recipient_input') as HTMLInputElement
+      dom.value = ''
       ctx.setRecipientID(userInputRecipient)
       handler.currentRecipientID = userInputRecipient
 
@@ -38,7 +39,7 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
       }
 
       // input does not exist, check with server to get convID
-      fetch("http://localhost:8080/api/convID?" +
+      fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/convID?" +
         new URLSearchParams({senderID: ctx.userID, recipientID: userInputRecipient}),
         {
           method: "POST",
@@ -79,7 +80,7 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
 
   return (
     <div className=''>
-      <input className="z-10 flex items-center w-full h-[3rem] bg-zinc-500 rounded-tl-lg pl-3 focus:ring-4 focus:outline-none focus:ring-highlight  placeholder-gray-200  " type='text' placeholder="Search friends"  onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
+      <input id='recipient_input' className="z-10 flex items-center w-full h-[3rem] bg-zinc-500 rounded-tl-lg pl-3 focus:ring-4 focus:outline-none focus:ring-highlight  placeholder-gray-200  " type='text' placeholder="Search friends"  onChange={handleTargetUserUpdate} onKeyDown={handleTargetUserSubmit}></input>
     </div>
   )
 }

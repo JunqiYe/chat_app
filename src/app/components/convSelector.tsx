@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
 import { mainAppContext } from "./context";
-import { handler } from "../page";
+import { SERVER_ADDRESS, SERVER_PORT, handler } from "../page";
 import { TextData } from "../lib/storage/text_data";
 
 export interface Recipients {
@@ -26,7 +26,7 @@ function ConvIDBox({recipient}: ConvIDBoxProps) {
 
                 if (!ctx.prevMsg.has(recipient.conversation)) {
 
-                    fetch("http://localhost:8080/api/chatHist?" +
+                    fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/chatHist?" +
                     new URLSearchParams({convID: recipient.conversation}),
                     {
                         method: "GET",
@@ -101,7 +101,7 @@ export default function ConversationsSelect() {
     const ctx = useContext(mainAppContext)
     useEffect(() => {
 
-        fetch("http://localhost:8080/api/convID?userID=" + ctx.userID)
+        fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/convID?userID=" + ctx.userID)
         .then(function(response) {
             return response.json();
         })

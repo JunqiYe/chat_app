@@ -14,7 +14,7 @@ export default function InputBox() {
     var ctx = useContext(mainAppContext)
 
     function handleClientPressSend(e: React.KeyboardEvent){
-      if (e.code == 'Enter') {
+      if (e.code == 'Enter'){
         let dom = document.getElementById('input_box') as HTMLInputElement
         if (dom != null && ctx.userID != null && ctx.recipientID != null){
           if (dom.value.length > 0) {

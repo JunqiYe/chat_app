@@ -14,7 +14,7 @@ type msgObj struct {
 	SenderID    string `json:"senderID"`
 	RecipientID string `json:"recipientID"`
 	MsgData     string `json:"msgData"`
-	TimeStamp   uint64 `json:"timeStamp"`
+	TimeStamp   uint64 `json:"timestamp"`
 }
 
 func debugJson(msg msgObj) {

@@ -11,8 +11,10 @@ import Login  from './components/login';
 import { MessageHandler } from './lib/msgHandler/handler';
 import ConversationsSelect from './components/convSelector';
 import { TextData } from './lib/storage/text_data';
-export const WS_URL = 'ws://localhost:8080/ws';
-
+export const SERVER_ADDRESS = "192.168.0.103"
+export const SERVER_PORT = ":8080"
+export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
+// export const WS_URL = 'ws://localhost:8080/ws';
 
 
 function DEV_storageControl() {
@@ -73,7 +75,6 @@ export default function Home() {
         }}>
 
       <main className="flex h-screen w-screen items-center justify-center p-0 md:p-16">
-
         {/* {!loggedIn ? <Login onLogin={(status) => {setLoggedIn(status)}}/> : <Area />} */}
         {!loggedIn ?
           <Login />

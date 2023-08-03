@@ -1,5 +1,5 @@
-import { mainAppContext, prevMsgContext } from "./context"
-import { useContext, useState } from "react"
+import { mainAppContext } from "./context"
+import { useContext } from "react"
 import { TextData } from "../lib/storage/text_data"
 
 interface TextBubbleProps {
@@ -42,7 +42,7 @@ export default function PrevTexts() {
       <div id="PrevTexts" className="flex flex-col-reverse w-full h-full max-h-full overflow-y-scroll no-scrollbar">
         { msgs != undefined ?
           msgs.map((text: TextData) => (
-            <TextBubble key={text.convID + '_' + text.counter} text={text} />
+            <TextBubble key={text.convID + '_' + text.timestamp} text={text} />
           ))
           :
           <></>
