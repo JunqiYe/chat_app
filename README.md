@@ -36,9 +36,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## todos
 - [x] update front end
-- [ ] add storage back into the server
+- [x] add storage back into the server
 - [ ] add collaspable side bar for mobile
-- [ ] on connect, fetch new messages
+- [x] on connect, fetch new messages
 - [ ] store user login credential for easy login 
 - [ ] add push notifications [resources](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
 
@@ -55,7 +55,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - [ ] add select for most recent text
 - [x] add left panel such that select the chat
 - [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
-- [ ] make text area full screen when screen is small
+- [x] make text area full screen when screen is small
 - [ ] push notification
 
 
@@ -63,7 +63,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - [x] server should asssign convID instead of client
 - [x] networking text (web socket) - peer to peer to start
 - [x] add broadcast
-- [ ] add http request for syncing messages
+- [x] add http request for syncing messages
 - [ ] using JWT for signing messages
 
 
