@@ -41,6 +41,16 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 func StartWebSocket(hub *Hub) {
 	log.Println("Starting WebSocket server...")
 
+	// check login information
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		httpChatIndexEndpoint(hub, w, r)
+	})
+
+	// check login information
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		httpChatLoginEndpoint(hub, w, r)
+	})
+
 	// handles the websocket connection
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		wsEndpoint(hub, w, r)

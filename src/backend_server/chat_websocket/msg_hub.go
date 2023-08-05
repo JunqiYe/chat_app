@@ -10,6 +10,8 @@ type Hub struct {
 	userBase                 map[string]*ClientHandler
 	register                 chan *ClientHandler
 	unregister               chan *ClientHandler
+
+	tokens map[string]session
 }
 
 func NewHub(storage *msg_storage) *Hub {
@@ -21,6 +23,7 @@ func NewHub(storage *msg_storage) *Hub {
 		userBase:                 make(map[string]*ClientHandler),
 		register:                 make(chan *ClientHandler),
 		unregister:               make(chan *ClientHandler),
+		tokens:                   make(map[string]session),
 	}
 
 	hub.initConversationsMap()
