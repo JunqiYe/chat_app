@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { mainAppContext } from './context';
 import { isIDValid } from '../lib/ID_helper';
+import { SERVER_ADDRESS, SERVER_PORT } from '../page';
 
 interface loginStatus {
 	// onLogin: (status: boolean) => void;
@@ -21,14 +22,37 @@ export default function Login(props: loginStatus){
 		if (!isIDValid(input)) {
 			alert("Please enter a valid username, use letters, numbers, _ or !")
 		} else {
-			ctx.setUserID(input)
-			ctx.setSignIn(true)
+			fetch("http://" + "localhost:8080" + "/login", {
+				method: "POST",
+				credentials: 'include',
+				headers:{
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					user_id: input,
+					password: 'none',
+				})
+			}).then(response => {
+				if (response.status == 200) {
+					ctx.setUserID(input)
+					ctx.setSignIn(true)
+
+					// localStorage.setItem(token!, input)
+				}
+			}).catch(error => {
+				console.log(error)
+			})
 		}
 
 		// // clean the entry
 		// setInput('')
 	}
 
+	useEffect(()=>{
+
+		// console.log("somehing")
+
+	},[])
 	return (
 		<div className='p-6 w-11/12 sm:max-w-[24rem] rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700'>
 			<h1 className='mb-3 space-y-4 md:space-y-6'>Chat App</h1>

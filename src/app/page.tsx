@@ -47,6 +47,21 @@ export default function Home() {
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
 
   useEffect(() => {
+    fetch("http://" + "localhost:8080" + "/", {
+      method: "GET",
+      credentials: 'include'
+    }).then(response =>{
+      if (response.status === 200) {
+        return response.json();
+      }
+      // console.log(response.json());
+    }).then((data)=>{
+      setLoggedIn(true)
+      setUserID(data.user_id)
+    }).catch(error => {
+      console.log(error)
+    })
+
     if (loggedIn) {
       var socket = new WebSocket(WS_URL)
       var storage = new ChatStorage()
