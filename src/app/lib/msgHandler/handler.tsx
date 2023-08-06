@@ -52,9 +52,9 @@ export class MessageHandler {
         this.initConnection()
 
         // this.websocket.onmessage = this.clientReceiveMessage
-        this.websocket.addEventListener("message", (event) => {
-            this.clientReceiveMessage(event)
-        });
+        // this.websocket.addEventListener("message", (event) => {
+        //     this.clientReceiveMessage(event)
+        // });
     }
 
 
@@ -134,5 +134,8 @@ export class MessageHandler {
         }
     }
 
+    clientReceiveMessageCallback() {
+        
+    }
 
 }

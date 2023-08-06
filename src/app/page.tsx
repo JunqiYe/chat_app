@@ -17,6 +17,24 @@ export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 // export const WS_URL = 'ws://localhost:8080/ws';
 
 
+// let swRegistration: ServiceWorkerRegistration | null = null
+// navigator.serviceWorker.register('lib/serviceWorker/sw.ts')
+//   .then(function(swReg) {
+//     console.log('Service Worker is registered', swReg);
+
+//     swRegistration = swReg;
+//   })
+//   .catch(function(error) {
+//     console.error('Service Worker Error', error);
+//   })
+
+// Notification.requestPermission().then((result) => {
+//   console.log(result);
+// });
+
+// const text = `HEY! Your task is now overdue.`;
+// const notification = new Notification("To do list", { body: text });
+
 function DEV_storageControl() {
   var storage: ChatStorage = new ChatStorage()
 
@@ -54,10 +72,13 @@ export default function Home() {
       if (response.status === 200) {
         return response.json();
       }
+      return null
       // console.log(response.json());
     }).then((data)=>{
-      setLoggedIn(true)
-      setUserID(data.user_id)
+      if (data != null) {
+        setLoggedIn(true)
+        setUserID(data.user_id)
+      }
     }).catch(error => {
       console.log(error)
     })
@@ -94,13 +115,15 @@ export default function Home() {
         {!loggedIn ?
           <Login />
          :
-         <div className='flex flex-col h-full w-full max-w-3xl justify-center items-center'>
+         <div className='flex flex-col h-full w-full max-h-full max-w-3xl justify-center items-center'>
            <HeaderBar />
             {/* <DEV_storageControl /> */}
 
-            <div id="main area" className='flex flex-initial flex-row basis-11/12 w-full rounded-2xl bg-slate-900'>
-                <ConversationsSelect />
-                <TextArea />
+            <div id="main area" className='flex h-[93%] w-full  rounded-2xl bg-slate-900'>
+                <div id="wrapper" className='flex flex-initial flex-row h-full w-full'>
+                  <ConversationsSelect />
+                  <TextArea />
+                </div>
             </div>
          </div>
          }
