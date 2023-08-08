@@ -65,7 +65,8 @@ export default function Home() {
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
 
   useEffect(() => {
-    fetch("http://" + "localhost:8080" + "/", {
+    // fetch("http://" + "localhost:8080" + "/", {
+    fetch("http://" + "192.168.0.103:8080" + "/", {
       method: "GET",
       credentials: 'include'
     }).then(response =>{
