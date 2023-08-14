@@ -50,4 +50,8 @@ export class TextData {
         )
     }
 
+    toString(): string {
+        return this.text
+    }
+
 }

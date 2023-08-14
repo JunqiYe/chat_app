@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import React, {KeyboardEvent, useState, useEffect, useMemo, createContext, useContext} from 'react';
+import React, {KeyboardEvent, useState, useEffect, useMemo, createContext, useContext, useRef} from 'react';
 import { ChatStorage } from './lib/storage/chat_localstorage'
 
 import { mainAppContext, prevMsgContext } from './components/context';
@@ -11,7 +11,8 @@ import Login  from './components/login';
 import { MessageHandler } from './lib/msgHandler/handler';
 import ConversationsSelect from './components/convSelector';
 import { TextData } from './lib/storage/text_data';
-export const SERVER_ADDRESS = "192.168.0.103"
+export const SERVER_ADDRESS = "localhost"
+// export const SERVER_ADDRESS = "192.168.0.103"
 export const SERVER_PORT = ":8080"
 export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 // export const WS_URL = 'ws://localhost:8080/ws';
@@ -28,12 +29,9 @@ export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 //     console.error('Service Worker Error', error);
 //   })
 
-// Notification.requestPermission().then((result) => {
-//   console.log(result);
-// });
-
-// const text = `HEY! Your task is now overdue.`;
-// const notification = new Notification("To do list", { body: text });
+Notification.requestPermission().then((result) => {
+  console.log(result);
+});
 
 function DEV_storageControl() {
   var storage: ChatStorage = new ChatStorage()
@@ -64,9 +62,34 @@ export default function Home() {
   const [convID, setconvID] = useState<string>("")
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
 
+  // const tempRef = useRef(setMsgBuffer)
+  
+  function newMessageCallback(message: TextData) {
+    console.log("[PAGE]: new message callback")
+    var convBuffer = msgBuffer.get(message.convID)
+
+    console.log("[PAGE]: buffer: " + convBuffer?.toString())
+    if (convBuffer === undefined) {
+      convBuffer = []
+    }
+    
+    
+    if (!window.focus && message.userID != userID) {
+      console.log("triggering notification")
+      new Notification("chat app", { body: message.userID + " " + message.text});
+    }
+    
+    console.log("[PAGE]: set buffer: " + [message, ...convBuffer!].toString())
+    setMsgBuffer(
+      function(map: Map<string, TextData[]>) {
+        return new Map(map.set(message.convID, [message, ...convBuffer!]))
+      }
+    )
+
+  }
+
   useEffect(() => {
-    // fetch("http://" + "localhost:8080" + "/", {
-    fetch("http://" + "192.168.0.103:8080" + "/", {
+    fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/", {
       method: "GET",
       credentials: 'include'
     }).then(response =>{
@@ -88,8 +111,44 @@ export default function Home() {
       var socket = new WebSocket(WS_URL)
       var storage = new ChatStorage()
       handler = new MessageHandler(userID, socket, storage);
+
+      handler.websocket.onmessage = (e: MessageEvent) => { handler.clientReceiveMessage(e, newMessageCallback)}
+
+      // var messageCallback = function(message: TextData, msgBuffer: Map<string, TextData[]>, setBuffer: (n:any)=>void) {
+        //   var convBuffer = buffer.get(message.convID)
+        //   if (convBuffer === undefined) {
+          //     convBuffer = []
+          //   }
+          
+          
+          //   if (!window.focus && message.userID != userID) {
+            //     console.log("triggering notification")
+            //     new Notification("chat app", { body: message.userID + " " + message.text});
+            //   }
+            
+            //   setBuffer(
+              //     function(map: Map<string, TextData[]>) {
+                //       return new Map(map.set(message.convID, [message, ...convBuffer!]))
+                //     }
+                //   )
+                // }
+                
+                // remove previous eventlistener handler 
+                // handler.controller.abort()
+                // handler.controller.
+                
+                // handler.websocket.addEventListener(
+      //   "message",
+      //   (event) => {
+      //       console.log("[Listener] :received message")
+      //       handler.clientReceiveMessage(event, messageCallback, msgBuffer, setMsgBuffer)
+      //   },
+      //   {signal: handler.controller.signal});
       // newWorker()
       // workerSendInit(userID)
+    }
+    if (handler != null) {
+      // handler.msgCallback = newMessageCallback
     }
 
     return () => {

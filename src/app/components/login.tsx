@@ -22,8 +22,7 @@ export default function Login(props: loginStatus){
 		if (!isIDValid(input)) {
 			alert("Please enter a valid username, use letters, numbers, _ or !")
 		} else {
-			// fetch("http://" + "localhost:8080" + "/login", {
-			fetch("http://" + "192.168.0.103:8080" + "/login", {
+			fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/login", {
 				method: "POST",
 				credentials: 'include',
 				headers:{

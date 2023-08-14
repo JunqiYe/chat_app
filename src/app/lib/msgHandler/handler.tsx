@@ -18,6 +18,12 @@ export class MessageHandler {
     currentConvID : string | null = null;
     websocket: WebSocket;
     storage: ChatStorage;
+    controller = new AbortController();
+    // someMsgFunction = (message: TextData)=>{console.log(message)}
+
+    someMsgFunction(message: TextData ) {
+        console.log(message)
+    }
 
     // send userID information to server when connecting
     private initConnection() {
@@ -44,17 +50,25 @@ export class MessageHandler {
     }
 
     constructor(userID: string, websocket: WebSocket, storage: ChatStorage) {
-        console.log("new connection")
+        console.log("new connection/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n")
         this.websocket = websocket;
         this.storage = storage;
         this.currentUserID = userID;
-
         this.initConnection()
 
-        // this.websocket.onmessage = this.clientReceiveMessage
-        // this.websocket.addEventListener("message", (event) => {
-        //     this.clientReceiveMessage(event)
-        // });
+
+        // this.messageCallback = (message: TextData) => {
+        //     console.log('prev listener')
+        //     // new Error("event listener not initialized")
+        // }
+
+        this.websocket.onmessage = (e: MessageEvent) => { this.clientReceiveMessage(e, this.someMsgFunction)}
+        // this.websocket.addEventListener(
+        //     "message",
+        //     (event) => {
+        //         this.clientReceiveMessage(event, this.someMsgFunction)
+        //     },
+        //     {signal: this.controller.signal});
     }
 
 
@@ -117,16 +131,21 @@ export class MessageHandler {
 
     // client received message from server, can be any conversation and sender
     // should add message to corresponding conversation
-    clientReceiveMessage(e: MessageEvent) {
+    // clientReceiveMessage(e: MessageEvent, callback: (n:any, n1:any, n2:any)=>void, buffer: Map<string, TextData[]>, setBuffer: (n:any)=>void) {
+    clientReceiveMessage(e: MessageEvent, someMsgFunction: (n:any)=>void ) {
         // create new TextData object
         var data = JSON.parse(e.data)
-        console.log('receive message:', data);
+        console.log('[HANDLER]: receive message:', data);
 
         switch (data.type) {
             case "transmit":
                 var msg = new TextData(data.senderID, data.recipientID, data.convID, data.counter, data.msgData)
+                // this.someMsgFunction(msg)
 
-                break
+                if (typeof this.someMsgFunction === 'function') {
+                    someMsgFunction(msg);
+                }
+                // callback(msg, buffer, setBuffer)
             default:
 
                 // store in storage
@@ -134,8 +153,5 @@ export class MessageHandler {
         }
     }
 
-    clientReceiveMessageCallback() {
-        
-    }
 
 }

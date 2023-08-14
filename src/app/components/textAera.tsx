@@ -39,10 +39,10 @@ export default function TextArea() {
     }
 
     useEffect(() =>{
-      if (handler != undefined) {
-        handler.websocket.addEventListener("message", (message) => addToMsgBuffer(message))
+      // if (handler != undefined) {
+      //   handler.websocket.addEventListener("message", (message) => addToMsgBuffer(message))
 
-      }
+      // }
     } )
 
     return (
