@@ -5,7 +5,7 @@ import React, {KeyboardEvent, useState, useEffect, useMemo, createContext, useCo
 import { ChatStorage } from './lib/storage/chat_localstorage'
 
 import { mainAppContext, prevMsgContext } from './components/context';
-import TextArea from './components/textAera';
+import TextArea from './components/textArea';
 import HeaderBar from './components/header'
 import Login  from './components/login';
 import { MessageHandler } from './lib/msgHandler/handler';
@@ -62,33 +62,27 @@ export default function Home() {
   const [convID, setconvID] = useState<string>("")
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
 
-  // const tempRef = useRef(setMsgBuffer)
-  
   function newMessageCallback(message: TextData) {
     console.log("[PAGE]: new message callback")
     var convBuffer = msgBuffer.get(message.convID)
 
-    console.log("[PAGE]: buffer: " + convBuffer?.toString())
     if (convBuffer === undefined) {
       convBuffer = []
     }
-    
-    
+
     if (!window.focus && message.userID != userID) {
       console.log("triggering notification")
       new Notification("chat app", { body: message.userID + " " + message.text});
     }
-    
-    console.log("[PAGE]: set buffer: " + [message, ...convBuffer!].toString())
-    setMsgBuffer(
-      function(map: Map<string, TextData[]>) {
-        return new Map(map.set(message.convID, [message, ...convBuffer!]))
-      }
-    )
 
+    setMsgBuffer(
+      new Map(msgBuffer.set(message.convID, [message, ...convBuffer]))
+    )
   }
 
   useEffect(() => {
+
+    // check if the user already signed in and skip auth using stored cookies
     fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/", {
       method: "GET",
       credentials: 'include'
@@ -99,6 +93,7 @@ export default function Home() {
       return null
       // console.log(response.json());
     }).then((data)=>{
+      // valid response from server, allow login
       if (data != null) {
         setLoggedIn(true)
         setUserID(data.user_id)
@@ -107,49 +102,15 @@ export default function Home() {
       console.log(error)
     })
 
+    // init the Message handler after login is successful
     if (loggedIn) {
       var socket = new WebSocket(WS_URL)
       var storage = new ChatStorage()
       handler = new MessageHandler(userID, socket, storage);
 
       handler.websocket.onmessage = (e: MessageEvent) => { handler.clientReceiveMessage(e, newMessageCallback)}
+    }
 
-      // var messageCallback = function(message: TextData, msgBuffer: Map<string, TextData[]>, setBuffer: (n:any)=>void) {
-        //   var convBuffer = buffer.get(message.convID)
-        //   if (convBuffer === undefined) {
-          //     convBuffer = []
-          //   }
-          
-          
-          //   if (!window.focus && message.userID != userID) {
-            //     console.log("triggering notification")
-            //     new Notification("chat app", { body: message.userID + " " + message.text});
-            //   }
-            
-            //   setBuffer(
-              //     function(map: Map<string, TextData[]>) {
-                //       return new Map(map.set(message.convID, [message, ...convBuffer!]))
-                //     }
-                //   )
-                // }
-                
-                // remove previous eventlistener handler 
-                // handler.controller.abort()
-                // handler.controller.
-                
-                // handler.websocket.addEventListener(
-      //   "message",
-      //   (event) => {
-      //       console.log("[Listener] :received message")
-      //       handler.clientReceiveMessage(event, messageCallback, msgBuffer, setMsgBuffer)
-      //   },
-      //   {signal: handler.controller.signal});
-      // newWorker()
-      // workerSendInit(userID)
-    }
-    if (handler != null) {
-      // handler.msgCallback = newMessageCallback
-    }
 
     return () => {
       // workerTerminate()
