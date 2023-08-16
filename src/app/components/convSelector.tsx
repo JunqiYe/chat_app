@@ -18,14 +18,15 @@ function ConvIDBox({recipient}: ConvIDBoxProps) {
     return (
         <div className="flex h-8 border-black items-center pl-3 bg-sky-500 hover:bg-sky-700"
             onClick={()=>{
+                console.log("[ConvIDBox]: " + recipient.recipient)
                 ctx.setConvID(recipient.conversation)
                 handler.currentConvID = recipient.conversation
                 ctx.setRecipientID(recipient.recipient)
                 handler.currentRecipientID = recipient.recipient
-                // console.log(convID)
 
                 if (!ctx.prevMsg.has(recipient.conversation)) {
 
+                    // call chatHistory API to get the history for this conversation
                     fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/chatHist?" +
                     new URLSearchParams({convID: recipient.conversation}),
                     {
@@ -42,7 +43,6 @@ function ConvIDBox({recipient}: ConvIDBoxProps) {
                     })
                     .then(function(data) {
                         // update context, handler, and react states
-                        console.log("get hist received data ", data)
                         var hist :TextData[] = []
 
                         data.msgs.forEach(function(msg:any) {
@@ -50,14 +50,12 @@ function ConvIDBox({recipient}: ConvIDBoxProps) {
                             hist.push(msg_obj)
 
                         })
-                        // for (var i = 0; i < data.msg.length; i++) {
-                        // }
 
-                        console.log("history", hist)
+                        console.log("[ConvIDBox]: history rst", hist)
+                        console.log("[ConvIDBox]: " + ctx.prevMsg.size)
+
                         ctx.setPrevMsg(
-                            function(map:Map<String, TextData[]>) {
-                                return new Map(map.set(recipient.conversation, hist))
-                            }
+                            new Map(ctx.prevMsg.set(recipient.conversation, hist))
                         )
                     })
                     .catch(function(err) {

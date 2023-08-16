@@ -9,7 +9,7 @@ export const mainAppContext = createContext<any>({
     setRecipientID: (n: any) => {},
     convID:"",
     setConvID: (n: any) => {},
-    prevMsg: [],
+    prevMsg: new Map(),
     setPrevMsg: (n: any) => {},
 })
 

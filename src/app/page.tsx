@@ -11,8 +11,10 @@ import Login  from './components/login';
 import { MessageHandler } from './lib/msgHandler/handler';
 import ConversationsSelect from './components/convSelector';
 import { TextData } from './lib/storage/text_data';
-export const SERVER_ADDRESS = "localhost"
+// export const SERVER_ADDRESS = "localhost"
 // export const SERVER_ADDRESS = "192.168.0.103"
+import address from '../../package.json'
+export const SERVER_ADDRESS = address.address
 export const SERVER_PORT = ":8080"
 export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 // export const WS_URL = 'ws://localhost:8080/ws';
@@ -62,8 +64,9 @@ export default function Home() {
   const [convID, setconvID] = useState<string>("")
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
 
+
   function newMessageCallback(message: TextData) {
-    console.log("[PAGE]: new message callback")
+    console.log("[PAGE]: new message callback");
     var convBuffer = msgBuffer.get(message.convID)
 
     if (convBuffer === undefined) {
@@ -75,10 +78,19 @@ export default function Home() {
       new Notification("chat app", { body: message.userID + " " + message.text});
     }
 
+    console.log("[PAGE]: " + msgBuffer.size)
     setMsgBuffer(
       new Map(msgBuffer.set(message.convID, [message, ...convBuffer]))
     )
   }
+
+  // use effect hook to updatet the newmessagecallback reference everytime the component is rendered...
+  useEffect(() => {
+    if (handler!= undefined) {
+      handler.websocket.onmessage = (e: MessageEvent) => { handler.clientReceiveMessage(e, newMessageCallback)}
+    }
+  })
+
 
   useEffect(() => {
 
