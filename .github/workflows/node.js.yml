@@ -32,8 +32,12 @@ jobs:
     - run: rm -rf src/backend_server/test 
     - run: mkdir src/backend_server/test 
     - run: |
-        make -C src/backend_server test &
+        cd src/backend_server 
+        go build main.go
+        sudo ./main ./test &
         strace -p $!
+        cd ../..
+    # make -C src/backend_server test &
     - run: sleep 20
     - run: npm run dev &
     
