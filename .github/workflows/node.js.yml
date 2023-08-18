@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 16.x, 14.x]
+        node-version: [18.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -32,13 +32,14 @@ jobs:
     - run: rm -rf src/backend_server/test 
     - run: mkdir src/backend_server/test 
     - run: |
-        cd src/backend_server 
-        go build main.go
-        sudo ./main ./test &
-        cd ../..
+        make -C src/backend_server test
+    # cd src/backend_server 
+    # cd ../..
+    # go build main.go
+    # sudo ./main ./test &
     # strace -p $!
     # make -C src/backend_server test &
-    - run: sleep 20
+    # - run: sleep 20
     - run: npm run dev &
     
     - run: npm run cypress_test
