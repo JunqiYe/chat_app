@@ -13,6 +13,7 @@
     "start2": "next start -p 3002",
     "lint": "next lint",
     "cypress": "cypress open",
+    "cypress_test": "cypress run",
     "cye2e": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress open",
     "cye2etest": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress run"
   },
