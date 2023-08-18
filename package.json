@@ -1,7 +1,7 @@
 {
   "name": "chat_app",
   "version": "0.1.0",
-  "address":"10.0.0.22",
+  "address": "localhost",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
@@ -11,7 +11,10 @@
     "build": "next build",
     "start1": "next start -p 3000",
     "start2": "next start -p 3002",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cypress": "cypress open",
+    "cye2e": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress open",
+    "cye2etest": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress run --spec 'cypress\\e2e\\spec.cy.ts' "
   },
   "dependencies": {
     "@types/node": "20.4.1",
@@ -20,11 +23,16 @@
     "autoprefixer": "10.4.14",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.9",
+    "mock-socket": "^9.2.1",
     "next": "13.4.9",
     "postcss": "8.4.25",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.2",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "wait-on": "^7.0.1"
+  },
+  "devDependencies": {
+    "cypress": "^12.17.4"
   }
 }

@@ -1,0 +1,13 @@
+{
+    "UserID": "test_cy1",
+    "ConvIDs": [
+        {
+            "ConvID": "test_cy1-test_recp_cy1",
+            "RecipientID": "test_recp_cy1"
+        },
+        {
+            "ConvID": "test_cy1-test_recp_cy2",
+            "RecipientID": "test_recp_cy2"
+        }
+    ]
+}

@@ -2,6 +2,10 @@
 server:
 	go run -race main.go ./data
 
+.PHONY: test
+test:
+	go run -race main.go ./test
+
 # go run cmd/fetch/main.go -req ./cmd/fetch/samples/input.txt -resp ./cmd/fetch/samples/output.txt localhost:8080
 # .PHONY: gohttpd
 # gohttpd:

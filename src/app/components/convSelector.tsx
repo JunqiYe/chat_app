@@ -13,10 +13,10 @@ interface ConvIDBoxProps {
     key: string;
     recipient: Recipients;
 }
-function ConvIDBox({recipient}: ConvIDBoxProps) {
+function ConvIDBox({key, recipient}: ConvIDBoxProps) {
     const ctx = useContext(mainAppContext);
     return (
-        <div className="flex h-8 border-black items-center pl-3 bg-sky-500 hover:bg-sky-700"
+        <div id={key} className="flex h-8 border-black items-center pl-3 bg-sky-500 hover:bg-sky-700"
             onClick={()=>{
                 console.log("[ConvIDBox]: " + recipient.recipient)
                 ctx.setConvID(recipient.conversation)
@@ -78,7 +78,9 @@ function ConvSelector({convIDs}: ConvSelectorProps) {
     return (
         <div className="overflow-y-scroll no-scrollbar rounded-bl-lg">
             {convIDs.map((rec: Recipients) => (
-                <ConvIDBox key={rec.conversation} recipient={rec}/>
+                <div id = {rec.recipient} key={rec.conversation}>
+                    <ConvIDBox key={rec.conversation} recipient={rec}/>
+                </div>
             ))}
         </div>
     )
@@ -123,7 +125,7 @@ export default function ConversationsSelect() {
     }, [ctx.userID])
 
     return (
-        <div id="left column" className="flex flex-col w-3/12 bg-slate-800 rounded-l-lg border-r-2 border-gray-600">
+        <div id="left_column" className="flex flex-col w-3/12 bg-slate-800 rounded-l-lg border-r-2 border-gray-600">
             <RecipientUserTitle convIDs={allConvID} setConvIDs={setAllConvID}/>
             <ConvSelector convIDs={allConvID} />
         </div>
