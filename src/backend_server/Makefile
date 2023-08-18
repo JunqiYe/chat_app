@@ -4,7 +4,8 @@ server:
 
 .PHONY: test
 test:
-	go run -race main.go ./test
+	go build main.go
+	sudo ./main ./test &
 
 # go run cmd/fetch/main.go -req ./cmd/fetch/samples/input.txt -resp ./cmd/fetch/samples/output.txt localhost:8080
 # .PHONY: gohttpd
