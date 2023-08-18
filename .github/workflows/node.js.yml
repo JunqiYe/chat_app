@@ -27,19 +27,9 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    # - run: npm run build --if-present
-    # - run: npm test
-    - run: rm -rf src/backend_server/test 
-    - run: mkdir src/backend_server/test 
     - run: |
-        make -C src/backend_server test
-    # cd src/backend_server 
-    # cd ../..
-    # go build main.go
-    # sudo ./main ./test &
-    # strace -p $!
-    # make -C src/backend_server test &
-    # - run: sleep 20
+        rm -rf src/backend_server/test 
+        mkdir src/backend_server/test 
+    - run: make -C src/backend_server test
     - run: npm run dev &
-    
     - run: npm run cypress_test
