@@ -29,4 +29,10 @@ jobs:
     - run: npm ci
     # - run: npm run build --if-present
     # - run: npm test
-    - run: npm run cye2etest
+    - run: rm -rf src/backend_server/test 
+    - run: mkdir src/backend_server/test 
+    - run: make -C src/backend_server test
+    
+    - run: npm run dev 
+    
+    - run: npm run cypress_test
