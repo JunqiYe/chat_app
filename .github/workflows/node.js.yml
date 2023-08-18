@@ -31,8 +31,8 @@ jobs:
     # - run: npm test
     - run: rm -rf src/backend_server/test 
     - run: mkdir src/backend_server/test 
-    - run: make -C src/backend_server test
+    - run: make -C src/backend_server test &
     
-    - run: npm run dev 
+    - run: npm run dev &
     
     - run: npm run cypress_test
