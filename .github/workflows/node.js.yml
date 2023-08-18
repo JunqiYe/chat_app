@@ -35,7 +35,7 @@ jobs:
         cd src/backend_server 
         go build main.go
         sudo ./main ./test &
-        strace -p $!
+    # strace -p $!
         cd ../..
     # make -C src/backend_server test &
     - run: sleep 20
