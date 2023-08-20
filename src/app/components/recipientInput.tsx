@@ -3,6 +3,7 @@ import { mainAppContext } from "./context"
 import { SERVER_ADDRESS, SERVER_PORT, handler } from "../page"
 import { Recipients } from "./convSelector"
 import { isIDValid } from "../lib/ID_helper"
+import { TextData } from "../lib/storage/text_data"
 
 
 interface RecipientUserTitleProps {
@@ -35,6 +36,46 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
       if (matchedConv != undefined) {
         ctx.setConvID(matchedConv.conversation);
         handler.currentConvID = matchedConv.recipient
+
+        if (!ctx.prevMsg.has(matchedConv.conversation)) {
+
+          // call chatHistory API to get the history for this conversation
+          fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/chatHist?" +
+          new URLSearchParams({convID: matchedConv.conversation}),
+          {
+              method: "GET",
+              // mode:"cors",
+              cache: "no-cache",
+              headers:{
+              // "Content-Type": "application/json",
+              },
+              // body: JSON.stringify(data)
+          })
+          .then(function(response) {
+              return response.json();
+          })
+          .then(function(data) {
+              // update context, handler, and react states
+              var hist :TextData[] = []
+
+              data.msgs.forEach(function(msg:any) {
+                  var msg_obj = new TextData(msg.senderID, msg.recipientID, msg.convID, 0, msg.msgData, false, msg.timestamp)
+                  hist.push(msg_obj)
+
+              })
+
+              console.log("[ConvIDBox]: history rst", hist)
+              console.log("[ConvIDBox]: " + ctx.prevMsg.size)
+
+              ctx.setPrevMsg(
+                  new Map(ctx.prevMsg.set(matchedConv!.conversation, hist))
+              )
+          })
+          .catch(function(err) {
+              console.log(err)
+          })
+      }
+
         return
       }
 
