@@ -13,10 +13,10 @@ interface ConvIDBoxProps {
     key: string;
     recipient: Recipients;
 }
-function ConvIDBox({key, recipient}: ConvIDBoxProps) {
+function ConvIDBox({recipient}: ConvIDBoxProps) {
     const ctx = useContext(mainAppContext);
     return (
-        <div id={key} className="flex h-8 border-black items-center pl-3 bg-sky-500 hover:bg-sky-700"
+        <div className="flex h-8 border-black items-center pl-3 bg-sky-500 hover:bg-sky-700"
             onClick={()=>{
                 console.log("[ConvIDBox]: " + recipient.recipient)
                 ctx.setConvID(recipient.conversation)
@@ -76,7 +76,7 @@ interface ConvSelectorProps {
 function ConvSelector({convIDs}: ConvSelectorProps) {
 
     return (
-        <div className="overflow-y-scroll no-scrollbar rounded-bl-lg">
+        <div id="selector" className="overflow-y-scroll no-scrollbar rounded-bl-lg">
             {convIDs.map((rec: Recipients) => (
                 <div id = {rec.recipient} key={rec.conversation}>
                     <ConvIDBox key={rec.conversation} recipient={rec}/>

@@ -14,7 +14,7 @@ export default function TextArea() {
 
     return (
       <div id="TextArea" className='grow flex flex-col min-w-fit items-center h-full justify-items-end '>
-        <div className="flex items-center justify-start p-6 w-full h-[3rem] rounded-tr-lg bg-slate-500">
+        <div id="RecipientTitle" className="flex items-center justify-start p-6 w-full h-[3rem] rounded-tr-lg bg-slate-500">
             {ctx.recipientID}
         </div>
         <PrevTexts />

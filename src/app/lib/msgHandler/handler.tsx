@@ -36,7 +36,7 @@ export class MessageHandler {
 
 
     private sendMsg(msg: TextData) {
-        console.log("msg json", msg.toJson())
+        console.log("sending msg json", msg.toJson())
         this.websocket.send(msg.toJson());
     }
 
