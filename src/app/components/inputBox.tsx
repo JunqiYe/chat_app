@@ -18,7 +18,7 @@ export default function InputBox() {
         let dom = document.getElementById('input_box') as HTMLInputElement
         if (dom != null && ctx.userID != null && ctx.recipientID != null){
           if (dom.value.length > 0) {
-            console.log("new message", dom.value);
+            console.log("new outgoing message", dom.value);
 
             handler.clientSendMessage(dom.value)
             // workerSendNewMsg(dom.value)

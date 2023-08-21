@@ -14,8 +14,9 @@
     "lint": "next lint",
     "cypress": "cypress open",
     "cypress_test": "cypress run",
-    "cye2e": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress open",
-    "cye2etest": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress run"
+    "cye2e": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server local_test & cypress open",
+    "cye2etest": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress run",
+    "cye2e_local": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress run  --spec 'cypress\\e2e\\spec.cy.ts' "
   },
   "dependencies": {
     "@types/node": "20.4.1",

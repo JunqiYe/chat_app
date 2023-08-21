@@ -1,5 +1,5 @@
 import { mainAppContext } from "./context"
-import { useContext } from "react"
+import { useContext, useEffect, useRef } from "react"
 import { TextData } from "../lib/storage/text_data"
 
 interface TextBubbleProps {
@@ -15,14 +15,14 @@ function TextBubble({text} : TextBubbleProps) {
     if (text.userID == ctx.userID) {
       return (
         // right
-        <div className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
+        <div id="self" className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
           {text.text}
         </div>
       )
     } else {
       return (
         // left
-        <div className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
+        <div id="other" className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
           {text.text}
         </div>
       )

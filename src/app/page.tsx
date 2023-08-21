@@ -30,10 +30,11 @@ export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 //   .catch(function(error) {
 //     console.error('Service Worker Error', error);
 //   })
-
-Notification.requestPermission().then((result) => {
-  console.log(result);
-});
+if (typeof Notification !== 'undefined') {
+  Notification.requestPermission().then((result) => {
+    console.log(result);
+  });
+}
 
 function DEV_storageControl() {
   var storage: ChatStorage = new ChatStorage()

@@ -9,6 +9,8 @@
 /coverage
 /cypress/e2e/1*
 /cypress/e2e/2*
+/cypress/videos/*
+/cypress/screenshots/*
 
 # next.js
 /.next/
@@ -16,6 +18,9 @@
 
 # production
 /build
+
+#build artifacts
+*/*/main.exe
 
 # misc
 .DS_Store
