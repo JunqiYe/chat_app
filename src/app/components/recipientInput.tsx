@@ -35,7 +35,7 @@ export default function RecipientUserTitle({convIDs, setConvIDs} : RecipientUser
       // input exists, terminate early
       if (matchedConv != undefined) {
         ctx.setConvID(matchedConv.conversation);
-        handler.currentConvID = matchedConv.recipient
+        handler.currentConvID = matchedConv.conversation
 
         if (!ctx.prevMsg.has(matchedConv.conversation)) {
 
