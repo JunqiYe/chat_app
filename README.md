@@ -1,3 +1,43 @@
+## todos
+- [x] update front end
+- [x] add storage back into the server
+- [ ] add collaspable side bar for mobile
+- [x] on connect, fetch new messages
+- [ ] store user login credential for easy login 
+- [ ] add push notifications [resources](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
+
+- [x] interactive send
+- [x] scolling through text
+- [x] hide text that are out of screen
+
+- [x] change underling store for sent and received text
+- [x] display text bubble according to send and received text
+
+
+
+### Frontend
+- [ ] add select for most recent text
+- [x] add left panel such that select the chat
+- [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
+- [x] make text area full screen when screen is small
+- [ ] push notification
+- [ ] add redux
+
+
+### Backend
+- [x] server should asssign convID instead of client
+- [x] networking text (web socket) - peer to peer to start
+- [x] add broadcast
+- [x] add http request for syncing messages
+- [ ] using JWT for signing messages
+
+
+### bug fixes
+- make sure ctx and handler value are updated at the same time
+- ~~research event.target, seems like values are crossing between elements, i.e. form values are getting set to recipients input~~
+- ~~counter is broken/not working~~
+- ~~issue where sending the first text result in two text bubble~~
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
@@ -34,42 +74,4 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
 
-## todos
-- [x] update front end
-- [x] add storage back into the server
-- [ ] add collaspable side bar for mobile
-- [x] on connect, fetch new messages
-- [ ] store user login credential for easy login 
-- [ ] add push notifications [resources](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
-
-- [x] interactive send
-- [x] scolling through text
-- [x] hide text that are out of screen
-
-- [x] change underling store for sent and received text
-- [x] display text bubble according to send and received text
-
-
-
-### Frontend
-- [ ] add select for most recent text
-- [x] add left panel such that select the chat
-- [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
-- [x] make text area full screen when screen is small
-- [ ] push notification
-
-
-### Backend
-- [x] server should asssign convID instead of client
-- [x] networking text (web socket) - peer to peer to start
-- [x] add broadcast
-- [x] add http request for syncing messages
-- [ ] using JWT for signing messages
-
-
-### bug fixes
-- make sure ctx and handler value are updated at the same time
-- ~~research event.target, seems like values are crossing between elements, i.e. form values are getting set to recipients input~~
-- ~~counter is broken/not working~~
-- ~~issue where sending the first text result in two text bubble~~
 
