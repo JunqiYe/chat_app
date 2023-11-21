@@ -3,7 +3,7 @@
 - [x] add storage back into the server
 - [ ] add collaspable side bar for mobile
 - [x] on connect, fetch new messages
-- [ ] store user login credential for easy login 
+- [x] store user login credential for easy login 
 - [ ] add push notifications [resources](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
 
 - [x] interactive send
@@ -16,6 +16,7 @@
 
 
 ### Frontend
+- [ ] sort conversation by most recent text
 - [ ] add select for most recent text
 - [x] add left panel such that select the chat
 - [ ] replace with online text bubble [link](https://daisyui.com/components/chat/)
@@ -25,6 +26,9 @@
 
 
 ### Backend
+- [ ] add authentication
+- [ ] update to secure connection https
+- [ ] add image support
 - [x] server should asssign convID instead of client
 - [x] networking text (web socket) - peer to peer to start
 - [x] add broadcast
