@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("something went wrong")
 	}
-	fmt.Print(tables)
+	fmt.Println(tables)
 
 	// msg := apiEndpoint.MsgObj{
 	// 	FrameType:   "0",
@@ -41,5 +41,14 @@ func main() {
 	// }
 	// for k, v := range item {
 	// 	fmt.Println(k, v)
+	// }
+
+	// // getting all message from a conversation ID
+	// messages, err := tb.GetMessageHist("conv1")
+	// if err != nil {
+	// 	log.Fatalf("something went wrong: \n%v", err.Error())
+	// }
+	// for m := range messages {
+	// 	fmt.Printf("%v", m)
 	// }
 }

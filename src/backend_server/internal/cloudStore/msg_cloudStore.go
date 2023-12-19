@@ -8,9 +8,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
 // CloudStore encapsulates the Amazon DynamoDB service actions used in the examples.
@@ -52,6 +52,12 @@ func (basics CloudStore) ListTables() ([]string, error) {
 	return tableNames, err
 }
 
+// ****************************************************************
+//
+// Table: MessageHistory
+//
+// ****************************************************************
+
 // createTable(tableName)
 // schema:
 // ConversationID | Timestamp | UserID | IsImg | MsgData
@@ -60,17 +66,26 @@ func (c CloudStore) createMessageHistoryTable() (*types.TableDescription, error)
 	var tableDesc *types.TableDescription
 	table, err := c.DynamoDbClient.CreateTable(context.TODO(), &dynamodb.CreateTableInput{
 		AttributeDefinitions: []types.AttributeDefinition{{
-			AttributeName: aws.String("year"),
+			AttributeName: aws.String("ConversationID"),
+			AttributeType: types.ScalarAttributeTypeS,
+		}, {
+			AttributeName: aws.String("Timestamp"),
 			AttributeType: types.ScalarAttributeTypeN,
 		}, {
-			AttributeName: aws.String("title"),
+			AttributeName: aws.String("UserID"),
+			AttributeType: types.ScalarAttributeTypeS,
+		}, {
+			AttributeName: aws.String("IsImg"),
+			AttributeType: types.ScalarAttributeTypeB,
+		}, {
+			AttributeName: aws.String("MsgData"),
 			AttributeType: types.ScalarAttributeTypeS,
 		}},
 		KeySchema: []types.KeySchemaElement{{
-			AttributeName: aws.String("year"),
+			AttributeName: aws.String("ConversationID"),
 			KeyType:       types.KeyTypeHash,
 		}, {
-			AttributeName: aws.String("title"),
+			AttributeName: aws.String("Timestamp"),
 			KeyType:       types.KeyTypeRange,
 		}},
 
@@ -97,7 +112,7 @@ func (c CloudStore) createMessageHistoryTable() (*types.TableDescription, error)
 
 // insert a new message that a user send to the MessageHistory table
 // convert the MsgObj into a cloudMsgObj, and put it into the message history table
-func (c CloudStore) insertMessageHistory(msg apiEndpoint.MsgObj) error {
+func (c CloudStore) InsertMessageHistory(msg apiEndpoint.MsgObj) error {
 	cloudMsg := CloudMsgObj{}
 	translateCloudMsg(&msg, &cloudMsg)
 
@@ -120,7 +135,7 @@ func (c CloudStore) insertMessageHistory(msg apiEndpoint.MsgObj) error {
 // Query gets all movies in the DynamoDB table that were released in the specified year.
 // The function uses the `expression` package to build the key condition expression
 // that is used in the query.
-func (c CloudStore) getMessageHist(convID string) ([]apiEndpoint.MsgObj, error) {
+func (c CloudStore) GetMessageHist(convID string) ([]CloudMsgObj, error) {
 	var err error
 	var response *dynamodb.QueryOutput
 	var cloudMsgs []CloudMsgObj
@@ -129,9 +144,11 @@ func (c CloudStore) getMessageHist(convID string) ([]apiEndpoint.MsgObj, error) 
 	if err != nil {
 		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)
 	} else {
+		// Note: dereference error caused by wrong import
+		// https://stackoverflow.com/questions/71876200/dynamodb-scaninput-cannot-use-expr-names-type-mapstringstring-as-the
 		response, err = c.DynamoDbClient.Query(context.TODO(), &dynamodb.QueryInput{
 			TableName:                 aws.String(c.MessageHistoryTableName),
-			ExpressionAttributeNames:  expr.Names(), // dereference error
+			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			KeyConditionExpression:    expr.KeyCondition(),
 		})
@@ -145,14 +162,18 @@ func (c CloudStore) getMessageHist(convID string) ([]apiEndpoint.MsgObj, error) 
 		}
 	}
 
-	// convert the messages
-	var messages []apiEndpoint.MsgObj
-	return messages, err
+	return cloudMsgs, err
 }
 
-// deleteTable(tableName)
+// deletes the message history table
+func (c CloudStore) DeleteTable() error {
 
-// Table: MessageHistory
+	_, err := c.DynamoDbClient.DeleteTable(context.TODO(), &dynamodb.DeleteTableInput{
+		TableName: &c.MessageHistoryTableName,
+	})
+
+	return err
+}
 
 // low priority
 // update a message that a user perviously send to the messageHistory table, identify using messageID
@@ -162,11 +183,14 @@ func (c CloudStore) getMessageHist(convID string) ([]apiEndpoint.MsgObj, error) 
 // delete a message by specifying a messageID
 // deleteMessageHistory(messageID) // delete a single message
 
+// ****************************************************************
+//
 // Table: ConvID
+//
+// ****************************************************************
+
 // get all user that are in the conversation
 // getUserID (from convID)
 
 // get all conversation that a user is in
 // getConvID (from UserID)
-
-// query
