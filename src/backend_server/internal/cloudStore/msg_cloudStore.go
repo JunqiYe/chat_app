@@ -25,7 +25,7 @@ type CloudStore struct {
 // TODO: Update MsgObj for better separation
 type CloudMsgObj struct {
 	ConversationID string
-	TimeStamp      uint64
+	Timestamp      int64
 	IsImg          bool
 	MsgData        string // TODO: might change to byte in the future
 	UserID         string
@@ -33,7 +33,7 @@ type CloudMsgObj struct {
 
 func translateCloudMsg(msg *apiEndpoint.MsgObj, cloudMsg *CloudMsgObj) {
 	cloudMsg.ConversationID = msg.ConvID
-	cloudMsg.TimeStamp = msg.TimeStamp
+	cloudMsg.Timestamp = msg.Timestamp
 	cloudMsg.IsImg = false // TODO: message only for now
 	cloudMsg.MsgData = msg.MsgData
 	cloudMsg.UserID = msg.SenderID
@@ -62,7 +62,7 @@ func (basics CloudStore) ListTables() ([]string, error) {
 // schema:
 // ConversationID | Timestamp | UserID | IsImg | MsgData
 // primaryKey	  |	sort key
-func (c CloudStore) createMessageHistoryTable() (*types.TableDescription, error) {
+func (c CloudStore) CreateMessageHistoryTable() (*types.TableDescription, error) {
 	var tableDesc *types.TableDescription
 	table, err := c.DynamoDbClient.CreateTable(context.TODO(), &dynamodb.CreateTableInput{
 		AttributeDefinitions: []types.AttributeDefinition{{
@@ -71,15 +71,6 @@ func (c CloudStore) createMessageHistoryTable() (*types.TableDescription, error)
 		}, {
 			AttributeName: aws.String("Timestamp"),
 			AttributeType: types.ScalarAttributeTypeN,
-		}, {
-			AttributeName: aws.String("UserID"),
-			AttributeType: types.ScalarAttributeTypeS,
-		}, {
-			AttributeName: aws.String("IsImg"),
-			AttributeType: types.ScalarAttributeTypeB,
-		}, {
-			AttributeName: aws.String("MsgData"),
-			AttributeType: types.ScalarAttributeTypeS,
 		}},
 		KeySchema: []types.KeySchemaElement{{
 			AttributeName: aws.String("ConversationID"),

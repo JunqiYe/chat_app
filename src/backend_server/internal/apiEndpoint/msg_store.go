@@ -81,7 +81,7 @@ func updateDB(db *sql.DB, msg MsgObj) {
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.TimeStamp, msg.MsgData)
+	statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.Timestamp, msg.MsgData)
 }
 
 func (s *msg_storage) StoreMsg(msg MsgObj) {
@@ -210,7 +210,7 @@ func (s *msg_storage) getHistFromConvID_V2(convID string) []MsgObj {
 	var ids []MsgObj = []MsgObj{}
 	for rows.Next() {
 		var id MsgObj
-		rows.Scan(&id.ConvID, &id.SenderID, &id.RecipientID, &id.TimeStamp, &id.MsgData)
+		rows.Scan(&id.ConvID, &id.SenderID, &id.RecipientID, &id.Timestamp, &id.MsgData)
 		ids = append(ids, id)
 	}
 
