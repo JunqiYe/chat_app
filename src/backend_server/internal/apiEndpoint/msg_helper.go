@@ -1,4 +1,4 @@
-package api_endpoint
+package apiEndpoint
 
 // race condition for multiple go routine
 // var conv = make(map[string]bool)

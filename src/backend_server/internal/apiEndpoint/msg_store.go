@@ -1,4 +1,4 @@
-package api_endpoint
+package apiEndpoint
 
 import (
 	"database/sql"

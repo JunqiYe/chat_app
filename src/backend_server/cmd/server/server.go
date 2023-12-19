@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backend_server/internal/api_endpoint"
+	"backend_server/internal/apiEndpoint"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,9 +22,9 @@ func main() {
 	dbDir := os.Args[1]
 
 	log.Print(filepath.Join(currDir, dbDir))
-	store := api_endpoint.NewStorage(filepath.Join(currDir, dbDir))
-	hub := api_endpoint.NewHub(store)
+	store := apiEndpoint.NewStorage(filepath.Join(currDir, dbDir))
+	hub := apiEndpoint.NewHub(store)
 
 	go hub.HubRun()
-	api_endpoint.StartWebSocket(hub)
+	apiEndpoint.StartWebSocket(hub)
 }
