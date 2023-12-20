@@ -1,4 +1,4 @@
-package chat_websocket
+package apiEndpoint
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 )
 
 type msg_storage struct {
-	store  []msgObj
+	store  []MsgObj
 	msgDB  *sql.DB
 	convDB *sql.DB
 }
@@ -48,7 +48,7 @@ const DEFAULT_MSGDB_FILENAME string = `msg.db`
 // constructor
 func NewStorage(baseDir string) *msg_storage {
 	return &msg_storage{
-		store:  make([]msgObj, 0),
+		store:  make([]MsgObj, 0),
 		msgDB:  createLocalDB(baseDir, createMsgTable_V2),
 		convDB: createLocalDB(baseDir, createConIDTable),
 	}
@@ -76,15 +76,15 @@ const insertMsg string = `
 	VALUES (?,?,?,?,?);
 	`
 
-func updateDB(db *sql.DB, msg msgObj) {
+func updateDB(db *sql.DB, msg MsgObj) {
 	statement, err := db.Prepare(insertMsg)
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.TimeStamp, msg.MsgData)
+	statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.Timestamp, msg.MsgData)
 }
 
-func (s *msg_storage) StoreMsg(msg msgObj) {
+func (s *msg_storage) StoreMsg(msg MsgObj) {
 	// s.store = append(s.store, msg)
 	log.Println("ew message stored", msg.ConvID, msg.MsgData)
 
@@ -178,15 +178,15 @@ const getHistFromConvID string = `
 	order by counter desc
 `
 
-func (s *msg_storage) getHistFromConvID(convID string) []msgObj {
+func (s *msg_storage) getHistFromConvID(convID string) []MsgObj {
 	rows, err := s.convDB.Query(getHistFromConvID, convID)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 
-	var ids []msgObj = []msgObj{}
+	var ids []MsgObj = []MsgObj{}
 	for rows.Next() {
-		var id msgObj
+		var id MsgObj
 		rows.Scan(&id.ConvID, &id.Counter, &id.SenderID, &id.MsgData)
 		ids = append(ids, id)
 	}
@@ -201,16 +201,16 @@ const getHistFromConvID_V2 string = `
 	order by timestamp desc
 `
 
-func (s *msg_storage) getHistFromConvID_V2(convID string) []msgObj {
+func (s *msg_storage) getHistFromConvID_V2(convID string) []MsgObj {
 	rows, err := s.convDB.Query(getHistFromConvID_V2, convID)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 
-	var ids []msgObj = []msgObj{}
+	var ids []MsgObj = []MsgObj{}
 	for rows.Next() {
-		var id msgObj
-		rows.Scan(&id.ConvID, &id.SenderID, &id.RecipientID, &id.TimeStamp, &id.MsgData)
+		var id MsgObj
+		rows.Scan(&id.ConvID, &id.SenderID, &id.RecipientID, &id.Timestamp, &id.MsgData)
 		ids = append(ids, id)
 	}
 

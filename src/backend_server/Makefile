@@ -1,19 +1,21 @@
 .PHONY: server
 server:
-	go run -race main.go ./data
+	go run -race cmd/server/server.go ./data
 
-
-main.exe: 
-	go build main.go
+server.exe: 
+	go build -o bin/server.exe cmd/server/server.go 
 
 .PHONY: test
-test: main.exe
-	sudo ./main ./test &
+test: server.exe
+	sudo ./bin/server.exe ./test &
 
 .PHONY: local_test
-local_test: main.exe
-	go run -race main.go ./test
+local_test:
+	go run -race cmd/server/server.go ./test
 
+.PHONY: cloud_test
+cloud_test:
+	go run msg_cloudTest.go
 # go build main.go
 # go run cmd/fetch/main.go -req ./cmd/fetch/samples/input.txt -resp ./cmd/fetch/samples/output.txt localhost:8080
 # .PHONY: gohttpd

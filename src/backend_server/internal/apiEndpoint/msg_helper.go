@@ -1,4 +1,4 @@
-package chat_websocket
+package apiEndpoint
 
 // race condition for multiple go routine
 // var conv = make(map[string]bool)

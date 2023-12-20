@@ -1,4 +1,4 @@
-package chat_websocket
+package apiEndpoint
 
 import (
 	"io"
@@ -7,17 +7,17 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type msgObj struct {
+type MsgObj struct {
 	FrameType   string `json:"type"`
 	ConvID      string `json:"convID"`
 	Counter     uint64 `json:"counter"`
 	SenderID    string `json:"senderID"`
 	RecipientID string `json:"recipientID"`
 	MsgData     string `json:"msgData"`
-	TimeStamp   uint64 `json:"timestamp"`
+	Timestamp   int64  `json:"timestamp"`
 }
 
-func debugJson(msg msgObj) {
+func debugJson(msg MsgObj) {
 	log.Printf(`
 	{frametype		- %s}
 	{convID			- %s}
@@ -33,7 +33,7 @@ type ClientHandler struct {
 	userID       string
 	convID       string
 	receipientID string
-	dispatchBuf  chan msgObj // msg received from other user
+	dispatchBuf  chan MsgObj // msg received from other user
 }
 
 func NewWebSocketClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
@@ -43,7 +43,7 @@ func NewWebSocketClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
 		userID:       "",
 		receipientID: "",
 		convID:       "",
-		dispatchBuf:  make(chan msgObj, 100),
+		dispatchBuf:  make(chan MsgObj, 100),
 	}
 }
 
@@ -53,7 +53,7 @@ func (c *ClientHandler) readMessage() {
 	}()
 
 	for {
-		var res msgObj
+		var res MsgObj
 		err := c.conn.ReadJSON(&res)
 		if err != nil {
 			if err == io.EOF {

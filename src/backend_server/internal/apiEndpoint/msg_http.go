@@ -1,4 +1,4 @@
-package chat_websocket
+package apiEndpoint
 
 import (
 	"encoding/json"
@@ -35,13 +35,13 @@ func marshalConvIDDataToSend(userID string, convIDs []converstationInfo) []byte 
 }
 
 type msgHistResponse struct {
-	Msgs []msgObj `json:"msgs"`
+	Msgs []MsgObj `json:"msgs"`
 }
 
-func marshalHistDataToSend(msgs []msgObj) []byte {
+func marshalHistDataToSend(msgs []MsgObj) []byte {
 	// marshal data into json
 	data := msgHistResponse{}
-	data.Msgs = make([]msgObj, len(msgs))
+	data.Msgs = make([]MsgObj, len(msgs))
 	copy(data.Msgs, msgs)
 
 	// convert json to []byte

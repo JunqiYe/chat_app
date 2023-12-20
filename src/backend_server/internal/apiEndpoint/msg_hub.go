@@ -1,10 +1,10 @@
-package chat_websocket
+package apiEndpoint
 
 import "log"
 
 type Hub struct {
 	storage                  *msg_storage
-	incommingMsg             chan msgObj
+	incommingMsg             chan MsgObj
 	conversations            map[string]map[string]bool // conversationID -> clientsID
 	conversation_msg_counter map[string]uint64          // conversation
 	userBase                 map[string]*ClientHandler
@@ -17,7 +17,7 @@ type Hub struct {
 func NewHub(storage *msg_storage) *Hub {
 	hub := &Hub{
 		storage:                  storage,
-		incommingMsg:             make(chan msgObj),
+		incommingMsg:             make(chan MsgObj),
 		conversations:            make(map[string]map[string]bool),
 		conversation_msg_counter: make(map[string]uint64),
 		userBase:                 make(map[string]*ClientHandler),

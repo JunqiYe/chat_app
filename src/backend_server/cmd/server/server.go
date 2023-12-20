@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backend_server/chat_websocket"
+	"backend_server/internal/apiEndpoint"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,9 +22,9 @@ func main() {
 	dbDir := os.Args[1]
 
 	log.Print(filepath.Join(currDir, dbDir))
-	store := chat_websocket.NewStorage(filepath.Join(currDir, dbDir))
-	hub := chat_websocket.NewHub(store)
+	store := apiEndpoint.NewStorage(filepath.Join(currDir, dbDir))
+	hub := apiEndpoint.NewHub(store)
 
 	go hub.HubRun()
-	chat_websocket.StartWebSocket(hub)
+	apiEndpoint.StartWebSocket(hub)
 }

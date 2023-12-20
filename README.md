@@ -35,6 +35,28 @@
 - [x] add http request for syncing messages
 - [ ] using JWT for signing messages
 
+### Database Design - AWS DynamoDB
+
+#### MessageHistory
+
+Primary Key |Sort Key| Attribute 1 |Attribute 2 | Attribute 3
+------------|--------|------|-----|----
+ConversationID | Timestamp | UserID | IsImg | MsgData
+
+Following DynamoDB best practice by using a single-table design. Primary key partitioning on Conversation ID allows low latency on search on specific message group. Query result will be sorted against the time that the message was send. The Database stores either the raw text message or a signed link to the location image is stored.
+
+#### ConversationMembers
+
+Primary Key |Sort Key| Attribute1 (GSI) |
+------------|--------|------
+ConversationID | N/a | UserID
+
+Store every user that are within a conversation. Works for both private conversation and group conversations.
+
+#### UserPoll
+
+For linking with AWS Amplify front-end authentication.
+
 
 ### bug fixes
 - make sure ctx and handler value are updated at the same time
