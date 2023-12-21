@@ -1,6 +1,6 @@
 export class TextData {
     readonly userID: string
-    readonly recipientID: string
+    // readonly recipientID: string
     readonly convID: string
     readonly counter: number
     readonly timestamp: number
@@ -11,7 +11,7 @@ export class TextData {
 
 
     constructor(userID: string,
-                recipientID: string,
+                // recipientID: string,
                 convID: string,
                 counter: number,
                 rawText: string,
@@ -19,7 +19,7 @@ export class TextData {
                 timestamp?: number) {
 
         this.userID = userID
-        this.recipientID = recipientID
+        // this.recipientID = recipientID
         this.convID = convID
         this.counter = counter
 
@@ -42,7 +42,7 @@ export class TextData {
             convID: this.convID,
             counter: this.counter,
             senderID: this.userID,
-            recipientID: this.recipientID,
+            // recipientID: this.recipientID,
             msgData: this.text,
             receivedFromServer: this.receivedFromServer,
             timestamp: this.timestamp
