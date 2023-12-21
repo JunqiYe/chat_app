@@ -195,7 +195,7 @@ func (s *msg_storage) getHistFromConvID(convID string) []MsgObj {
 }
 
 const getHistFromConvID_V2 string = `
-	select convID, senderID, recipientID, timestamp, msg
+	select convID, senderID, timestamp, msg
 	from msgHist
 	where convID = ?
 	order by timestamp desc
@@ -210,7 +210,8 @@ func (s *msg_storage) getHistFromConvID_V2(convID string) []MsgObj {
 	var ids []MsgObj = []MsgObj{}
 	for rows.Next() {
 		var id MsgObj
-		rows.Scan(&id.ConvID, &id.SenderID, nil, &id.Timestamp, &id.MsgData)
+		rows.Scan(&id.ConvID, &id.SenderID, &id.Timestamp, &id.MsgData)
+		log.Printf("[GetHistory]: %+v", id)
 		ids = append(ids, id)
 	}
 
