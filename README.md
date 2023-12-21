@@ -66,6 +66,37 @@ For linking with AWS Amplify front-end authentication.
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+
+## Documentation
+
+### Backend API
+<!-- #### `\login`
+handled by the browser for login cookies. Allows for user to remain logged in for certain period of time
+
+#### `\ws`
+For upgrading a HTTP connection to a WebSocket connection. Allows for real-time communication with the server -->
+
+#### `/api/convID`
+- GET: 
+    - URL Search Params：`userID`
+    - return all the conversation that current user is in
+
+- POST: 
+    - URL Search Params：`userID`，`recipientID`
+    - post to the server for a new conversation between the current user and new recipient user
+
+#### `/api/chatHist`
+- GET: 
+    - URL Search Params：`convID`
+    - return a list of messages from the current conversation 
+
+
+
+
+
+
+
+
 ## Getting Started
 
 First, run the development server:

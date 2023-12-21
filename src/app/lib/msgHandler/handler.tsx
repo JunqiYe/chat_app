@@ -102,7 +102,7 @@ export class MessageHandler {
         }
 
         // create a new message
-        var msg = new TextData(this.currentUserID, this.currentRecipientID, this.currentConvID, 0, data)
+        var msg = new TextData(this.currentUserID, this.currentConvID, 0, data)
 
         // store in storage
         // this.localStoreText(msg)
@@ -121,7 +121,7 @@ export class MessageHandler {
 
         switch (data.type) {
             case "transmit":
-                var msg = new TextData(data.senderID, data.recipientID, data.convID, data.counter, data.msgData)
+                var msg = new TextData(data.senderID, data.convID, data.counter, data.msgData)
                 msgCallback(msg);
 
             default:

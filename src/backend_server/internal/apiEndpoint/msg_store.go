@@ -210,7 +210,7 @@ func (s *msg_storage) getHistFromConvID_V2(convID string) []MsgObj {
 	var ids []MsgObj = []MsgObj{}
 	for rows.Next() {
 		var id MsgObj
-		rows.Scan(&id.ConvID, &id.SenderID, &id.RecipientID, &id.Timestamp, &id.MsgData)
+		rows.Scan(&id.ConvID, &id.SenderID, nil, &id.Timestamp, &id.MsgData)
 		ids = append(ids, id)
 	}
 

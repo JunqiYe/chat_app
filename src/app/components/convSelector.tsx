@@ -46,7 +46,7 @@ function ConvIDBox({recipient}: ConvIDBoxProps) {
                         var hist :TextData[] = []
 
                         data.msgs.forEach(function(msg:any) {
-                            var msg_obj = new TextData(msg.senderID, msg.recipientID, msg.convID, 0, msg.msgData, false, msg.timestamp)
+                            var msg_obj = new TextData(msg.senderID, msg.convID, 0, msg.msgData, false, msg.timestamp)
                             hist.push(msg_obj)
 
                         })
