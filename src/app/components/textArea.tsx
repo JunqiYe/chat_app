@@ -5,7 +5,7 @@ import { prevMsgContext, mainAppContext } from "./context";
 import RecipientUserTitle  from "./recipientInput";
 import PrevTexts from "./prevTexts";
 import InputBox from "./inputBox";
-import { handler } from "../page";
+import { handler } from "./MainPage";
 
 
 

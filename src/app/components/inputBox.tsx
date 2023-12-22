@@ -1,7 +1,7 @@
 import { useContext } from "react"
 import { prevMsgContext, mainAppContext } from "./context"
 import { TextData } from "../lib/storage/text_data"
-import { handler } from "../page"
+import { handler } from "./MainPage"
 
 
 interface InputBoxProps {

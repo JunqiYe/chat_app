@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
 import { mainAppContext } from "./context";
-import { SERVER_ADDRESS, SERVER_PORT, handler } from "../page";
+import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage";
 import { TextData } from "../lib/storage/text_data";
 
 export interface Recipients {

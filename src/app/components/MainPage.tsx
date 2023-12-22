@@ -17,6 +17,7 @@ import address from '../../../package.json'
 
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import {UserStateSlice, userLogin} from '../userSlice'
+import { RootState } from '../store';
 
 export const SERVER_ADDRESS = address.address
 export const SERVER_PORT = ":8080"
@@ -36,7 +37,7 @@ export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 //   })
 if (typeof Notification !== 'undefined') {
   Notification.requestPermission().then((result) => {
-    console.log(result);
+    console.log("[MainPage]: notification permission:", result);
   });
 }
 
@@ -70,9 +71,8 @@ export default function MainPage() {
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
   
   // redux
-  // const dispatch = useDispatch()
-  const loggedIn = useSelector((state: UserStateSlice) => state.loggedIn)
-  const userID = useSelector((state: UserStateSlice) => state.currentUserID)
+  const loggedIn = useSelector((state: RootState) => state.userState.loggedIn)
+  const userID = useSelector((state: RootState) => state.userState.currentUserID)
 
   function newMessageCallback(message: TextData) {
     console.log("[PAGE]: new message callback");
@@ -102,8 +102,6 @@ export default function MainPage() {
 
 
   useEffect(() => {
-
-    
     // check if the user already signed in and skip auth using stored cookies
     fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/", {
       method: "GET",
@@ -145,18 +143,18 @@ export default function MainPage() {
 
     return (
 
-      <mainAppContext.Provider value={{
-        signedIn: loggedIn,
-        // setSignIn: setLoggedIn,
-        userID: userID,
-        // setUserID: setUserID,
-        recipientID: recipientID,
-        setRecipientID: setrecipientID,
-        convID: convID,
-        setConvID: setconvID,
-        prevMsg: msgBuffer,
-        setPrevMsg: setMsgBuffer
-      }}>
+      // <mainAppContext.Provider value={{
+      //   signedIn: loggedIn,
+      //   // setSignIn: setLoggedIn,
+      //   userID: userID,
+      //   // setUserID: setUserID,
+      //   recipientID: recipientID,
+      //   setRecipientID: setrecipientID,
+      //   convID: convID,
+      //   setConvID: setconvID,
+      //   prevMsg: msgBuffer,
+      //   setPrevMsg: setMsgBuffer
+      // }}>
 
       <main className="flex h-screen w-screen items-center justify-center p-0 md:p-16">
         {/* {!loggedIn ? <Login onLogin={(status) => {setLoggedIn(status)}}/> : <Area />} */}
@@ -178,7 +176,7 @@ export default function MainPage() {
 
       </main>
 
-      </mainAppContext.Provider>
+      // </mainAppContext.Provider>
     )
   // }
 

@@ -1,7 +1,4 @@
-// import { mainAppContext } from "../page"
-// import { useContext } from "react"
 import { mainAppContext } from "./context"
-import {handler} from "./../page"
 
 export default function HeaderBar() {
     return (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react"
 import { mainAppContext } from "./context"
-import { SERVER_ADDRESS, SERVER_PORT, handler } from "../page"
+import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage"
 import { Recipients } from "./convSelector"
 import { isIDValid } from "../lib/ID_helper"
 import { TextData } from "../lib/storage/text_data"
