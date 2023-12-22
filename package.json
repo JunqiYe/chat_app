@@ -19,6 +19,7 @@
     "cye2e_local": "rm -rf src/backend_server/test && mkdir src/backend_server/test && npm run dev & make -C src/backend_server test & cypress run  --spec 'cypress\\e2e\\spec.cy.ts' "
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.0.1",
     "@types/node": "20.4.1",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
@@ -30,6 +31,7 @@
     "postcss": "8.4.25",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-redux": "^9.0.4",
     "tailwindcss": "3.3.2",
     "typescript": "5.1.6",
     "wait-on": "^7.0.1"
