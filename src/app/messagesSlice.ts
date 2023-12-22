@@ -1,8 +1,15 @@
 import { PayloadAction, createSlice} from "@reduxjs/toolkit";
 import { TextData } from "./lib/storage/text_data";
 
+export interface TextDatav2 {
+    userID: string
+    convID: string
+    timestamp: number
+    msgData: string
+    isImg: boolean
+}
 type messageHistoryState = {
-    history: TextData[]
+    history: TextDatav2[]
 }
 
 const initialState : messageHistoryState = {
@@ -13,7 +20,7 @@ const messageHistorySlice = createSlice({
     name: "messageHistory",
     initialState,
     reducers:{
-        addNewMessage: (state, action: PayloadAction<TextData>) => {
+        addNewMessage: (state, action: PayloadAction<TextDatav2>) => {
             let msg = action.payload
             state.history.push(msg)
             // if (state.history.has(msg.convID)) {
@@ -22,7 +29,7 @@ const messageHistorySlice = createSlice({
             //     state.history.set(msg.convID, [msg]);
             // }
         },
-        newMessageHist: (state, action: PayloadAction<TextData[]>) => {
+        newMessageHist: (state, action: PayloadAction<TextDatav2[]>) => {
             state.history = action.payload
         },
     }

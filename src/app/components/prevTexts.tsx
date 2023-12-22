@@ -1,9 +1,10 @@
 import { TextData } from "../lib/storage/text_data"
+import { TextDatav2 } from "../messagesSlice"
 import { RootState } from "../store"
 import { useSelector } from "react-redux"
 
 interface TextBubbleProps {
-  textObj: TextData
+  textObj: TextDatav2
 }
 function TextBubble({textObj} : TextBubbleProps) {
     {/* <div className="chat chat-start">
@@ -15,14 +16,14 @@ function TextBubble({textObj} : TextBubbleProps) {
       return (
         // right
         <div id="self" className='z-9 self-end rounded-lg w-fit bg-slate-500 my-1 mx-2 p-1 text-right'>
-          {textObj.text}
+          {textObj.msgData}
         </div>
       )
     } else {
       return (
         // left
         <div id="other" className='z-9 self-start rounded-lg w-fit bg-slate-500 my-1 mx-4 p-1 text-left'>
-          {textObj.text}
+          {textObj.msgData}
         </div>
       )
     }
@@ -37,7 +38,7 @@ export default function PrevTexts() {
     return (
       <div id="PrevTexts" className="flex flex-col-reverse w-full h-full max-h-full overflow-y-scroll no-scrollbar">
         { msgs != undefined ?
-          msgs.map((text: TextData) => (
+          msgs.map((text: TextDatav2) => (
             <TextBubble key={text.convID + '_' + text.timestamp} textObj={text} />
           ))
           :

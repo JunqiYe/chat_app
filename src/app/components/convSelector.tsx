@@ -6,7 +6,7 @@ import { TextData } from "../lib/storage/text_data";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import { ConversationInfo, changeConv, updateConvList } from "../convSlice";
-import { addNewMessage, newMessageHist } from "../messagesSlice";
+import { TextDatav2, addNewMessage, newMessageHist } from "../messagesSlice";
 
 export interface Recipients {
     recipient: string;
@@ -53,11 +53,18 @@ function ConvIDBox({convInfo}: ConvIDBoxProps) {
                 })
                 .then(function(data) {
                     // update context, handler, and react states
-                    var hist :TextData[] = []
+                    var hist :TextDatav2[] = []
 
                     data.msgs.forEach(function(msg:any) {
                         var msg_obj = new TextData(msg.senderID, msg.convID, 0, msg.msgData, false, msg.timestamp)
-                        hist.push(msg_obj)
+                        // var msg_obj = new TextData(msg.senderID, msg.convID, 0, msg.msgData, false, msg.timestamp)
+                        hist.push({
+                            userID: msg.senderID,
+                            convID: msg.convID,
+                            timestamp: msg.timestamp,
+                            msgData: msg.msgData,
+                            isImg: false,
+                        } as TextDatav2)
 
                     })
 
