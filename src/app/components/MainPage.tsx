@@ -9,7 +9,7 @@ import TextArea from './textArea';
 import HeaderBar from './header'
 import Login  from './login';
 import { MessageHandler } from '../lib/msgHandler/handler';
-import ConversationsSelect from './convSelector';
+import ConversationPanel from './convSelector';
 import { TextData } from '../lib/storage/text_data';
 // export const SERVER_ADDRESS = "localhost"
 // export const SERVER_ADDRESS = "192.168.0.103"
@@ -66,8 +66,8 @@ export var handler : MessageHandler
 export default function MainPage() {
   // const [loggedIn, setLoggedIn] = useState(false)
   // const [userID, setUserID] = useState<string>("")
-  const [recipientID, setrecipientID] = useState<string>("")
-  const [convID, setconvID] = useState<string>("")
+  // const [recipientID, setrecipientID] = useState<string>("")
+  // const [convID, setconvID] = useState<string>("")
   const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
   
   // redux
@@ -142,22 +142,7 @@ export default function MainPage() {
   },[loggedIn, userID])
 
     return (
-
-      // <mainAppContext.Provider value={{
-      //   signedIn: loggedIn,
-      //   // setSignIn: setLoggedIn,
-      //   userID: userID,
-      //   // setUserID: setUserID,
-      //   recipientID: recipientID,
-      //   setRecipientID: setrecipientID,
-      //   convID: convID,
-      //   setConvID: setconvID,
-      //   prevMsg: msgBuffer,
-      //   setPrevMsg: setMsgBuffer
-      // }}>
-
       <main className="flex h-screen w-screen items-center justify-center p-0 md:p-16">
-        {/* {!loggedIn ? <Login onLogin={(status) => {setLoggedIn(status)}}/> : <Area />} */}
         {!loggedIn ?
           <Login />
           :
@@ -167,7 +152,7 @@ export default function MainPage() {
 
             <div id="main area" className='flex h-[93%] w-full  rounded-2xl bg-slate-900'>
                 <div id="wrapper" className='flex flex-initial flex-row h-full w-full'>
-                  <ConversationsSelect />
+                  <ConversationPanel />
                   <TextArea />
                 </div>
             </div>
@@ -175,9 +160,5 @@ export default function MainPage() {
          }
 
       </main>
-
-      // </mainAppContext.Provider>
     )
-  // }
-
 }

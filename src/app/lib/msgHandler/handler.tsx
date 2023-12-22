@@ -14,7 +14,6 @@ interface serverMessage {
 // send and receive message through websocket
 export class MessageHandler {
     currentUserID : string | null = null; // single source of truth?
-    currentRecipientID : string | null = null;
     currentConvID : string | null = null;
     websocket: WebSocket;
     storage: ChatStorage;
@@ -77,7 +76,7 @@ export class MessageHandler {
             this.websocket.send(JSON.stringify({
                 type: "request convID",
                 senderID: this.currentUserID,
-                recipientID: this.currentRecipientID,
+                recipientID: "deprecated",
             }))
 
             this.websocket.addEventListener("message", (message) => {
@@ -96,7 +95,6 @@ export class MessageHandler {
     // whenever user press enter on input box
     clientSendMessage(data: string) {
         if (this.currentUserID === null ||
-            this.currentRecipientID === null ||
             this.currentConvID === null) {
              throw new Error("Invalid user or recipient")
         }

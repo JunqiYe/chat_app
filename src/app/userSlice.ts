@@ -21,7 +21,7 @@ const userSlice = createSlice({
         },
         userSignout: (state, action: PayloadAction<string>) => {
             state.loggedIn = false
-            state.currentUserID = action.payload
+            state.currentUserID = ""
         }
     }
 })

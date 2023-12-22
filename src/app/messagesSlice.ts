@@ -22,7 +22,11 @@ const messageHistorySlice = createSlice({
             //     state.history.set(msg.convID, [msg]);
             // }
         },
+        newMessageHist: (state, action: PayloadAction<TextData[]>) => {
+            state.history = action.payload
+        },
     }
 })
 
+export const {addNewMessage, newMessageHist} = messageHistorySlice.actions 
 export default messageHistorySlice.reducer

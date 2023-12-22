@@ -6,19 +6,19 @@ import RecipientUserTitle  from "./recipientInput";
 import PrevTexts from "./prevTexts";
 import InputBox from "./inputBox";
 import { handler } from "./MainPage";
-
+import { RootState } from "../store";
+import { useSelector } from "react-redux";
 
 
 export default function TextArea() {
-    const ctx = useContext(mainAppContext)
-
-    return (
-      <div id="TextArea" className='grow flex flex-col min-w-fit items-center h-full justify-items-end '>
-        <div id="RecipientTitle" className="flex items-center justify-start p-6 w-full h-[3rem] rounded-tr-lg bg-slate-500">
-            {ctx.recipientID}
-        </div>
-        <PrevTexts />
-        <InputBox  />
+  const convInfo = useSelector((state: RootState) => state.convState.currentConv)
+  return (
+    <div id="TextArea" className='grow flex flex-col min-w-fit items-center h-full justify-items-end '>
+      <div id="RecipientTitle" className="flex items-center justify-start p-6 w-full h-[3rem] rounded-tr-lg bg-slate-500">
+          {convInfo?.convID}
       </div>
-    )
-  }
+      <PrevTexts />
+      <InputBox  />
+    </div>
+  )
+}
