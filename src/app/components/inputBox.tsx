@@ -1,7 +1,7 @@
-import { useContext } from "react"
-import { prevMsgContext, mainAppContext } from "./context"
 import { TextData } from "../lib/storage/text_data"
-import { handler } from "../page"
+import { handler } from "./MainPage"
+import { useSelector } from "react-redux"
+import { RootState } from "../state/store"
 
 
 interface InputBoxProps {
@@ -10,17 +10,20 @@ interface InputBoxProps {
 }
 
 export default function InputBox() {
-    // var {prevMsg, setPrevMsg} = useContext(prevMsgContext)
-    var ctx = useContext(mainAppContext)
-
+    let userID = useSelector((state: RootState) => state.userState.currentUserID)
+    let currConv = useSelector((state: RootState) => state.convState.currentConv)
     function handleClientPressSend(e: React.KeyboardEvent){
       if (e.code == 'Enter'){
         let dom = document.getElementById('input_box') as HTMLInputElement
-        if (dom != null && ctx.userID != null && ctx.recipientID != null){
+        if (dom != null && userID != null){
           if (dom.value.length > 0) {
             console.log("new outgoing message", dom.value);
 
-            handler.clientSendMessage(dom.value)
+            if (currConv == null) {
+              // user didn't select a conversation
+              return
+            }
+            handler.clientSendMessage(currConv.convID, dom.value)
             // workerSendNewMsg(dom.value)
           }
           dom.value = ''

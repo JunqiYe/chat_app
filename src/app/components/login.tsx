@@ -1,8 +1,9 @@
 'use client'
 import React, { useState, useEffect, useContext } from 'react';
-import { mainAppContext } from './context';
 import { isIDValid } from '../lib/ID_helper';
-import { SERVER_ADDRESS, SERVER_PORT } from '../page';
+import { SERVER_ADDRESS, SERVER_PORT } from './MainPage'
+import { useDispatch } from 'react-redux';
+import { userLogin }	from '../state/userSlice'
 
 interface loginStatus {
 	// onLogin: (status: boolean) => void;
@@ -10,7 +11,9 @@ interface loginStatus {
 
 export default function Login(props: loginStatus){
 	var [input, setInput] = useState("")
-	const ctx = useContext(mainAppContext)
+
+	// redux
+	const dispatch = useDispatch()
 
 	function handleUsernameChange(event: any) {
 		setInput(event.target.value)
@@ -21,29 +24,35 @@ export default function Login(props: loginStatus){
 		// enforce ID
 		if (!isIDValid(input)) {
 			alert("Please enter a valid username, use letters, numbers, _ or !")
-		} else {
-			fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/login", {
-				method: "POST",
-				credentials: 'include',
-				headers:{
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					user_id: input,
-					password: 'none',
-				})
-			}).then(response => {
-				if (response.status == 200) {
-					ctx.setUserID(input)
-					ctx.setSignIn(true)
-
-					// localStorage.setItem(token!, input)
-				}
-			}).catch(error => {
-				console.log(error)
-			})
+			return
 		}
 
+		fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/login", {
+			method: "POST",
+			credentials: 'include',
+			headers:{
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				user_id: input,
+				password: 'none',
+			})
+		}).then(response => {
+			if (response.status == 200) {
+				// ctx.setUserID(input)
+				// ctx.setSignIn(true)
+
+				// update the redux state
+				dispatch(
+					userLogin(input)
+				)
+				
+				// localStorage.setItem(token!, input)
+			}
+		}).catch(error => {
+			console.log(error)
+		})
+		
 		// // clean the entry
 		// setInput('')
 	}
@@ -74,4 +83,3 @@ export default function Login(props: loginStatus){
 		</div>
 	)
 }
-
