@@ -127,7 +127,7 @@ export default function MainPage() {
 					<Login />
 					:
 					<div className='flex flex-col h-full w-full max-h-full max-w-3xl justify-center items-center'>
-					 <HeaderBar />
+						<HeaderBar />
 						{/* <DEV_storageControl /> */}
 
 						<div id="main area" className='flex h-[93%] w-full  rounded-2xl bg-slate-900'>

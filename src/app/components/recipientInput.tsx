@@ -3,13 +3,9 @@ import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage"
 import { isIDValid } from "../lib/ID_helper"
 import { RootState } from "../store"
 import { useDispatch, useSelector } from "react-redux"
-import { ConversationInfo, addNewConv } from "../convSlice"
+import { ConversationInfo, addNewConv, changeConv } from "../convSlice"
 
 
-// interface RecipientUserTitleProps {
-//   convIDs: Recipients[]
-//   setConvIDs: (convIDs: Recipients[]) => void
-// }
 export default function RecipientUserTitle() {
   const convIDs = useSelector((state: RootState) => state.convState.convsations)
   const userID = useSelector((state: RootState) => state.userState.currentUserID)
@@ -37,49 +33,9 @@ export default function RecipientUserTitle() {
         // TODO update the current conv
 
         
-        // dispatch(
-        //   changeConv()
-        // )
-        // handler.currentConvID = matchedConv.conversation
-
-        // if (!ctx.prevMsg.has(matchedConv.conversation)) {
-
-        //   // call chatHistory API to get the history for this conversation
-        //   fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/chatHist?" +
-        //   new URLSearchParams({convID: matchedConv.conversation}),
-        //   {
-        //       method: "GET",
-        //       // mode:"cors",
-        //       cache: "no-cache",
-        //       headers:{
-        //       // "Content-Type": "application/json",
-        //       },
-        //       // body: JSON.stringify(data)
-        //   })
-        //   .then(function(response) {
-        //       return response.json();
-        //   })
-        //   .then(function(data) {
-        //       // update context, handler, and react states
-        //       var hist :TextData[] = []
-
-        //       data.msgs.forEach(function(msg:any) {
-        //           var msg_obj = new TextData(msg.senderID, msg.convID, 0, msg.msgData, false, msg.timestamp)
-        //           hist.push(msg_obj)
-
-        //       })
-
-        //       console.log("[ConvIDBox]: history rst", hist)
-        //       console.log("[ConvIDBox]: " + ctx.prevMsg.size)
-
-        //       ctx.setPrevMsg(
-        //           new Map(ctx.prevMsg.set(matchedConv!.conversation, hist))
-        //       )
-        //   })
-        //   .catch(function(err) {
-        //       console.log(err)
-        //   })
-        // }
+        dispatch(
+          changeConv(matchedConv.convID)
+        )
 
         return
       }
