@@ -106,7 +106,7 @@ export default function RecipientUserTitle() {
           // create new recipient object
           var temp1: ConversationInfo = {
             convID: data.convID,
-            convName: data.convID,
+            convName: userInputRecipient,
             recipients: [userInputRecipient],
             }
 

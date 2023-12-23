@@ -22,7 +22,7 @@ const messageHistorySlice = createSlice({
     reducers:{
         addNewMessage: (state, action: PayloadAction<TextDatav2>) => {
             let msg = action.payload
-            state.history.push(msg)
+            state.history.unshift(msg)
             // if (state.history.has(msg.convID)) {
             //     state.history.get(msg.convID)!.push(msg)
             // } else {

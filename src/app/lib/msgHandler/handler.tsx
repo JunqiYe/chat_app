@@ -1,3 +1,4 @@
+import { TextDatav2 } from "@/app/messagesSlice";
 import { ChatStorage } from "../storage/chat_localstorage";
 import { TextData } from "../storage/text_data";
 
@@ -13,11 +14,31 @@ interface serverMessage {
 // put incomming and outgoing message in storage
 // send and receive message through websocket
 export class MessageHandler {
-    currentUserID : string | null = null; // single source of truth?
-    currentConvID : string | null = null;
+    currentUserID : string;
+    // currentConvID : string | null = null;
     websocket: WebSocket;
     storage: ChatStorage;
     controller = new AbortController();
+
+    constructor(userID: string, websocket: WebSocket, storage: ChatStorage) {
+        console.log("[Handler]: new connection")
+        this.websocket = websocket;
+        this.storage = storage;
+        this.currentUserID = userID;
+        this.initConnection()
+
+        // init the onmessage handler
+        // page needs to reinit with new callback function
+        this.websocket.onmessage = (e: MessageEvent) => { this.clientReceiveMessage(e, ()=>{})}
+        // this.websocket.addEventListener(
+        //     "message",
+        //     (event) => {
+        //         this.clientReceiveMessage(event, this.someMsgFunction)
+        //     },
+        //     {signal: this.controller.signal});
+    }
+
+
 
     // send userID information to server when connecting
     private initConnection() {
@@ -44,23 +65,6 @@ export class MessageHandler {
         this.storage.storeText(data)
     }
 
-    constructor(userID: string, websocket: WebSocket, storage: ChatStorage) {
-        console.log("[Handler]: new connection")
-        this.websocket = websocket;
-        this.storage = storage;
-        this.currentUserID = userID;
-        this.initConnection()
-
-        // init the onmessage handler
-        // page needs to reinit with new callback function
-        this.websocket.onmessage = (e: MessageEvent) => { this.clientReceiveMessage(e, ()=>{})}
-        // this.websocket.addEventListener(
-        //     "message",
-        //     (event) => {
-        //         this.clientReceiveMessage(event, this.someMsgFunction)
-        //     },
-        //     {signal: this.controller.signal});
-    }
 
 
     clientGetHistory(target_userID: string) {
@@ -93,14 +97,14 @@ export class MessageHandler {
     }
 
     // whenever user press enter on input box
-    clientSendMessage(data: string) {
-        if (this.currentUserID === null ||
-            this.currentConvID === null) {
-             throw new Error("Invalid user or recipient")
-        }
+    clientSendMessage(targetConvID: string, data: string) {
+        // if (this.currentUserID === null ||
+        //     this.targetConvID === null) {
+        //      throw new Error("Invalid user or recipient")
+        // }
 
         // create a new message
-        var msg = new TextData(this.currentUserID, this.currentConvID, 0, data)
+        var msg = new TextData(this.currentUserID, targetConvID, 0, data)
 
         // store in storage
         // this.localStoreText(msg)
@@ -119,7 +123,14 @@ export class MessageHandler {
 
         switch (data.type) {
             case "transmit":
-                var msg = new TextData(data.senderID, data.convID, data.counter, data.msgData)
+                // var msg = new TextData(data.senderID, data.convID, data.counter, data.msgData)
+                var msg : TextDatav2 = {
+                    userID: data.senderID,
+                    convID: data.convID,
+                    timestamp: data.timestamp,
+                    msgData: data.msgData,
+                    isImg: false, // TODO: update after adding image feature
+                }
                 msgCallback(msg);
 
             default:

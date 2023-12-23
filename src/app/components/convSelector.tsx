@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
-import { mainAppContext } from "./context";
 import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage";
 import { TextData } from "../lib/storage/text_data";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,10 +28,6 @@ function ConvIDBox({convInfo}: ConvIDBoxProps) {
                 dispatch(
                     changeConv(selectedConversationID)
                 )
-
-                handler.currentConvID = selectedConversationID
-                // handler.currentRecipientID = convInfo.recipients[0]
-                // ctx.setRecipientID(convInfo.recipients[0])
 
                 // TODO: removed checking for if message history exists, might need to optimize later
 
@@ -81,7 +76,7 @@ function ConvIDBox({convInfo}: ConvIDBoxProps) {
                 })
             }}>
 
-            {convInfo.convID}
+            {convInfo.convName}
         </div>
     )
 }
@@ -105,7 +100,7 @@ function ConversationList() {
             var conversations = data.ConvIDs.map((obj: { ConvID: string; RecipientID: string; }) => {
                 return {
                     convID : obj.ConvID,
-                    convName: "tbd",
+                    convName: obj.RecipientID,
                     recipients: [obj.RecipientID]
                 }
             })
@@ -122,7 +117,9 @@ function ConversationList() {
     return (
         <div id="selector" className="overflow-y-scroll no-scrollbar rounded-bl-lg">
             {convInfos.map((conv: ConversationInfo) => (
-                <ConvIDBox key={conv.convID} convInfo={conv}/>
+                <div id = {conv.convName} key={conv.convName}>
+                    <ConvIDBox key={conv.convID} convInfo={conv}/>
+                </div>
             ))}
         </div>
     )

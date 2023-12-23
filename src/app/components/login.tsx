@@ -1,6 +1,5 @@
 'use client'
 import React, { useState, useEffect, useContext } from 'react';
-import { mainAppContext } from './context';
 import { isIDValid } from '../lib/ID_helper';
 import { SERVER_ADDRESS, SERVER_PORT } from './MainPage'
 import { useDispatch } from 'react-redux';
@@ -12,7 +11,6 @@ interface loginStatus {
 
 export default function Login(props: loginStatus){
 	var [input, setInput] = useState("")
-	const ctx = useContext(mainAppContext)
 
 	// redux
 	const dispatch = useDispatch()
