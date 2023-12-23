@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { isIDValid } from '../lib/ID_helper';
 import { SERVER_ADDRESS, SERVER_PORT } from './MainPage'
 import { useDispatch } from 'react-redux';
-import { userLogin }	from '../../app/userSlice'
+import { userLogin }	from '../state/userSlice'
 
 interface loginStatus {
 	// onLogin: (status: boolean) => void;

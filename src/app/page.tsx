@@ -1,6 +1,6 @@
 'use client'
 import { Provider } from 'react-redux'
-import { store } from './store'
+import { store } from './state/store'
 import MainPage from './components/MainPage'
 
 // ==========COMPONENTS============

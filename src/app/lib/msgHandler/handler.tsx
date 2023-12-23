@@ -1,4 +1,4 @@
-import { TextDatav2 } from "@/app/messagesSlice";
+import { TextDatav2 } from "@/app/state/messagesSlice";
 import { ChatStorage } from "../storage/chat_localstorage";
 import { TextData } from "../storage/text_data";
 

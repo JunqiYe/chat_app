@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux"
-import { RootState } from "../store"
+import { RootState } from "../state/store"
 
 export default function HeaderBar() {
     const userID = useSelector((state: RootState) => state.userState.currentUserID)

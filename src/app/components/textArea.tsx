@@ -2,7 +2,7 @@
 import RecipientUserTitle  from "./recipientInput";
 import PrevTexts from "./prevTexts";
 import InputBox from "./inputBox";
-import { RootState } from "../store";
+import { RootState } from "../state/store";
 import { useSelector } from "react-redux";
 
 

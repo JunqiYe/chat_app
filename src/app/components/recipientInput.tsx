@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react"
 import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage"
 import { isIDValid } from "../lib/ID_helper"
-import { RootState } from "../store"
+import { RootState } from "../state/store"
 import { useDispatch, useSelector } from "react-redux"
-import { ConversationInfo, addNewConv, changeConv } from "../convSlice"
+import { ConversationInfo, addNewConv, changeConv } from "../state/convSlice"
 
 
 export default function RecipientUserTitle() {

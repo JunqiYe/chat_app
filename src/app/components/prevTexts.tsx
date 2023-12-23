@@ -1,6 +1,6 @@
 import { useEffect } from "react"
-import { TextDatav2, newMessageHist } from "../messagesSlice"
-import { RootState } from "../store"
+import { TextDatav2, newMessageHist } from "../state/messagesSlice"
+import { RootState } from "../state/store"
 import { useDispatch, useSelector } from "react-redux"
 import { SERVER_ADDRESS, SERVER_PORT } from "./MainPage"
 

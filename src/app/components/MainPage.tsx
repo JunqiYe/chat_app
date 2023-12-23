@@ -14,9 +14,9 @@ import ConversationPanel from './convSelector';
 import address from '../../../package.json'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { userLogin} from '../userSlice'
-import { RootState } from '../store';
-import { TextDatav2, addNewMessage } from '../messagesSlice';
+import { userLogin} from '../state/userSlice'
+import { RootState } from '../state/store';
+import { TextDatav2, addNewMessage } from '../state/messagesSlice';
 
 export const SERVER_ADDRESS = address.address
 export const SERVER_PORT = ":8080"

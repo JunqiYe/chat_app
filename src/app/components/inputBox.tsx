@@ -1,7 +1,7 @@
 import { TextData } from "../lib/storage/text_data"
 import { handler } from "./MainPage"
 import { useSelector } from "react-redux"
-import { RootState } from "../store"
+import { RootState } from "../state/store"
 
 
 interface InputBoxProps {

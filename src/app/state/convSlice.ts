@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice, current} from "@reduxjs/toolkit";
-import { TextData } from "./lib/storage/text_data";
+import { TextData } from "../lib/storage/text_data";
 
 export interface ConversationInfo {
     convID: string,
