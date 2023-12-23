@@ -9,13 +9,12 @@ import HeaderBar from './header'
 import Login  from './login';
 import { MessageHandler } from '../lib/msgHandler/handler';
 import ConversationPanel from './convSelector';
-import { TextData } from '../lib/storage/text_data';
 // export const SERVER_ADDRESS = "localhost"
 // export const SERVER_ADDRESS = "192.168.0.103"
 import address from '../../../package.json'
 
-import { Provider, useDispatch, useSelector } from 'react-redux'
-import {UserStateSlice, userLogin} from '../userSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { userLogin} from '../userSlice'
 import { RootState } from '../store';
 import { TextDatav2, addNewMessage } from '../messagesSlice';
 
@@ -24,17 +23,7 @@ export const SERVER_PORT = ":8080"
 export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
 // export const WS_URL = 'ws://localhost:8080/ws';
 
-
-// let swRegistration: ServiceWorkerRegistration | null = null
-// navigator.serviceWorker.register('lib/serviceWorker/sw.ts')
-//   .then(function(swReg) {
-//     console.log('Service Worker is registered', swReg);
-
-//     swRegistration = swReg;
-//   })
-//   .catch(function(error) {
-//     console.error('Service Worker Error', error);
-//   })
+// requestion permission for notification
 if (typeof Notification !== 'undefined') {
 	Notification.requestPermission().then((result) => {
 		console.log("[MainPage]: notification permission:", result);
@@ -64,17 +53,12 @@ export var handler : MessageHandler
 
 // ==========COMPONENTS============
 export default function MainPage() {
-	// const [loggedIn, setLoggedIn] = useState(false)
-	// const [userID, setUserID] = useState<string>("")
-	// const [recipientID, setrecipientID] = useState<string>("")
-	// const [convID, setconvID] = useState<string>("")
-	const [msgBuffer, setMsgBuffer] = useState<Map<string, TextData[]>>(new Map<string, TextData[]>());
-	
-	// redux
+	// redux store
 	const loggedIn = useSelector((state: RootState) => state.userState.loggedIn)
 	const userID = useSelector((state: RootState) => state.userState.currentUserID)
 	const currConv = useSelector((state: RootState) => state.convState.currentConv)
 	const dispatch = useDispatch()
+	
 	function newMessageCallback(message: TextDatav2) {
 		console.log("[MainPage]: new message callback");
 
@@ -88,21 +72,10 @@ export default function MainPage() {
 			)
 			console.log("[MainPage]: add new message to redux store")
 
-		// var convBuffer = msgBuffer.get(message.convID)
-
-		// if (convBuffer === undefined) {
-		//   convBuffer = []
-		// }
-
 		// if (!window.focus && message.userID != userID) {
 		//   console.log("triggering notification")
 		//   new Notification("chat app", { body: message.userID + " " + message.text});
 		// }
-
-		// console.log("[PAGE]: " + msgBuffer.size)
-		// setMsgBuffer(
-		//   new Map(msgBuffer.set(message.convID, [message, ...convBuffer]))
-		// )
 	}
 
 	// use effect hook to updatet the newmessagecallback reference everytime the component is rendered...
@@ -113,6 +86,7 @@ export default function MainPage() {
 	})
 
 
+	// useEffort for checking the session cookie and allow quick login
 	useEffect(() => {
 		// check if the user already signed in and skip auth using stored cookies
 		fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/", {
@@ -123,21 +97,20 @@ export default function MainPage() {
 				return response.json();
 			}
 			return null
-			// console.log(response.json());
 		}).then((data)=>{
 			// valid response from server, allow login
 			if (data != null) {
-				// setLoggedIn(true)
-				// setUserID(data.user_id)
-				// dispatch(
-				// 	userLogin(data.user_id)
-				// )
-				// loggedIn = true
+				dispatch(
+					userLogin(data.user_id)
+				)
 			}
 		}).catch(error => {
 			console.log(error)
 		})
 
+	})
+
+	useEffect(() => {
 		// init the Message handler after login is successful
 		if (loggedIn) {
 			var socket = new WebSocket(WS_URL)
@@ -145,11 +118,6 @@ export default function MainPage() {
 			handler = new MessageHandler(userID, socket, storage);
 
 			handler.websocket.onmessage = (e: MessageEvent) => { handler.clientReceiveMessage(e, newMessageCallback)}
-		}
-
-
-		return () => {
-			// workerTerminate()
 		}
 	},[loggedIn, userID])
 

@@ -28,54 +28,7 @@ function ConvIDBox({convInfo}: ConvIDBoxProps) {
                 dispatch(
                     changeConv(selectedConversationID)
                 )
-
-                // TODO: removed checking for if message history exists, might need to optimize later
-
-                // call chatHistory API to get the history for this conversation
-                fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/chatHist?" +
-                new URLSearchParams({convID: selectedConversationID}),
-                {
-                    method: "GET",
-                    // mode:"cors",
-                    cache: "no-cache",
-                    headers:{
-                    // "Content-Type": "application/json",
-                    },
-                    // body: JSON.stringify(data)
-                })
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-                    // update context, handler, and react states
-                    var hist :TextDatav2[] = []
-
-                    data.msgs.forEach(function(msg:any) {
-                        var msg_obj = new TextData(msg.senderID, msg.convID, 0, msg.msgData, false, msg.timestamp)
-                        // var msg_obj = new TextData(msg.senderID, msg.convID, 0, msg.msgData, false, msg.timestamp)
-                        hist.push({
-                            userID: msg.senderID,
-                            convID: msg.convID,
-                            timestamp: msg.timestamp,
-                            msgData: msg.msgData,
-                            isImg: false,
-                        } as TextDatav2)
-
-                    })
-
-                    console.log("[ConvIDBox]: history rst", hist)
-                    // console.log("[ConvIDBox]: " + ctx.prevMsg.size)
-
-                    // set the message history state
-                    dispatch(
-                        newMessageHist(hist)
-                    )
-                })
-                .catch(function(err) {
-                    console.log(err)
-                })
             }}>
-
             {convInfo.convName}
         </div>
     )
@@ -88,8 +41,9 @@ function ConversationList() {
     const userID = useSelector((state: RootState) => state.userState.currentUserID)
     const dispatch = useDispatch()
     
+    // side effect for retrieving list of conversation that the user is part of
     useEffect(() => {
-
+        // fetch api for ConvID api
         fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/api/convID?userID=" + userID)
         .then(function(response) {
             return response.json();
@@ -112,7 +66,7 @@ function ConversationList() {
         .catch(function(err) {
             console.log(err)
         })
-    }, [userID])
+    }, [dispatch, userID])
 
     return (
         <div id="selector" className="overflow-y-scroll no-scrollbar rounded-bl-lg">
