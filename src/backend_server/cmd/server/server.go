@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend_server/internal/apiEndpoint"
+	"backend_server/internal/store/localStore"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,7 +23,9 @@ func main() {
 	dbDir := os.Args[1]
 
 	log.Print(filepath.Join(currDir, dbDir))
-	store := apiEndpoint.NewStorage(filepath.Join(currDir, dbDir))
+	// store := localStore.LocalMsgStore{}
+	// store.NewStorage(filepath.Join(currDir, dbDir))
+	store := localStore.NewStorage(filepath.Join(currDir, dbDir))
 	hub := apiEndpoint.NewHub(store)
 
 	go hub.HubRun()

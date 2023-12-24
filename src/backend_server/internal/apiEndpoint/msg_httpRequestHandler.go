@@ -1,26 +1,22 @@
 package apiEndpoint
 
 import (
+	"backend_server/internal/objects"
 	"encoding/json"
 	"log"
 	"net/http"
 )
 
-type converstationInfo struct {
-	ConvID      string `json:"ConvID"`
-	RecipientID string `json:"RecipientID"`
+type ConvIDResponse struct {
+	UserID  string                      `json:"UserID"`
+	ConvIDs []objects.ConverstationInfo `json:"ConvIDs"`
 }
 
-type convIDResponse struct {
-	UserID  string              `json:"UserID"`
-	ConvIDs []converstationInfo `json:"ConvIDs"`
-}
-
-func marshalConvIDDataToSend(userID string, convIDs []converstationInfo) []byte {
+func marshalConvIDDataToSend(userID string, convIDs []objects.ConverstationInfo) []byte {
 	// marshal data into json
-	data := convIDResponse{
+	data := ConvIDResponse{
 		UserID:  userID,
-		ConvIDs: make([]converstationInfo, len(convIDs)),
+		ConvIDs: make([]objects.ConverstationInfo, len(convIDs)),
 	}
 	copy(data.ConvIDs, convIDs)
 
@@ -35,13 +31,13 @@ func marshalConvIDDataToSend(userID string, convIDs []converstationInfo) []byte 
 }
 
 type msgHistResponse struct {
-	Msgs []MsgObj `json:"msgs"`
+	Msgs []objects.MsgObj `json:"msgs"`
 }
 
-func marshalHistDataToSend(msgs []MsgObj) []byte {
+func marshalHistDataToSend(msgs []objects.MsgObj) []byte {
 	// marshal data into json
 	data := msgHistResponse{}
-	data.Msgs = make([]MsgObj, len(msgs))
+	data.Msgs = make([]objects.MsgObj, len(msgs))
 	copy(data.Msgs, msgs)
 
 	// convert json to []byte
@@ -68,7 +64,7 @@ func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		ids := hub.storage.getAllConvIDsFromUserID(userID)
+		ids := hub.storage.GetAllConvIDsFromUserID(userID)
 		log.Println("ids :", ids)
 		w.Write(marshalConvIDDataToSend(userID, ids))
 		break
@@ -91,13 +87,13 @@ func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			hub.conversations[conversationID][recipientID] = true
 			hub.conversation_msg_counter[conversationID] = 0
 
-			hub.storage.storeConvID(conversationID, senderID, recipientID)
+			hub.storage.StoreConvID(conversationID, senderID, recipientID)
 		}
 
-		type convIDResponse struct {
+		type ConvIDResponse struct {
 			ConvID string `json:"convID"`
 		}
-		res := convIDResponse{}
+		res := ConvIDResponse{}
 		res.ConvID = conversationID
 
 		b, err := json.Marshal(res)
@@ -123,7 +119,7 @@ func httpChatHistAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		convID := q.Get("convID")
 		log.Println("query", convID)
 		if convID != "" {
-			msgs := hub.storage.getHistFromConvID_V2(convID)
+			msgs := hub.storage.GetHistFromConvID_V2(convID)
 			log.Println(msgs)
 
 			w.Header().Add("Content-Type", "application/json")

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"backend_server/internal/apiEndpoint"
-	"backend_server/internal/cloudStore"
+	"backend_server/internal/objects"
+	"backend_server/internal/store/cloudStore"
 	"bufio"
 	"context"
 	"fmt"
@@ -117,7 +117,7 @@ mainLoop:
 			case "w":
 				textMsg := StringPrompt("what message to send?")
 				fmt.Printf("Sending to conversationID: %s as %s\n", testSenario.convID, testSenario.userID)
-				err = store.InsertMessageHistory(apiEndpoint.MsgObj{
+				err = store.InsertMessageHistory(objects.MsgObj{
 					FrameType:   "stub",
 					ConvID:      testSenario.convID,
 					Counter:     0,
@@ -257,7 +257,7 @@ mainLoop:
 	// }
 	// fmt.Println(tables)
 
-	// msg := apiEndpoint.MsgObj{
+	// msg := objects.MsgObj{
 	// 	FrameType:   "0",
 	// 	ConvID:      "0",
 	// 	Counter:     0,

@@ -34,8 +34,8 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client_H := NewWebSocketClientHandler(conn, hub)
-	go client_H.readMessage()
-	go client_H.sendMessage()
+	go client_H.handleIncommingMessages()
+	go client_H.handleOutgoingMessages()
 }
 
 func StartWebSocket(hub *Hub) {

@@ -1,7 +1,7 @@
 package cloudStore
 
 import (
-	"backend_server/internal/apiEndpoint"
+	"backend_server/internal/objects"
 	"context"
 	"log"
 	"time"
@@ -32,7 +32,7 @@ type CloudMsgObj struct {
 	UserID         string
 }
 
-func translateCloudMsg(msg *apiEndpoint.MsgObj, cloudMsg *CloudMsgObj) {
+func translateCloudMsg(msg *objects.MsgObj, cloudMsg *CloudMsgObj) {
 	cloudMsg.ConversationID = msg.ConvID
 	cloudMsg.Timestamp = msg.Timestamp
 	cloudMsg.IsImg = false // TODO: message only for now
@@ -112,7 +112,7 @@ func (c CloudStore) CreateMessageHistoryTable() (*types.TableDescription, error)
 
 // insert a new message that a user send to the MessageHistory table
 // convert the MsgObj into a cloudMsgObj, and put it into the message history table
-func (c CloudStore) InsertMessageHistory(msg apiEndpoint.MsgObj) error {
+func (c CloudStore) InsertMessageHistory(msg objects.MsgObj) error {
 	cloudMsg := CloudMsgObj{}
 	translateCloudMsg(&msg, &cloudMsg)
 
