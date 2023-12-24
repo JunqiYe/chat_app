@@ -2,10 +2,12 @@ package main
 
 import (
 	"backend_server/internal/apiEndpoint"
-	"backend_server/internal/store/localStore"
+	"backend_server/internal/store/cloudStore"
+	"context"
 	"log"
-	"os"
-	"path/filepath"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 const (
@@ -15,18 +17,31 @@ const (
 )
 
 func main() {
-	currDir, err := os.Getwd()
+	// currDir, err := os.Getwd()
+	// if err != nil {
+	// 	log.Fatalf("Could not get current working directory: %v", err)
+	// }
+
+	// dbDir := os.Args[1]
+
+	// log.Print(filepath.Join(currDir, dbDir))
+
+	// using local store implemented with sqlite
+	// sqlLiteStore := localStore.NewStorage(filepath.Join(currDir, dbDir))
+
+	log.Println("Loading AWS config...")
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		log.Fatalf("Could not get current working directory: %v", err)
+		log.Fatalf("failed to load configuration, \n%v", err)
 	}
 
-	dbDir := os.Args[1]
-
-	log.Print(filepath.Join(currDir, dbDir))
-	// store := localStore.LocalMsgStore{}
-	// store.NewStorage(filepath.Join(currDir, dbDir))
-	store := localStore.NewStorage(filepath.Join(currDir, dbDir))
-	hub := apiEndpoint.NewHub(store)
+	client := dynamodb.NewFromConfig(cfg)
+	DynamoDBStore := &cloudStore.CloudStore{
+		DynamoDbClient:               client,
+		MessageHistoryTableName:      "MessageHistory",
+		ConversationMembersTableName: "ConversationMembers",
+	}
+	hub := apiEndpoint.NewHub(DynamoDBStore)
 
 	go hub.HubRun()
 	apiEndpoint.StartWebSocket(hub)

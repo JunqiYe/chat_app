@@ -49,6 +49,7 @@ func marshalHistDataToSend(msgs []objects.MsgObj) []byte {
 	return b
 }
 
+// API request for GET conversations belonging to a user, or POST new conversations
 func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	log.Println("new convid request:", r.URL)
 	q := r.URL.Query()
@@ -64,7 +65,11 @@ func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		ids := hub.storage.GetAllConvIDsFromUserID(userID)
+		ids, err := hub.storage.GetAllConvIDsFromUserID(userID)
+		if err != nil {
+			log.Println("[API: ConvID] encountered error:", err.Error())
+			break
+		}
 		log.Println("ids :", ids)
 		w.Write(marshalConvIDDataToSend(userID, ids))
 		break
@@ -110,6 +115,7 @@ func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 }
 
+// API request for GET message history for a conversation
 func httpChatHistAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	log.Println("new msg hist request:", r.URL)
 
@@ -119,7 +125,11 @@ func httpChatHistAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		convID := q.Get("convID")
 		log.Println("query", convID)
 		if convID != "" {
-			msgs := hub.storage.GetHistFromConvID_V2(convID)
+			msgs, err := hub.storage.GetHistFromConvID_V2(convID)
+			if err != nil {
+				log.Println(err.Error())
+				break
+			}
 			log.Println(msgs)
 
 			w.Header().Add("Content-Type", "application/json")
