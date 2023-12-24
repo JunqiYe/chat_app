@@ -1,6 +1,8 @@
 package objects
 
 type ConverstationInfo struct {
-	ConvID      string `json:"ConvID"`
-	RecipientID string `json:"RecipientID"`
+	ConversationID string `json:"ConversationID"`
+	ConvName       string `json:"ConvName"`
+	SenderID       string `json:"SenderID"`
+	RecipientID    string `json:"RecipientID"`
 }

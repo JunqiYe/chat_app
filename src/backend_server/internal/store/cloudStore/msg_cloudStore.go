@@ -39,12 +39,23 @@ func (s *CloudStore) StoreMsg(msg objects.MsgObj) error {
 
 func (s *CloudStore) StoreConvID(convID string, userID string, recipientID string) error {
 	var err error
-	err = s.InsertConversationMember(convID, userID)
+	tempConvObj1 := objects.ConverstationInfo{
+		ConversationID: convID,
+		SenderID:       userID,
+		RecipientID:    recipientID,
+		ConvName:       recipientID,
+	}
+	err = s.InsertConversationMember(tempConvObj1)
 	if err != nil {
 		return err
 	}
-
-	err = s.InsertConversationMember(convID, recipientID)
+	tempConvObj2 := objects.ConverstationInfo{
+		ConversationID: convID,
+		SenderID:       recipientID,
+		RecipientID:    userID,
+		ConvName:       userID,
+	}
+	err = s.InsertConversationMember(tempConvObj2)
 	if err != nil {
 		return err
 	}
@@ -79,7 +90,7 @@ func (s *CloudStore) GetAllConvIDUserIDPair() []objects.ConverstationInfo {
 }
 
 func (s *CloudStore) GetAllConvIDsFromUserID(userID string) ([]objects.ConverstationInfo, error) {
-	members, err := s.GetConvIDFromUserID(userID)
+	members, err := s.GetConvIDFromSenderID(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,8 +98,8 @@ func (s *CloudStore) GetAllConvIDsFromUserID(userID string) ([]objects.Conversta
 
 	for _, m := range members {
 		tempConvObj := objects.ConverstationInfo{
-			ConvID:      m.ConversationID,
-			RecipientID: "Not Implemented",
+			ConversationID: m.ConversationID,
+			RecipientID:    "Not Implemented",
 		}
 		rst = append(rst, tempConvObj)
 	}
@@ -266,25 +277,25 @@ func (c *CloudStore) CreateConversationMembersTable() (*types.TableDescription, 
 			AttributeName: aws.String("ConversationID"),
 			AttributeType: types.ScalarAttributeTypeS,
 		}, {
-			AttributeName: aws.String("UserID"),
+			AttributeName: aws.String("SenderID"),
 			AttributeType: types.ScalarAttributeTypeS,
 		}},
 		KeySchema: []types.KeySchemaElement{{
 			AttributeName: aws.String("ConversationID"),
 			KeyType:       types.KeyTypeHash,
 		}, {
-			AttributeName: aws.String("UserID"),
+			AttributeName: aws.String("SenderID"),
 			KeyType:       types.KeyTypeRange,
 		}},
 		GlobalSecondaryIndexes: []types.GlobalSecondaryIndex{{
-			IndexName: aws.String("UserID"),
+			IndexName: aws.String("SenderID"),
 			KeySchema: []types.KeySchemaElement{{
-				AttributeName: aws.String("UserID"),
+				AttributeName: aws.String("SenderID"),
 				KeyType:       types.KeyTypeHash,
 			}},
 			Projection: &types.Projection{
-				// NonKeyAttributes: []string{"UserID"},
-				ProjectionType: types.ProjectionTypeKeysOnly,
+				// NonKeyAttributes: []string{"SenderID"},
+				ProjectionType: types.ProjectionTypeAll,
 			},
 
 			ProvisionedThroughput: &types.ProvisionedThroughput{
@@ -305,7 +316,7 @@ func (c *CloudStore) CreateConversationMembersTable() (*types.TableDescription, 
 }
 
 // get all user that are in the conversation
-func (c *CloudStore) GetUserIDFromConvID(convID string) ([]MemberObj, error) {
+func (c *CloudStore) GetSenderIDFromConvID(convID string) ([]MemberObj, error) {
 	var err error
 	var response *dynamodb.QueryOutput
 	var convMembers []MemberObj
@@ -336,27 +347,27 @@ func (c *CloudStore) GetUserIDFromConvID(convID string) ([]MemberObj, error) {
 }
 
 // get all conversation that a user is in
-// getConvID (from UserID)
+// getConvID (from SenderID)
 // might need to use GSI for query
 // get all user that are in the conversation
-func (c *CloudStore) GetConvIDFromUserID(UserID string) ([]MemberObj, error) {
+func (c *CloudStore) GetConvIDFromSenderID(SenderID string) ([]MemberObj, error) {
 	var err error
 	var response *dynamodb.QueryOutput
 	var convMembers []MemberObj
-	keyEx := expression.Key("UserID").Equal(expression.Value(UserID))
+	keyEx := expression.Key("SenderID").Equal(expression.Value(SenderID))
 	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
 	if err != nil {
 		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)
 	} else {
 		response, err = c.DynamoDbClient.Query(context.TODO(), &dynamodb.QueryInput{
 			TableName:                 aws.String(c.ConversationMembersTableName),
-			IndexName:                 aws.String("UserID"),
+			IndexName:                 aws.String("SenderID"),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			KeyConditionExpression:    expr.KeyCondition(),
 		})
 		if err != nil {
-			log.Printf("Couldn't query for UserID  %v. Here's why: %v\n", UserID, err)
+			log.Printf("Couldn't query for SenderID  %v. Here's why: %v\n", SenderID, err)
 		} else {
 			err = attributevalue.UnmarshalListOfMaps(response.Items, &convMembers)
 			if err != nil {
@@ -372,10 +383,10 @@ func (c *CloudStore) GetConvIDFromUserID(UserID string) ([]MemberObj, error) {
 // create new conversation
 // insert a new message that a user send to the MessageHistory table
 // convert the MsgObj into a cloudMsgObj, and put it into the message history table
-func (c *CloudStore) InsertConversationMember(convID string, userID string) error {
+func (c *CloudStore) InsertConversationMember(convInfo objects.ConverstationInfo) error {
 
 	// using a temperarly defined struct for now
-	item, err := attributevalue.MarshalMap(MemberObj{ConversationID: convID, UserID: userID})
+	item, err := attributevalue.MarshalMap(convInfo)
 	if err != nil {
 		panic(err)
 	}

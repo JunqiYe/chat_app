@@ -1,4 +1,4 @@
-package storeAdapter
+package store
 
 import (
 	"backend_server/internal/objects"

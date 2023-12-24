@@ -194,7 +194,7 @@ mainLoop:
 			case "rc":
 				// fmt.Printf("Calling DynamoDB query on conversationID: %s\n", testSenario.convID)
 				convID := StringPrompt("which conversationID?")
-				members, err := store.GetUserIDFromConvID(convID)
+				members, err := store.GetSenderIDFromConvID(convID)
 				if err != nil {
 					fmt.Printf("Encouter error: %v\n", err.Error())
 				}
@@ -206,7 +206,7 @@ mainLoop:
 			case "ru":
 				// fmt.Printf("Calling DynamoDB query on conversationID: %s\n", testSenario.convID)
 				userID := StringPrompt("which userID?")
-				members, err := store.GetConvIDFromUserID(userID)
+				members, err := store.GetConvIDFromSenderID(userID)
 				if err != nil {
 					fmt.Printf("Encouter error: %v\n", err.Error())
 				}
@@ -218,7 +218,9 @@ mainLoop:
 			case "w":
 				convID := StringPrompt("which conversationID?")
 				userID := StringPrompt("which userID?")
-				err = store.InsertConversationMember(convID, userID)
+				recipientID := StringPrompt("which recipient?")
+
+				err = store.StoreConvID(convID, userID, recipientID)
 				if err != nil {
 					fmt.Printf("Encouter error: %v\n", err.Error())
 				}

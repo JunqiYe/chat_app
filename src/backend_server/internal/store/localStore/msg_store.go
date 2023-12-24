@@ -145,7 +145,7 @@ func (s *LocalMsgStore) GetAllConvIDsFromUserID(userID string) []objects.Convers
 	// var ids []objects.ConverstationInfo
 	for rows.Next() {
 		var id objects.ConverstationInfo
-		rows.Scan(&id.ConvID, &id.RecipientID)
+		rows.Scan(&id.ConversationID, &id.RecipientID)
 
 		log.Println(id)
 		userIDs = append(userIDs, id)
@@ -173,7 +173,7 @@ func (s *LocalMsgStore) GetAllConvIDUserIDPair() []objects.ConverstationInfo {
 	var ids []objects.ConverstationInfo = []objects.ConverstationInfo{}
 	for rows.Next() {
 		var id objects.ConverstationInfo
-		rows.Scan(&id.ConvID, &id.RecipientID)
+		rows.Scan(&id.ConversationID, &id.RecipientID)
 		ids = append(ids, id)
 	}
 

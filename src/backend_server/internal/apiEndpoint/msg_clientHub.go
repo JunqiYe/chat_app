@@ -2,12 +2,12 @@ package apiEndpoint
 
 import (
 	"backend_server/internal/objects"
-	storeAdapter "backend_server/internal/store/storeAdaptor"
+	"backend_server/internal/store"
 	"log"
 )
 
 type Hub struct {
-	storage                  storeAdapter.StorageInterface
+	storage                  store.StorageInterface
 	incommingMsg             chan objects.MsgObj
 	conversations            map[string]map[string]bool // conversationID -> clientsID
 	conversation_msg_counter map[string]uint64          // conversation
@@ -18,7 +18,7 @@ type Hub struct {
 	tokens map[string]session
 }
 
-func NewHub(storage storeAdapter.StorageInterface) *Hub {
+func NewHub(storage store.StorageInterface) *Hub {
 	hub := &Hub{
 		storage:                  storage,
 		incommingMsg:             make(chan objects.MsgObj),
@@ -38,11 +38,11 @@ func NewHub(storage storeAdapter.StorageInterface) *Hub {
 func (hub *Hub) initConversationsMap() {
 	pairs := hub.storage.GetAllConvIDUserIDPair()
 	for _, pair := range pairs {
-		if _, ok := hub.conversations[pair.ConvID]; !ok {
-			hub.conversations[pair.ConvID] = make(map[string]bool)
+		if _, ok := hub.conversations[pair.ConversationID]; !ok {
+			hub.conversations[pair.ConversationID] = make(map[string]bool)
 		}
 
-		hub.conversations[pair.ConvID][pair.RecipientID] = true
+		hub.conversations[pair.ConversationID][pair.RecipientID] = true
 	}
 }
 
