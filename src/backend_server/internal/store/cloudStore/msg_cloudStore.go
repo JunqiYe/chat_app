@@ -90,21 +90,7 @@ func (s *CloudStore) GetAllConvIDUserIDPair() []objects.ConverstationInfo {
 }
 
 func (s *CloudStore) GetAllConvIDsFromUserID(userID string) ([]objects.ConverstationInfo, error) {
-	members, err := s.GetConvIDFromSenderID(userID)
-	if err != nil {
-		return nil, err
-	}
-	rst := make([]objects.ConverstationInfo, len(members))
-
-	for _, m := range members {
-		tempConvObj := objects.ConverstationInfo{
-			ConversationID: m.ConversationID,
-			RecipientID:    "Not Implemented",
-		}
-		rst = append(rst, tempConvObj)
-	}
-
-	return rst, nil
+	return s.GetConvIDFromSenderID(userID)
 }
 
 func translateCloudMsg(msg *objects.MsgObj, cloudMsg *CloudMsgObj) {
@@ -350,10 +336,10 @@ func (c *CloudStore) GetSenderIDFromConvID(convID string) ([]MemberObj, error) {
 // getConvID (from SenderID)
 // might need to use GSI for query
 // get all user that are in the conversation
-func (c *CloudStore) GetConvIDFromSenderID(SenderID string) ([]MemberObj, error) {
+func (c *CloudStore) GetConvIDFromSenderID(SenderID string) ([]objects.ConverstationInfo, error) {
 	var err error
 	var response *dynamodb.QueryOutput
-	var convMembers []MemberObj
+	var convInfo []objects.ConverstationInfo
 	keyEx := expression.Key("SenderID").Equal(expression.Value(SenderID))
 	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
 	if err != nil {
@@ -369,14 +355,14 @@ func (c *CloudStore) GetConvIDFromSenderID(SenderID string) ([]MemberObj, error)
 		if err != nil {
 			log.Printf("Couldn't query for SenderID  %v. Here's why: %v\n", SenderID, err)
 		} else {
-			err = attributevalue.UnmarshalListOfMaps(response.Items, &convMembers)
+			err = attributevalue.UnmarshalListOfMaps(response.Items, &convInfo)
 			if err != nil {
 				log.Printf("Couldn't unmarshal query response. Here's why: %v\n", err)
 			}
 		}
 	}
 
-	return convMembers, err
+	return convInfo, err
 }
 
 // add user to conversation

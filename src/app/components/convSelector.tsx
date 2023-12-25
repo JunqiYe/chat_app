@@ -49,12 +49,12 @@ function ConversationList() {
             return response.json();
         })
         .then(function(data) {
-            console.log("received data ",data)
+            console.log("received data ", data)
 
-            var conversations = data.ConvIDs.map((obj: { ConvID: string; RecipientID: string; }) => {
+            var conversations = data.ConvIDs.map((obj: { ConversationID: string; ConvName: string; SenderID: string; RecipientID: string }) => {
                 return {
-                    convID : obj.ConvID,
-                    convName: obj.RecipientID,
+                    convID : obj.ConversationID,
+                    convName: obj.ConvName,
                     recipients: [obj.RecipientID]
                 }
             })
