@@ -20,23 +20,20 @@ func debugJson(msg objects.MsgObj) {
 }
 
 type ClientHandler struct {
-	conn         *websocket.Conn
-	hub          *Hub
-	userID       string
-	convID       string
-	receipientID string
-	dispatchBuf  chan objects.MsgObj // msg received from other user
+	conn        *websocket.Conn
+	hub         *Hub
+	userID      string
+	dispatchBuf chan objects.MsgObj // msg from other user, dispatch to the current client
 }
 
 func NewWebSocketClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
-	return &ClientHandler{
-		conn:         conn,
-		hub:          hub,
-		userID:       "",
-		receipientID: "",
-		convID:       "",
-		dispatchBuf:  make(chan objects.MsgObj, 100),
+	handler := &ClientHandler{
+		conn:        conn,
+		hub:         hub,
+		userID:      "",
+		dispatchBuf: make(chan objects.MsgObj, 100),
 	}
+	return handler
 }
 
 // incomming messages thru the websocket, parse the message and distribute to thru the hub
@@ -68,6 +65,7 @@ func (c *ClientHandler) handleIncommingMessages() {
 
 		case "transmit":
 			log.Print("msg send to hub")
+			// find the correct recipient within the conv, and send the message to hub with recipient information
 			c.hub.incommingMsg <- res
 			break
 		}

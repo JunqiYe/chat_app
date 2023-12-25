@@ -1,6 +1,7 @@
 import { TextDatav2 } from "@/app/state/messagesSlice";
 import { ChatStorage } from "../storage/chat_localstorage";
 import { TextData } from "../storage/text_data";
+import { ConversationInfo } from "@/app/state/convSlice";
 
 interface serverMessage {
     type: string;
@@ -97,14 +98,9 @@ export class MessageHandler {
     }
 
     // whenever user press enter on input box
-    clientSendMessage(targetConvID: string, data: string) {
-        // if (this.currentUserID === null ||
-        //     this.targetConvID === null) {
-        //      throw new Error("Invalid user or recipient")
-        // }
-
+    clientSendMessage(convInfo: ConversationInfo, data: string) {
         // create a new message
-        var msg = new TextData(this.currentUserID, targetConvID, 0, data)
+        var msg = new TextData(this.currentUserID, convInfo.recipients[0], convInfo.convID, 0, data)
 
         // store in storage
         // this.localStoreText(msg)

@@ -1,13 +1,7 @@
-import { TextData } from "../lib/storage/text_data"
 import { handler } from "./MainPage"
 import { useSelector } from "react-redux"
 import { RootState } from "../state/store"
 
-
-interface InputBoxProps {
-  prevMsg: Map<string, TextData[]>,
-  setPrevMsg: (n:any) => void
-}
 
 export default function InputBox() {
     let userID = useSelector((state: RootState) => state.userState.currentUserID)
@@ -23,7 +17,7 @@ export default function InputBox() {
               // user didn't select a conversation
               return
             }
-            handler.clientSendMessage(currConv.convID, dom.value)
+            handler.clientSendMessage(currConv, dom.value)
             // workerSendNewMsg(dom.value)
           }
           dom.value = ''

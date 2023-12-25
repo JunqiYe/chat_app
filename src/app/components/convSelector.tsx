@@ -1,11 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
 import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage";
-import { TextData } from "../lib/storage/text_data";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../state/store";
 import { ConversationInfo, changeConv, updateConvList } from "../state/convSlice";
-import { TextDatav2, addNewMessage, newMessageHist } from "../state/messagesSlice";
 
 export interface Recipients {
     recipient: string;

@@ -61,6 +61,8 @@ func (h *Hub) checkConvIDExist(senderID string, recipientID string) (string, boo
 	}
 }
 
+// go routine for hub, handles distributing messages between client handlers
+// registers and unregister whenever a client handler connect/disconnect to the server
 func (h *Hub) HubRun() {
 	for {
 		select {
@@ -78,27 +80,20 @@ func (h *Hub) HubRun() {
 				h.storage.StoreMsg(msg)
 			}
 
-			// check if there are users connected currently that are in this conversation
-			users, ok := h.conversations[msg.ConvID]
+			sender := msg.SenderID
+			recipient := msg.RecipientID
+			recipientHandler, ok := h.userBase[recipient]
 			if ok {
-				// update conversation message counter
-				h.conversation_msg_counter[msg.ConvID]++
-				msg.Counter = h.conversation_msg_counter[msg.ConvID]
+				log.Println("[Hub]: dispatch message to", recipient)
+				recipientHandler.dispatchBuf <- msg
 
-				for user := range users {
-					// if user == msg.RecipientID {
-					log.Println("receipient located")
-
-					// get the handler for this specific user
-					recipientHandler, ok := h.userBase[user]
-					if ok {
-						recipientHandler.dispatchBuf <- msg
-					}
-					// }
-				}
-			} else {
-				log.Println("WARNING: CONVERSATION ID DO NOT EXIST\n\n\n ")
 			}
+			senderHandler, ok := h.userBase[sender]
+			if ok {
+				log.Println("[Hub]: relay the information back to sender", sender)
+				senderHandler.dispatchBuf <- msg
+			}
+
 		}
 	}
 }
