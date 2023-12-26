@@ -14,12 +14,55 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     strategy:
       matrix:
-        node-version: [18.x, 16.x]
+        node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::419472707659:role/github_action_testing
+        aws-region: us-west-1
+
+    - name: create test tables
+      run: |
+        aws dynamodb create-table \
+        --table-name MessageHistory_test \
+        --attribute-definitions AttributeName=ConversationID,AttributeType=S AttributeName=Timestamp,AttributeType=N \
+        --key-schema AttributeName=ConversationID,KeyType=HASH AttributeName=Timestamp,KeyType=RANGE \
+        --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+
+        aws dynamodb create-table \
+        --table-name ConversationMembers_test \
+        --attribute-definitions AttributeName=ConversationID,AttributeType=S AttributeName=SenderID,AttributeType=N \
+        --key-schema AttributeName=ConversationID,KeyType=HASH AttributeName=SenderID,KeyType=RANGE \
+        --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+        --global-secondary-indexes \
+        "[
+            {
+                \"IndexName\": \"SenderID\",
+                \"KeySchema\": [
+                    {\"AttributeName\":\"SenderID\",\"KeyType\":\"HASH\"}
+                ],
+                \"Projection\": {
+                    \"ProjectionType\":\"ALL\"
+                },
+                \"ProvisionedThroughput\": {
+                    \"ReadCapacityUnits\": 1,
+                    \"WriteCapacityUnits\": 1
+                }
+            }
+        ]"
+
+        aws dynamodb wait table-exists --table-name MessageHistory_test
+        aws dynamodb wait table-exists --table-name ConversationMembers_test
+
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
@@ -33,3 +76,9 @@ jobs:
     - run: make -C src/backend_server test
     - run: npm run dev &
     - run: npm run cypress_test
+
+    - name: delete the test tables
+      run: |
+        aws dynamodb delete-table --table-name MessageHistory_test
+        aws dynamodb delete-table --table-name ConversationMembers_test
+
