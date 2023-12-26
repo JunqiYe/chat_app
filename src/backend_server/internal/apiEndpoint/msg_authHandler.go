@@ -89,7 +89,7 @@ type credentials struct {
 
 func httpChatLoginEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	origin := r.Header.Get("Origin")
-	log.Println(origin)
+	log.Println("[Login] origin:", origin)
 	w.Header().Add("Access-Control-Allow-Origin", origin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	switch r.Method {

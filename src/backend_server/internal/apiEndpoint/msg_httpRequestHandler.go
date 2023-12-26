@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
+	"github.com/juliangruber/go-intersect"
 )
 
 type ConvIDResponse struct {
@@ -22,7 +25,6 @@ func marshalConvIDDataToSend(userID string, convIDs []objects.ConverstationInfo)
 
 	// convert json to []byte
 	b, err := json.Marshal(data)
-	log.Println(b)
 	if err != nil {
 		log.Println(err)
 	}
@@ -82,24 +84,53 @@ func httpConvIDAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			break
 		}
-
-		conversationID, exists := hub.checkConvIDExist(senderID, recipientID)
-
-		if !exists {
-			log.Println("new conversation created", conversationID)
-			// init server side conversation
-			hub.conversations[conversationID][senderID] = true
-			hub.conversations[conversationID][recipientID] = true
-			hub.conversation_msg_counter[conversationID] = 0
-
-			hub.storage.StoreConvID(conversationID, senderID, recipientID)
+		// check if a conversation exists between the sender and the recipient
+		// by finding the intersection of the sender and the recipient conversation ids
+		senderConvs, err := hub.storage.GetAllConvIDsFromUserID(senderID)
+		if err != nil {
+			log.Println("[API CONVID] encountered error:", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			break
 		}
+		recipientConv, err := hub.storage.GetAllConvIDsFromUserID(recipientID)
+		if err != nil {
+			log.Println("[API CONVID] encountered error:", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			break
+		}
+
+		senderConvIDs := []string{}
+		for _, convID := range senderConvs {
+			senderConvIDs = append(senderConvIDs, convID.ConversationID)
+		}
+
+		recipientConvIDs := []string{}
+		for _, convID := range recipientConv {
+			recipientConvIDs = append(recipientConvIDs, convID.ConversationID)
+		}
+
+		intersection := intersect.Hash(senderConvIDs, recipientConvIDs)
 
 		type ConvIDResponse struct {
 			ConvID string `json:"convID"`
 		}
+
 		res := ConvIDResponse{}
-		res.ConvID = conversationID
+		// if conversation already exists, reply with the conversation ID
+		if len(intersection) != 0 {
+			res.ConvID = intersection[0].(string)
+
+		} else {
+			// conversation does not exist, create a convID and add to storage, reply with the conversation
+			newConvID := uuid.NewString()
+			res.ConvID = newConvID
+			err = hub.storage.StoreConvID(newConvID, senderID, recipientID)
+			if err != nil {
+				log.Println("[API CONVID] encountered error:", err.Error())
+				w.WriteHeader(http.StatusBadRequest)
+				break
+			}
+		}
 
 		b, err := json.Marshal(res)
 		if err != nil {

@@ -7,62 +7,30 @@ import (
 )
 
 type Hub struct {
-	storage                  store.StorageInterface
-	incommingMsg             chan objects.MsgObj
-	conversations            map[string]map[string]bool // conversationID -> clientsID
-	conversation_msg_counter map[string]uint64          // conversation
-	userBase                 map[string]*ClientHandler
-	register                 chan *ClientHandler
-	unregister               chan *ClientHandler
+	storage      store.StorageInterface
+	incommingMsg chan objects.MsgObj
+	userBase     map[string]*ClientHandler
+	register     chan *ClientHandler
+	unregister   chan *ClientHandler
 
 	tokens map[string]session
 }
 
 func NewHub(storage store.StorageInterface) *Hub {
 	hub := &Hub{
-		storage:                  storage,
-		incommingMsg:             make(chan objects.MsgObj),
-		conversations:            make(map[string]map[string]bool),
-		conversation_msg_counter: make(map[string]uint64),
-		userBase:                 make(map[string]*ClientHandler),
-		register:                 make(chan *ClientHandler),
-		unregister:               make(chan *ClientHandler),
-		tokens:                   make(map[string]session),
+		storage:      storage,
+		incommingMsg: make(chan objects.MsgObj),
+		userBase:     make(map[string]*ClientHandler),
+		register:     make(chan *ClientHandler),
+		unregister:   make(chan *ClientHandler),
+		tokens:       make(map[string]session),
 	}
-
-	hub.initConversationsMap()
 
 	return hub
 }
 
-func (hub *Hub) initConversationsMap() {
-	pairs := hub.storage.GetAllConvIDUserIDPair()
-	for _, pair := range pairs {
-		if _, ok := hub.conversations[pair.ConversationID]; !ok {
-			hub.conversations[pair.ConversationID] = make(map[string]bool)
-		}
-
-		hub.conversations[pair.ConversationID][pair.RecipientID] = true
-	}
-}
-
-// check if convID exists in converation map, otherwise init the and return convid
-func (h *Hub) checkConvIDExist(senderID string, recipientID string) (string, bool) {
-	primary := convertConvID(senderID, recipientID)
-	secondary := convertConvID(recipientID, senderID)
-
-	if _, ok := h.conversations[primary]; ok {
-		return primary, true
-	} else if _, ok := h.conversations[secondary]; ok {
-		return secondary, true
-	} else {
-		h.conversations[primary] = make(map[string]bool)
-		return primary, false
-	}
-}
-
 // go routine for hub, handles distributing messages between client handlers
-// registers and unregister whenever a client handler connect/disconnect to the server
+// registers and unregisters whenever a client handler connect/disconnect to the server
 func (h *Hub) HubRun() {
 	for {
 		select {
@@ -82,12 +50,16 @@ func (h *Hub) HubRun() {
 
 			sender := msg.SenderID
 			recipient := msg.RecipientID
+
+			// check if recipient is currently connected to the server, and dispatch message
 			recipientHandler, ok := h.userBase[recipient]
 			if ok {
 				log.Println("[Hub]: dispatch message to", recipient)
 				recipientHandler.dispatchBuf <- msg
 
 			}
+
+			// relay the message back to sender for comfirmation message is sent
 			senderHandler, ok := h.userBase[sender]
 			if ok {
 				log.Println("[Hub]: relay the information back to sender", sender)

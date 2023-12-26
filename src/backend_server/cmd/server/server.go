@@ -44,5 +44,5 @@ func main() {
 	hub := apiEndpoint.NewHub(DynamoDBStore)
 
 	go hub.HubRun()
-	apiEndpoint.StartWebSocket(hub)
+	apiEndpoint.StartEndpoint(hub)
 }

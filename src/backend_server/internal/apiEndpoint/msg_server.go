@@ -38,7 +38,7 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	go client_H.handleOutgoingMessages()
 }
 
-func StartWebSocket(hub *Hub) {
+func StartEndpoint(hub *Hub) {
 	log.Println("Starting WebSocket server...")
 
 	// check login information
