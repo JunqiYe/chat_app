@@ -1,13 +1,17 @@
 .PHONY: server
 server:
-	go run -race cmd/server/server.go ./data
+	go run -race cmd/server/server.go
 
-server.exe: 
-	go build -o bin/server.exe cmd/server/server.go 
+.PHONY: test_server
+test_server:
+	go run -race cmd/server/server.go -test
+
+server.exe:
+	go build -o bin/server.exe cmd/server/server.go
 
 .PHONY: test
 test: server.exe
-	sudo ./bin/server.exe ./test &
+	sudo ./bin/server.exe -test ./test &
 
 .PHONY: local_test
 local_test:

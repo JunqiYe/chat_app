@@ -10,7 +10,18 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # setup:
+  #   runs-on: ubuntu-latest
+  #   steps:
+
+  # test:
+  #   runs-on: ubuntu-latest
+
   build:
+    # env: # Or as an environment variable
+    #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION}}
 
     runs-on: ubuntu-latest
 
@@ -27,8 +38,22 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::419472707659:role/github_action_testing
         aws-region: us-west-1
+        role-to-assume: arn:aws:iam::419472707659:role/github_action_testing
+
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - run: |
+        rm -rf src/backend_server/test 
+        mkdir src/backend_server/test 
+        mkdir src/backend_server/log
+    - run: make -C src/backend_server test_server &
+    # - run: make -C src/backend_server test
 
     - name: create test tables
       run: |
@@ -40,7 +65,7 @@ jobs:
 
         aws dynamodb create-table \
         --table-name ConversationMembers_test \
-        --attribute-definitions AttributeName=ConversationID,AttributeType=S AttributeName=SenderID,AttributeType=N \
+        --attribute-definitions AttributeName=ConversationID,AttributeType=S AttributeName=SenderID,AttributeType=S \
         --key-schema AttributeName=ConversationID,KeyType=HASH AttributeName=SenderID,KeyType=RANGE \
         --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
         --global-secondary-indexes \
@@ -63,22 +88,29 @@ jobs:
         aws dynamodb wait table-exists --table-name MessageHistory_test
         aws dynamodb wait table-exists --table-name ConversationMembers_test
 
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
     - run: npm ci --legacy-peer-deps
-    - run: |
-        rm -rf src/backend_server/test 
-        mkdir src/backend_server/test 
-    - run: make -C src/backend_server test
     - run: npm run dev &
     - run: npm run cypress_test
 
-    - name: delete the test tables
-      run: |
-        aws dynamodb delete-table --table-name MessageHistory_test
-        aws dynamodb delete-table --table-name ConversationMembers_test
+    - name: Upload screenshots
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: cypress/screenshots
+        
+    - name: Upload server log
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: server log
+        path: src/backend_server/log/
+
+    - name: delete the test MessageHistory_test
+      if: always()
+      run: aws dynamodb delete-table --table-name MessageHistory_test
+
+    - name: delete the test ConversationMembers_test
+      if: always()
+      run: aws dynamodb delete-table --table-name ConversationMembers_test
 
