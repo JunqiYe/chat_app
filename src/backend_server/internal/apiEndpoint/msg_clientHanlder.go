@@ -13,10 +13,9 @@ func debugJson(msg objects.MsgObj) {
 	log.Printf(`
 	{frametype		- %s}
 	{convID			- %s}
-	{counter		- %d}
 	{senderID		- %s}
 	{recipientID		- %s}
-	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.Counter, msg.SenderID, msg.RecipientID, msg.MsgData)
+	{msgData		- %s}`, msg.FrameType, msg.ConvID, msg.SenderID, msg.RecipientID, msg.MsgData)
 }
 
 type ClientHandler struct {

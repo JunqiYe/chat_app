@@ -73,7 +73,6 @@ func (s *CloudStore) GetHistFromConvID_V2(convID string) ([]objects.MsgObj, erro
 		tempObj := objects.MsgObj{
 			FrameType:   "Not Implemented",
 			ConvID:      cloudMsg.ConversationID,
-			Counter:     0,
 			SenderID:    cloudMsg.UserID,
 			RecipientID: "Not Implemented",
 			MsgData:     cloudMsg.MsgData,
