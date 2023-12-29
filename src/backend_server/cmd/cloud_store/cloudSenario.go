@@ -120,7 +120,6 @@ mainLoop:
 				err = store.InsertMessageHistory(objects.MsgObj{
 					FrameType:   "stub",
 					ConvID:      testSenario.convID,
-					Counter:     0,
 					SenderID:    testSenario.userID,
 					RecipientID: "stub",
 					MsgData:     textMsg,

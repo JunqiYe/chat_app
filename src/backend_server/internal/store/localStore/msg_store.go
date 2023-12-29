@@ -181,10 +181,9 @@ func (s *LocalMsgStore) GetAllConvIDUserIDPair() []objects.ConverstationInfo {
 }
 
 const getHistFromConvID string = `
-	select convID, counter, senderID, msg
+	select convID, senderID, msg
 	from indexes
 	where convID = ?
-	order by counter desc
 `
 
 func (s *LocalMsgStore) getHistFromConvID(convID string) []objects.MsgObj {
@@ -196,7 +195,7 @@ func (s *LocalMsgStore) getHistFromConvID(convID string) []objects.MsgObj {
 	var ids []objects.MsgObj = []objects.MsgObj{}
 	for rows.Next() {
 		var id objects.MsgObj
-		rows.Scan(&id.ConvID, &id.Counter, &id.SenderID, &id.MsgData)
+		rows.Scan(&id.ConvID, &id.SenderID, &id.MsgData)
 		ids = append(ids, id)
 	}
 
