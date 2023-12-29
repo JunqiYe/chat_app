@@ -21,7 +21,8 @@
 
 #build artifacts
 */*/main.exe
-src/backend_server/bin/
+src/backend_server/bin/*
+src/backend_server/log/*
 
 # misc
 .DS_Store

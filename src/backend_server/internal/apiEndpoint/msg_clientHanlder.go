@@ -4,20 +4,12 @@ import (
 	"io"
 	"log"
 
+	"backend_server/internal/objects"
+
 	"github.com/gorilla/websocket"
 )
 
-type MsgObj struct {
-	FrameType   string `json:"type"`
-	ConvID      string `json:"convID"`
-	Counter     uint64 `json:"counter"`
-	SenderID    string `json:"senderID"`
-	RecipientID string `json:"recipientID"`
-	MsgData     string `json:"msgData"`
-	Timestamp   int64  `json:"timestamp"`
-}
-
-func debugJson(msg MsgObj) {
+func debugJson(msg objects.MsgObj) {
 	log.Printf(`
 	{frametype		- %s}
 	{convID			- %s}
@@ -28,32 +20,30 @@ func debugJson(msg MsgObj) {
 }
 
 type ClientHandler struct {
-	conn         *websocket.Conn
-	hub          *Hub
-	userID       string
-	convID       string
-	receipientID string
-	dispatchBuf  chan MsgObj // msg received from other user
+	conn        *websocket.Conn
+	hub         *Hub
+	userID      string
+	dispatchBuf chan objects.MsgObj // msg from other user, dispatch to the current client
 }
 
 func NewWebSocketClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
-	return &ClientHandler{
-		conn:         conn,
-		hub:          hub,
-		userID:       "",
-		receipientID: "",
-		convID:       "",
-		dispatchBuf:  make(chan MsgObj, 100),
+	handler := &ClientHandler{
+		conn:        conn,
+		hub:         hub,
+		userID:      "",
+		dispatchBuf: make(chan objects.MsgObj, 100),
 	}
+	return handler
 }
 
-func (c *ClientHandler) readMessage() {
+// incomming messages thru the websocket, parse the message and distribute to thru the hub
+func (c *ClientHandler) handleIncommingMessages() {
 	defer func() {
 		c.hub.unregister <- c
 	}()
 
 	for {
-		var res MsgObj
+		var res objects.MsgObj
 		err := c.conn.ReadJSON(&res)
 		if err != nil {
 			if err == io.EOF {
@@ -75,6 +65,7 @@ func (c *ClientHandler) readMessage() {
 
 		case "transmit":
 			log.Print("msg send to hub")
+			// find the correct recipient within the conv, and send the message to hub with recipient information
 			c.hub.incommingMsg <- res
 			break
 		}
@@ -82,7 +73,8 @@ func (c *ClientHandler) readMessage() {
 	}
 }
 
-func (c *ClientHandler) sendMessage() {
+// outgoing messages from the hub, marshal the message as json and send to the client
+func (c *ClientHandler) handleOutgoingMessages() {
 	for {
 		dispatchMsg := <-c.dispatchBuf
 

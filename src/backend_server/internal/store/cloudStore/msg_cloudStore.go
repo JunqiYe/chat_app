@@ -1,7 +1,7 @@
 package cloudStore
 
 import (
-	"backend_server/internal/apiEndpoint"
+	"backend_server/internal/objects"
 	"context"
 	"log"
 	"time"
@@ -32,7 +32,68 @@ type CloudMsgObj struct {
 	UserID         string
 }
 
-func translateCloudMsg(msg *apiEndpoint.MsgObj, cloudMsg *CloudMsgObj) {
+// interface calls
+func (s *CloudStore) StoreMsg(msg objects.MsgObj) error {
+	return s.InsertMessageHistory(msg)
+}
+
+func (s *CloudStore) StoreConvID(convID string, userID string, recipientID string) error {
+	var err error
+	tempConvObj1 := objects.ConverstationInfo{
+		ConversationID: convID,
+		SenderID:       userID,
+		RecipientID:    recipientID,
+		ConvName:       recipientID,
+	}
+	err = s.InsertConversationMember(tempConvObj1)
+	if err != nil {
+		return err
+	}
+	tempConvObj2 := objects.ConverstationInfo{
+		ConversationID: convID,
+		SenderID:       recipientID,
+		RecipientID:    userID,
+		ConvName:       userID,
+	}
+	err = s.InsertConversationMember(tempConvObj2)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CloudStore) GetHistFromConvID_V2(convID string) ([]objects.MsgObj, error) {
+	msgList, err := s.GetMessageHist(convID)
+	if err != nil {
+		return nil, err
+	}
+	// copying over the from cloudMsgObj to MsgObj, might be a good idea to combine the two
+	msgObjList := make([]objects.MsgObj, 0, len(msgList))
+	for _, cloudMsg := range msgList {
+		tempObj := objects.MsgObj{
+			FrameType:   "Not Implemented",
+			ConvID:      cloudMsg.ConversationID,
+			Counter:     0,
+			SenderID:    cloudMsg.UserID,
+			RecipientID: "Not Implemented",
+			MsgData:     cloudMsg.MsgData,
+			Timestamp:   cloudMsg.Timestamp,
+		}
+
+		msgObjList = append(msgObjList, tempObj)
+	}
+	return msgObjList, nil
+}
+
+func (s *CloudStore) GetAllConvIDUserIDPair() []objects.ConverstationInfo {
+	return []objects.ConverstationInfo{}
+}
+
+func (s *CloudStore) GetAllConvIDsFromUserID(userID string) ([]objects.ConverstationInfo, error) {
+	return s.GetConvIDFromSenderID(userID)
+}
+
+func translateCloudMsg(msg *objects.MsgObj, cloudMsg *CloudMsgObj) {
 	cloudMsg.ConversationID = msg.ConvID
 	cloudMsg.Timestamp = msg.Timestamp
 	cloudMsg.IsImg = false // TODO: message only for now
@@ -41,7 +102,7 @@ func translateCloudMsg(msg *apiEndpoint.MsgObj, cloudMsg *CloudMsgObj) {
 }
 
 // ListTables lists the DynamoDB table names for the current account.
-func (basics CloudStore) ListTables() ([]string, error) {
+func (basics *CloudStore) ListTables() ([]string, error) {
 	var tableNames []string
 	tables, err := basics.DynamoDbClient.ListTables(
 		context.TODO(), &dynamodb.ListTablesInput{})
@@ -54,7 +115,7 @@ func (basics CloudStore) ListTables() ([]string, error) {
 }
 
 // given a table name and tableInput in the format of *dynamodb.CreateTableInput, create a new table
-func (c CloudStore) createDynamodbTable(tablename string, tableInput *dynamodb.CreateTableInput) (*types.TableDescription, error) {
+func (c *CloudStore) createDynamodbTable(tablename string, tableInput *dynamodb.CreateTableInput) (*types.TableDescription, error) {
 	var tableDesc *types.TableDescription
 	table, err := c.DynamoDbClient.CreateTable(context.TODO(), tableInput)
 	if err != nil {
@@ -81,7 +142,7 @@ func (c CloudStore) createDynamodbTable(tablename string, tableInput *dynamodb.C
 // schema:
 // ConversationID | Timestamp | UserID | IsImg | MsgData
 // primaryKey	  |	sort key
-func (c CloudStore) CreateMessageHistoryTable() (*types.TableDescription, error) {
+func (c *CloudStore) CreateMessageHistoryTable() (*types.TableDescription, error) {
 	tableInput := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []types.AttributeDefinition{{
 			AttributeName: aws.String("ConversationID"),
@@ -112,7 +173,7 @@ func (c CloudStore) CreateMessageHistoryTable() (*types.TableDescription, error)
 
 // insert a new message that a user send to the MessageHistory table
 // convert the MsgObj into a cloudMsgObj, and put it into the message history table
-func (c CloudStore) InsertMessageHistory(msg apiEndpoint.MsgObj) error {
+func (c CloudStore) InsertMessageHistory(msg objects.MsgObj) error {
 	cloudMsg := CloudMsgObj{}
 	translateCloudMsg(&msg, &cloudMsg)
 
@@ -135,7 +196,7 @@ func (c CloudStore) InsertMessageHistory(msg apiEndpoint.MsgObj) error {
 // Query gets all movies in the DynamoDB table that were released in the specified year.
 // The function uses the `expression` package to build the key condition expression
 // that is used in the query.
-func (c CloudStore) GetMessageHist(convID string) ([]CloudMsgObj, error) {
+func (c *CloudStore) GetMessageHist(convID string) ([]CloudMsgObj, error) {
 	var err error
 	var response *dynamodb.QueryOutput
 	var cloudMsgs []CloudMsgObj
@@ -151,6 +212,7 @@ func (c CloudStore) GetMessageHist(convID string) ([]CloudMsgObj, error) {
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			KeyConditionExpression:    expr.KeyCondition(),
+			ScanIndexForward:          aws.Bool(false),
 		})
 		if err != nil {
 			log.Printf("Couldn't query for convID  %v. Here's why: %v\n", convID, err)
@@ -166,7 +228,7 @@ func (c CloudStore) GetMessageHist(convID string) ([]CloudMsgObj, error) {
 }
 
 // deletes the message history table
-func (c CloudStore) DeleteTable(tableName string) error {
+func (c *CloudStore) DeleteTable(tableName string) error {
 
 	_, err := c.DynamoDbClient.DeleteTable(context.TODO(), &dynamodb.DeleteTableInput{
 		TableName: &tableName,
@@ -195,31 +257,31 @@ type MemberObj struct {
 
 // TODO make userID also a key schema as it does not allow multiple data
 
-func (c CloudStore) CreateConversationMembersTable() (*types.TableDescription, error) {
+func (c *CloudStore) CreateConversationMembersTable() (*types.TableDescription, error) {
 	tableInput := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []types.AttributeDefinition{{
 			AttributeName: aws.String("ConversationID"),
 			AttributeType: types.ScalarAttributeTypeS,
 		}, {
-			AttributeName: aws.String("UserID"),
+			AttributeName: aws.String("SenderID"),
 			AttributeType: types.ScalarAttributeTypeS,
 		}},
 		KeySchema: []types.KeySchemaElement{{
 			AttributeName: aws.String("ConversationID"),
 			KeyType:       types.KeyTypeHash,
 		}, {
-			AttributeName: aws.String("UserID"),
+			AttributeName: aws.String("SenderID"),
 			KeyType:       types.KeyTypeRange,
 		}},
 		GlobalSecondaryIndexes: []types.GlobalSecondaryIndex{{
-			IndexName: aws.String("UserID"),
+			IndexName: aws.String("SenderID"),
 			KeySchema: []types.KeySchemaElement{{
-				AttributeName: aws.String("UserID"),
+				AttributeName: aws.String("SenderID"),
 				KeyType:       types.KeyTypeHash,
 			}},
 			Projection: &types.Projection{
-				// NonKeyAttributes: []string{"UserID"},
-				ProjectionType: types.ProjectionTypeKeysOnly,
+				// NonKeyAttributes: []string{"SenderID"},
+				ProjectionType: types.ProjectionTypeAll,
 			},
 
 			ProvisionedThroughput: &types.ProvisionedThroughput{
@@ -240,7 +302,7 @@ func (c CloudStore) CreateConversationMembersTable() (*types.TableDescription, e
 }
 
 // get all user that are in the conversation
-func (c CloudStore) GetUserIDFromConvID(convID string) ([]MemberObj, error) {
+func (c *CloudStore) GetSenderIDFromConvID(convID string) ([]MemberObj, error) {
 	var err error
 	var response *dynamodb.QueryOutput
 	var convMembers []MemberObj
@@ -271,46 +333,46 @@ func (c CloudStore) GetUserIDFromConvID(convID string) ([]MemberObj, error) {
 }
 
 // get all conversation that a user is in
-// getConvID (from UserID)
+// getConvID (from SenderID)
 // might need to use GSI for query
 // get all user that are in the conversation
-func (c CloudStore) GetConvIDFromUserID(UserID string) ([]MemberObj, error) {
+func (c *CloudStore) GetConvIDFromSenderID(SenderID string) ([]objects.ConverstationInfo, error) {
 	var err error
 	var response *dynamodb.QueryOutput
-	var convMembers []MemberObj
-	keyEx := expression.Key("UserID").Equal(expression.Value(UserID))
+	var convInfo []objects.ConverstationInfo
+	keyEx := expression.Key("SenderID").Equal(expression.Value(SenderID))
 	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
 	if err != nil {
 		log.Printf("Couldn't build expression for query. Here's why: %v\n", err)
 	} else {
 		response, err = c.DynamoDbClient.Query(context.TODO(), &dynamodb.QueryInput{
 			TableName:                 aws.String(c.ConversationMembersTableName),
-			IndexName:                 aws.String("UserID"),
+			IndexName:                 aws.String("SenderID"),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			KeyConditionExpression:    expr.KeyCondition(),
 		})
 		if err != nil {
-			log.Printf("Couldn't query for UserID  %v. Here's why: %v\n", UserID, err)
+			log.Printf("Couldn't query for SenderID  %v. Here's why: %v\n", SenderID, err)
 		} else {
-			err = attributevalue.UnmarshalListOfMaps(response.Items, &convMembers)
+			err = attributevalue.UnmarshalListOfMaps(response.Items, &convInfo)
 			if err != nil {
 				log.Printf("Couldn't unmarshal query response. Here's why: %v\n", err)
 			}
 		}
 	}
 
-	return convMembers, err
+	return convInfo, err
 }
 
 // add user to conversation
 // create new conversation
 // insert a new message that a user send to the MessageHistory table
 // convert the MsgObj into a cloudMsgObj, and put it into the message history table
-func (c CloudStore) InsertConversationMember(convID string, userID string) error {
+func (c *CloudStore) InsertConversationMember(convInfo objects.ConverstationInfo) error {
 
 	// using a temperarly defined struct for now
-	item, err := attributevalue.MarshalMap(MemberObj{ConversationID: convID, UserID: userID})
+	item, err := attributevalue.MarshalMap(convInfo)
 	if err != nil {
 		panic(err)
 	}

@@ -1,11 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import RecipientUserTitle from "./recipientInput";
 import { SERVER_ADDRESS, SERVER_PORT, handler } from "./MainPage";
-import { TextData } from "../lib/storage/text_data";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../state/store";
 import { ConversationInfo, changeConv, updateConvList } from "../state/convSlice";
-import { TextDatav2, addNewMessage, newMessageHist } from "../state/messagesSlice";
 
 export interface Recipients {
     recipient: string;
@@ -49,12 +47,12 @@ function ConversationList() {
             return response.json();
         })
         .then(function(data) {
-            console.log("received data ",data)
+            console.log("received data ", data)
 
-            var conversations = data.ConvIDs.map((obj: { ConvID: string; RecipientID: string; }) => {
+            var conversations = data.ConvIDs.map((obj: { ConversationID: string; ConvName: string; SenderID: string; RecipientID: string }) => {
                 return {
-                    convID : obj.ConvID,
-                    convName: obj.RecipientID,
+                    convID : obj.ConversationID,
+                    convName: obj.ConvName,
                     recipients: [obj.RecipientID]
                 }
             })

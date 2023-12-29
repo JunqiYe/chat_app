@@ -1,6 +1,7 @@
-package apiEndpoint
+package localStore
 
 import (
+	"backend_server/internal/objects"
 	"database/sql"
 	"log"
 	"path/filepath"
@@ -8,8 +9,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type msg_storage struct {
-	store  []MsgObj
+type LocalMsgStore struct {
+	store  []objects.MsgObj
 	msgDB  *sql.DB
 	convDB *sql.DB
 }
@@ -46,12 +47,18 @@ const deleteFile string = `delete from indexes where fileName == ?;`
 const DEFAULT_MSGDB_FILENAME string = `msg.db`
 
 // constructor
-func NewStorage(baseDir string) *msg_storage {
-	return &msg_storage{
-		store:  make([]MsgObj, 0),
+func NewStorage(baseDir string) *LocalMsgStore {
+	return &LocalMsgStore{
+		store:  make([]objects.MsgObj, 0),
 		msgDB:  createLocalDB(baseDir, createMsgTable_V2),
 		convDB: createLocalDB(baseDir, createConIDTable),
 	}
+}
+
+func (s *LocalMsgStore) NewStorage(baseDir string) {
+	s.store = make([]objects.MsgObj, 0)
+	s.msgDB = createLocalDB(baseDir, createMsgTable_V2)
+	s.convDB = createLocalDB(baseDir, createConIDTable)
 }
 
 func createLocalDB(baseDir string, query string) *sql.DB {
@@ -76,30 +83,32 @@ const insertMsg string = `
 	VALUES (?,?,?,?,?);
 	`
 
-func updateDB(db *sql.DB, msg MsgObj) {
+func updateDB(db *sql.DB, msg objects.MsgObj) error {
 	statement, err := db.Prepare(insertMsg)
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.Timestamp, msg.MsgData)
+	_, err = statement.Exec(msg.ConvID, msg.SenderID, msg.RecipientID, msg.Timestamp, msg.MsgData)
+	return err
 }
 
-func (s *msg_storage) StoreMsg(msg MsgObj) {
+func (s *LocalMsgStore) StoreMsg(msg objects.MsgObj) error {
 	// s.store = append(s.store, msg)
 	log.Println("ew message stored", msg.ConvID, msg.MsgData)
 
-	updateDB(s.msgDB, msg)
+	return updateDB(s.msgDB, msg)
 }
 
-func (s *msg_storage) storeConvID(convID string, userID string, recipientID string) {
+func (s *LocalMsgStore) StoreConvID(convID string, userID string, recipientID string) error {
 	statement, err := s.convDB.Prepare(insertConvID)
 	if err != nil {
 		log.Panic(err.Error())
 	}
-	statement.Exec(convID, userID, recipientID)
+	_, err = statement.Exec(convID, userID, recipientID)
+	return err
 }
 
-func (s *msg_storage) getAllUserFromConvID(convID string) []string {
+func (s *LocalMsgStore) getAllUserFromConvID(convID string) []string {
 	rows, err := s.convDB.Query(getAllUserID, convID)
 	if err != nil {
 		log.Panic(err.Error())
@@ -124,8 +133,8 @@ const getAllConvIDs string = `
 	where senderID = ? or recipientID = ?;
 `
 
-func (s *msg_storage) getAllConvIDsFromUserID(userID string) []converstationInfo {
-	userIDs := make([]converstationInfo, 0)
+func (s *LocalMsgStore) GetAllConvIDsFromUserID(userID string) []objects.ConverstationInfo {
+	userIDs := make([]objects.ConverstationInfo, 0)
 
 	rows, err := s.convDB.Query(getAllConvIDs, userID, userID, userID, userID)
 	if err != nil {
@@ -133,10 +142,10 @@ func (s *msg_storage) getAllConvIDsFromUserID(userID string) []converstationInfo
 		return userIDs
 	}
 
-	// var ids []converstationInfo
+	// var ids []objects.ConverstationInfo
 	for rows.Next() {
-		var id converstationInfo
-		rows.Scan(&id.ConvID, &id.RecipientID)
+		var id objects.ConverstationInfo
+		rows.Scan(&id.ConversationID, &id.RecipientID)
 
 		log.Println(id)
 		userIDs = append(userIDs, id)
@@ -145,7 +154,7 @@ func (s *msg_storage) getAllConvIDsFromUserID(userID string) []converstationInfo
 	return userIDs
 }
 
-const getAllConvIDUserIDPair string = `
+const GetAllConvIDUserIDPair_query string = `
 	SELECT DISTINCT *
 	FROM (
 		SELECT convID, senderID as ID·
@@ -155,16 +164,16 @@ const getAllConvIDUserIDPair string = `
 		FROM conversationID);
 `
 
-func (s *msg_storage) getAllConvIDUserIDPair() []converstationInfo {
-	rows, err := s.convDB.Query(getAllConvIDUserIDPair)
+func (s *LocalMsgStore) GetAllConvIDUserIDPair() []objects.ConverstationInfo {
+	rows, err := s.convDB.Query(GetAllConvIDUserIDPair_query)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 
-	var ids []converstationInfo = []converstationInfo{}
+	var ids []objects.ConverstationInfo = []objects.ConverstationInfo{}
 	for rows.Next() {
-		var id converstationInfo
-		rows.Scan(&id.ConvID, &id.RecipientID)
+		var id objects.ConverstationInfo
+		rows.Scan(&id.ConversationID, &id.RecipientID)
 		ids = append(ids, id)
 	}
 
@@ -178,15 +187,15 @@ const getHistFromConvID string = `
 	order by counter desc
 `
 
-func (s *msg_storage) getHistFromConvID(convID string) []MsgObj {
+func (s *LocalMsgStore) getHistFromConvID(convID string) []objects.MsgObj {
 	rows, err := s.convDB.Query(getHistFromConvID, convID)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 
-	var ids []MsgObj = []MsgObj{}
+	var ids []objects.MsgObj = []objects.MsgObj{}
 	for rows.Next() {
-		var id MsgObj
+		var id objects.MsgObj
 		rows.Scan(&id.ConvID, &id.Counter, &id.SenderID, &id.MsgData)
 		ids = append(ids, id)
 	}
@@ -194,22 +203,22 @@ func (s *msg_storage) getHistFromConvID(convID string) []MsgObj {
 	return ids
 }
 
-const getHistFromConvID_V2 string = `
+const GetHistFromConvID_V2 string = `
 	select convID, senderID, timestamp, msg
 	from msgHist
 	where convID = ?
 	order by timestamp desc
 `
 
-func (s *msg_storage) getHistFromConvID_V2(convID string) []MsgObj {
-	rows, err := s.convDB.Query(getHistFromConvID_V2, convID)
+func (s *LocalMsgStore) GetHistFromConvID_V2(convID string) []objects.MsgObj {
+	rows, err := s.convDB.Query(GetHistFromConvID_V2, convID)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 
-	var ids []MsgObj = []MsgObj{}
+	var ids []objects.MsgObj = []objects.MsgObj{}
 	for rows.Next() {
-		var id MsgObj
+		var id objects.MsgObj
 		rows.Scan(&id.ConvID, &id.SenderID, &id.Timestamp, &id.MsgData)
 		log.Printf("[GetHistory]: %+v", id)
 		ids = append(ids, id)
