@@ -18,6 +18,13 @@ import { userLogin} from '../state/userSlice'
 import { RootState } from '../state/store';
 import { TextDatav2, addNewMessage } from '../state/messagesSlice';
 
+import { Amplify } from 'aws-amplify';
+import config from '../amplifyconfiguration.json';
+Amplify.configure(config);
+
+import { withAuthenticator, Button, Heading } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+
 export const SERVER_ADDRESS = address.address
 export const SERVER_PORT = ":8080"
 export const WS_URL = 'ws://' + SERVER_ADDRESS + SERVER_PORT + '/ws';
@@ -50,15 +57,22 @@ function DEV_storageControl() {
 
 
 export var handler : MessageHandler
+import { type AuthUser } from "aws-amplify/auth";
+import { type UseAuthenticator } from "@aws-amplify/ui-react-core";
+
 
 // ==========COMPONENTS============
-export default function MainPage() {
+interface MainPageProps {
+  signOut?: UseAuthenticator["signOut"]; //() => void;
+  user?: AuthUser;
+};
+function MainPage({ signOut, user }: MainPageProps) {
 	// redux store
-	const loggedIn = useSelector((state: RootState) => state.userState.loggedIn)
 	const userID = useSelector((state: RootState) => state.userState.currentUserID)
 	const currConv = useSelector((state: RootState) => state.convState.currentConv)
 	const dispatch = useDispatch()
-	
+
+
 	function newMessageCallback(message: TextDatav2) {
 		console.log("[MainPage]: new message callback");
 
@@ -86,59 +100,33 @@ export default function MainPage() {
 	})
 
 
-	// useEffort for checking the session cookie and allow quick login
 	useEffect(() => {
-		// check if the user already signed in and skip auth using stored cookies
-		fetch("http://" + SERVER_ADDRESS + SERVER_PORT + "/", {
-			method: "GET",
-			credentials: 'include'
-		}).then(response =>{
-			if (response.status === 200) {
-				return response.json();
-			}
-			return null
-		}).then((data)=>{
-			// valid response from server, allow login
-			if (data != null) {
-				dispatch(
-					userLogin(data.user_id)
-				)
-			}
-		}).catch(error => {
-			console.log(error)
-		})
-
-	})
-
-	useEffect(() => {
+		// update the state for userid and information
+		dispatch(
+			userLogin([user!.userId, user!.username])
+		)
 		// init the Message handler after login is successful
-		if (loggedIn) {
-			var socket = new WebSocket(WS_URL)
-			var storage = new ChatStorage()
-			handler = new MessageHandler(userID, socket, storage);
-
-			handler.websocket.onmessage = (e: MessageEvent) => { handler.clientReceiveMessage(e, newMessageCallback)}
-		}
-	},[loggedIn, userID])
+		var socket = new WebSocket(WS_URL)
+		var storage = new ChatStorage()
+		handler = new MessageHandler(userID, socket, storage);
+		handler.websocket.onmessage = (e: MessageEvent) => { handler.clientReceiveMessage(e, newMessageCallback)}
+	},[user])
 
 		return (
 			<main className="flex h-screen w-screen items-center justify-center p-0 md:p-16">
-				{!loggedIn ?
-					<Login />
-					:
-					<div className='flex flex-col h-full w-full max-h-full max-w-3xl justify-center items-center'>
-						<HeaderBar />
-						{/* <DEV_storageControl /> */}
+				<div className='flex flex-col h-full w-full max-h-full max-w-3xl justify-center items-center'>
+					<HeaderBar />
+					{/* <DEV_storageControl /> */}
 
-						<div id="main area" className='flex h-[93%] w-full  rounded-2xl bg-slate-900'>
-								<div id="wrapper" className='flex flex-initial flex-row h-full w-full'>
-									<ConversationPanel />
-									<TextArea />
-								</div>
-						</div>
-				 </div>
-				 }
-
+					<div id="main area" className='flex h-[93%] w-full  rounded-2xl bg-slate-900'>
+							<div id="wrapper" className='flex flex-initial flex-row h-full w-full'>
+								<ConversationPanel />
+								<TextArea />
+							</div>
+					</div>
+				</div>
 			</main>
 		)
 }
+
+export default withAuthenticator(MainPage);

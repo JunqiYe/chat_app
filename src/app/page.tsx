@@ -5,9 +5,9 @@ import MainPage from './components/MainPage'
 
 // ==========COMPONENTS============
 export default function App() {
-    return (
-      <Provider store={store}>
-        <MainPage />
-      </Provider>
-    )
+	return (
+		<Provider store={store}>
+			<MainPage />
+		</Provider>
+	)
 }
