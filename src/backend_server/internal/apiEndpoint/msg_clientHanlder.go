@@ -1,11 +1,15 @@
 package apiEndpoint
 
 import (
+	"encoding/json"
 	"io"
 	"log"
+	"os"
+	"time"
 
 	"backend_server/internal/objects"
 
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/gorilla/websocket"
 )
 
@@ -19,31 +23,51 @@ func debugJson(msg objects.MsgObj) {
 }
 
 type ClientHandler struct {
-	conn        *websocket.Conn
-	hub         *Hub
-	userID      string
-	dispatchBuf chan objects.MsgObj // msg from other user, dispatch to the current client
+	conn *websocket.Conn
+	// hub           *Hub
+	userID string
+	// dispatchBuf   chan objects.MsgObj // msg from other user, dispatch to the current client
+	kafkaConsumer *kafka.Consumer
+	kafkaProducer *kafka.Producer
 }
 
-func NewWebSocketClientHandler(conn *websocket.Conn, hub *Hub) *ClientHandler {
+func NewWebSocketClientHandler(conn *websocket.Conn) *ClientHandler {
+	c, err := kafka.NewConsumer((&kafka.ConfigMap{
+		"bootstrap.servers": "localhost:9092,localhost:9092",
+		"group.id":          "foo",
+		"auto.offset.reset": "smallest"}))
+
+	if err != nil {
+		log.Printf("Failed to create consumer: %s", err)
+		os.Exit(1)
+	}
+
+	p, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": "localhost:9092,localhost:9092",
+		"client.id":         "boo",
+		"acks":              "all"})
+
+	if err != nil {
+		log.Printf("Failed to create producer: %s\n", err)
+		os.Exit(1)
+	}
+
 	handler := &ClientHandler{
-		conn:        conn,
-		hub:         hub,
-		userID:      "",
-		dispatchBuf: make(chan objects.MsgObj, 100),
+		conn: conn,
+		// hub:           nil, // deprecated
+		userID: "",
+		// dispatchBuf:   make(chan objects.MsgObj, 100),
+		kafkaConsumer: c,
+		kafkaProducer: p,
 	}
 	return handler
 }
 
-// incomming messages thru the websocket, parse the message and distribute to thru the hub
+// incomming message from current client, route the message though hub/kafka to reach recipient
 func (c *ClientHandler) handleIncommingMessages() {
-	defer func() {
-		c.hub.unregister <- c
-	}()
-
 	for {
-		var res objects.MsgObj
-		err := c.conn.ReadJSON(&res)
+		var msgObj objects.MsgObj
+		err := c.conn.ReadJSON(&msgObj)
 		if err != nil {
 			if err == io.EOF {
 				log.Println("connection closed for ", c.userID)
@@ -54,35 +78,92 @@ func (c *ClientHandler) handleIncommingMessages() {
 		}
 
 		log.Println("websocket reader:")
-		debugJson(res)
+		debugJson(msgObj)
 
-		switch frameType := res.FrameType; frameType {
+		switch frameType := msgObj.FrameType; frameType {
 		case "init":
-			c.userID = res.SenderID
-			c.hub.register <- c
+			// initiate user id for the handler
+			c.userID = msgObj.SenderID
+
+			// after client userid is specified, subscribe to topic on this userid
+			err = c.kafkaConsumer.SubscribeTopics([]string{c.userID}, nil)
+			if err != nil {
+				log.Fatalf("failed to subscribe to topic: %s", err)
+			}
+
+			go c.handleKafkaConsumerMessage()
 			break
 
 		case "transmit":
-			log.Print("msg send to hub")
-			// find the correct recipient within the conv, and send the message to hub with recipient information
-			c.hub.incommingMsg <- res
+			b, err := json.Marshal(msgObj)
+			if err != nil {
+				log.Fatal("Failed to marshal", err)
+			}
+
+			deliveryChan := make(chan kafka.Event)
+			// produce a new message to the recipient topic
+			c.kafkaProducer.Produce(&kafka.Message{
+				TopicPartition: kafka.TopicPartition{Topic: &msgObj.RecipientID, Partition: kafka.PartitionAny},
+				Key:            nil,
+				Value:          b,
+			}, deliveryChan)
+
+			go c.checkDeliveryEvent(deliveryChan, msgObj)
 			break
 		}
 
 	}
 }
 
-// outgoing messages from the hub, marshal the message as json and send to the client
-func (c *ClientHandler) handleOutgoingMessages() {
-	for {
-		dispatchMsg := <-c.dispatchBuf
+// check the delivery channel after message is produced, if message is acknowledged from broker, relay message back to the sender
+func (c *ClientHandler) checkDeliveryEvent(deliveryChan chan kafka.Event, msg objects.MsgObj) {
+	defer close(deliveryChan)
 
-		err := c.conn.WriteJSON(dispatchMsg)
+	event := <-deliveryChan
+	m := event.(*kafka.Message)
+
+	if m.TopicPartition.Error != nil {
+		log.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+
+		// error occured when sending msg to Kafka, indicate error to user
+		c.conn.WriteJSON(msg)
+	} else {
+		log.Printf("Delivered message to topic %s [%d] at offset %v\n",
+			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
+
+		// successfully delivered to kafka topic
+		c.conn.WriteJSON(msg)
+	}
+
+}
+
+// Kafka Consumer, polls messages from Kafka for userID as topic id
+func (c *ClientHandler) handleKafkaConsumerMessage() {
+	for {
+		ev, err := c.kafkaConsumer.ReadMessage(100 * time.Millisecond)
+
+		if err != nil {
+			// Errors are informational and automatically handled by the consumer
+			continue
+		}
+		log.Printf("[Handler]: Consumed event from topic %s: key = %-10s value = %s\n",
+			*ev.TopicPartition.Topic, string(ev.Key), string(ev.Value))
+
+		// convert []byte to json
+		var msgObj objects.MsgObj
+		err = json.Unmarshal(ev.Value, &msgObj)
 		if err != nil {
 			log.Println(err)
-			return
 		}
 
-		log.Print("dispatched msg to :", dispatchMsg.RecipientID)
+		// send the consumed message to client
+		err = c.conn.WriteJSON(msgObj)
+		if err != nil {
+			log.Println("[handleKafkaConsumerMessage]: failed to send message,", err)
+			c.kafkaConsumer.Close()
+			c.kafkaProducer.Close()
+			c.conn.Close()
+			return
+		}
 	}
 }

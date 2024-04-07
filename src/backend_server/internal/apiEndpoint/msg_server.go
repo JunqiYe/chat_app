@@ -17,7 +17,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	// defer w.close()
 	// upgrade this connection to a WebSocket
 	// connection
@@ -33,9 +33,8 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client_H := NewWebSocketClientHandler(conn, hub)
+	client_H := NewWebSocketClientHandler(conn)
 	go client_H.handleIncommingMessages()
-	go client_H.handleOutgoingMessages()
 }
 
 func StartEndpoint(hub *Hub) {
@@ -53,7 +52,7 @@ func StartEndpoint(hub *Hub) {
 
 	// handles the websocket connection
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		wsEndpoint(hub, w, r)
+		wsEndpoint(w, r)
 	})
 
 	// handles the http request

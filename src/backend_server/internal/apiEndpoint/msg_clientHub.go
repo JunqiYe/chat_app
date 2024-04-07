@@ -3,7 +3,6 @@ package apiEndpoint
 import (
 	"backend_server/internal/objects"
 	"backend_server/internal/store"
-	"log"
 )
 
 type Hub struct {
@@ -48,23 +47,23 @@ func (h *Hub) HubRun() {
 				h.storage.StoreMsg(msg)
 			}
 
-			sender := msg.SenderID
-			recipient := msg.RecipientID
+			// sender := msg.SenderID
+			// recipient := msg.RecipientID
 
 			// check if recipient is currently connected to the server, and dispatch message
-			recipientHandler, ok := h.userBase[recipient]
-			if ok {
-				log.Println("[Hub]: dispatch message to", recipient)
-				recipientHandler.dispatchBuf <- msg
+			// recipientHandler, ok := h.userBase[recipient]
+			// if ok {
+			// 	log.Println("[Hub]: dispatch message to", recipient)
+			// 	recipientHandler.dispatchBuf <- msg
 
-			}
+			// }
 
-			// relay the message back to sender for comfirmation message is sent
-			senderHandler, ok := h.userBase[sender]
-			if ok {
-				log.Println("[Hub]: relay the information back to sender", sender)
-				senderHandler.dispatchBuf <- msg
-			}
+			// // relay the message back to sender for comfirmation message is sent
+			// senderHandler, ok := h.userBase[sender]
+			// if ok {
+			// 	log.Println("[Hub]: relay the information back to sender", sender)
+			// 	senderHandler.dispatchBuf <- msg
+			// }
 
 		}
 	}
