@@ -29,9 +29,10 @@ type ClientHandler struct {
 	// dispatchBuf   chan objects.MsgObj // msg from other user, dispatch to the current client
 	kafkaConsumer *kafka.Consumer
 	kafkaProducer *kafka.Producer
+	databaseChan  chan objects.MsgObj // channel to relay sucessfully sent messages and record to db
 }
 
-func NewWebSocketClientHandler(conn *websocket.Conn) *ClientHandler {
+func NewWebSocketClientHandler(conn *websocket.Conn, databaseChan chan objects.MsgObj) *ClientHandler {
 	c, err := kafka.NewConsumer((&kafka.ConfigMap{
 		"bootstrap.servers": "localhost:9092,localhost:9092",
 		"group.id":          "foo",
@@ -59,6 +60,7 @@ func NewWebSocketClientHandler(conn *websocket.Conn) *ClientHandler {
 		// dispatchBuf:   make(chan objects.MsgObj, 100),
 		kafkaConsumer: c,
 		kafkaProducer: p,
+		databaseChan:  databaseChan,
 	}
 	return handler
 }
@@ -92,7 +94,6 @@ func (c *ClientHandler) handleIncommingMessages() {
 			}
 
 			go c.handleKafkaConsumerMessage()
-			break
 
 		case "transmit":
 			b, err := json.Marshal(msgObj)
@@ -109,7 +110,6 @@ func (c *ClientHandler) handleIncommingMessages() {
 			}, deliveryChan)
 
 			go c.checkDeliveryEvent(deliveryChan, msgObj)
-			break
 		}
 
 	}
@@ -133,6 +133,7 @@ func (c *ClientHandler) checkDeliveryEvent(deliveryChan chan kafka.Event, msg ob
 
 		// successfully delivered to kafka topic
 		c.conn.WriteJSON(msg)
+		c.databaseChan <- msg
 	}
 
 }

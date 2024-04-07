@@ -161,7 +161,7 @@ func httpChatHistAPIEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 				log.Println(err.Error())
 				break
 			}
-			log.Println(msgs)
+			// log.Println("[CHATHIST API]", msgs)
 
 			w.Header().Add("Content-Type", "application/json")
 			w.Header().Add("Access-Control-Allow-Origin", "*")
