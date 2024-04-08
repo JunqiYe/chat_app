@@ -2,6 +2,7 @@ package apiEndpoint
 
 import (
 	"backend_server/internal/objects"
+	"backend_server/internal/store"
 	"log"
 	"net/http"
 
@@ -10,13 +11,15 @@ import (
 
 type Endpoint struct {
 	messageStoreChan chan objects.MsgObj
-	hub              *Hub
+	tokens           map[string]session
+	store            store.StorageInterface
 }
 
-func NewEndpoint(messageStoreChan chan objects.MsgObj, hub *Hub) *Endpoint {
+func NewEndpoint(messageStoreChan chan objects.MsgObj, store store.StorageInterface) *Endpoint {
 	return &Endpoint{
 		messageStoreChan: messageStoreChan,
-		hub:              hub,
+		tokens:           make(map[string]session),
+		store:            store,
 	}
 }
 
@@ -55,12 +58,12 @@ func (e Endpoint) StartEndpoint() {
 
 	// check login information
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		httpChatIndexEndpoint(e.hub, w, r)
+		e.httpChatIndexEndpoint(w, r)
 	})
 
 	// check login information
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		httpChatLoginEndpoint(e.hub, w, r)
+		e.httpChatLoginEndpoint(w, r)
 	})
 
 	// handles the websocket connection
@@ -70,11 +73,11 @@ func (e Endpoint) StartEndpoint() {
 
 	// handles the http request
 	http.HandleFunc("/api/convID", func(w http.ResponseWriter, r *http.Request) {
-		httpConvIDAPIEndpoint(e.hub, w, r)
+		e.httpConvIDAPIEndpoint(w, r)
 	})
 
 	http.HandleFunc("/api/chatHist", func(w http.ResponseWriter, r *http.Request) {
-		httpChatHistAPIEndpoint(e.hub, w, r)
+		e.httpChatHistAPIEndpoint(w, r)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

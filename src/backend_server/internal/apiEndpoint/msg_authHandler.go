@@ -24,7 +24,7 @@ func (s session) isExpired() bool {
 	return s.expireTime.Before(time.Now())
 }
 
-func httpChatIndexEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func (e Endpoint) httpChatIndexEndpoint(w http.ResponseWriter, r *http.Request) {
 	origin := r.Header.Get("Origin")
 	log.Println("[GET]: ", origin)
 	w.Header().Add("Access-Control-Allow-Origin", origin)
@@ -50,14 +50,14 @@ func httpChatIndexEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println("[GET]: reading session token:", token)
 
 		// check if token exists in the server
-		if _, ok := hub.tokens[token]; !ok {
+		if _, ok := e.tokens[token]; !ok {
 			log.Println("[GET]: session_token doesn't exist in server")
 			redirectToLogin(w)
 			return
 		}
 
 		// check if token expired
-		if hub.tokens[token].isExpired() {
+		if e.tokens[token].isExpired() {
 			log.Println("[GET]: session_token expired")
 			redirectToLogin(w)
 			return
@@ -65,7 +65,7 @@ func httpChatIndexEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 		cred := credentials{
-			UserID:   hub.tokens[token].uid,
+			UserID:   e.tokens[token].uid,
 			Password: "",
 		}
 		b, err := json.Marshal(cred)
@@ -87,7 +87,7 @@ type credentials struct {
 	Password string `json:"password"`
 }
 
-func httpChatLoginEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func (e Endpoint) httpChatLoginEndpoint(w http.ResponseWriter, r *http.Request) {
 	origin := r.Header.Get("Origin")
 	log.Println("[Login] origin:", origin)
 	w.Header().Add("Access-Control-Allow-Origin", origin)
@@ -97,7 +97,6 @@ func httpChatLoginEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Allow", "POST")
 		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Credential")
 		w.WriteHeader(http.StatusNoContent)
-		break
 
 	case "POST":
 		loginCredentials := credentials{}
@@ -121,7 +120,7 @@ func httpChatLoginEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 			expireTime: time.Now().Add(24 * time.Hour),
 		}
 
-		hub.tokens[sessionToken] = session
+		e.tokens[sessionToken] = session
 
 		cookie := http.Cookie{
 			Name:     "session_token",
@@ -139,7 +138,6 @@ func httpChatLoginEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		// w.Write(json.Marshal())
 		w.WriteHeader(http.StatusOK)
 
-		break
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 	}

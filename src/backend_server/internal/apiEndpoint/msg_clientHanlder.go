@@ -74,7 +74,7 @@ func (c *ClientHandler) handleIncommingMessages() {
 			if err == io.EOF {
 				log.Println("connection closed for ", c.userID)
 			} else {
-				log.Println(err)
+				log.Println("err", err)
 			}
 			return
 		}

@@ -21,7 +21,6 @@ func setLogOutputFile() *os.File {
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-
 	return f
 }
 
@@ -31,6 +30,7 @@ func main() {
 	log.SetOutput(f)
 	defer f.Close()
 
+	// channel used for sending new messages from client handlers to new message store handler
 	messageStoreChan := make(chan objects.MsgObj)
 	DynamoDBStore := cloudStore.NewDynamoDBClient()
 	// LocalStore := localStore.NewLocalStoreClient()
@@ -38,12 +38,7 @@ func main() {
 	store := store.NewMessageStoreHandler(DynamoDBStore, messageStoreChan)
 	go store.RunMessageStore()
 
-	hub := apiEndpoint.NewHub(DynamoDBStore)
-	go hub.HubRun()
-
-	// store := store.NewMessageStoreHandler(DynamoDBStore)
-
 	// start api endpoint
-	endpoint := apiEndpoint.NewEndpoint(messageStoreChan, hub)
+	endpoint := apiEndpoint.NewEndpoint(messageStoreChan, DynamoDBStore)
 	endpoint.StartEndpoint()
 }
