@@ -1,5 +1,5 @@
 cloudServer:
-	go build -o bin/cloudServer cmd/server/server.go
+	go build -o /bin/cloudServer cmd/server/server.go
 
 .PHONY: server
 server: cloudServer
