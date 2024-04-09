@@ -32,13 +32,13 @@ func main() {
 
 	// channel used for sending new messages from client handlers to new message store handler
 	messageStoreChan := make(chan objects.MsgObj)
-	DynamoDBStore := cloudStore.NewDynamoDBClient()
-	// LocalStore := localStore.NewLocalStoreClient()
+	storeClient := cloudStore.NewDynamoDBClient()
+	// storeClient := localStore.NewLocalStoreClient()
 
-	store := store.NewMessageStoreHandler(DynamoDBStore, messageStoreChan)
+	store := store.NewMessageStoreHandler(storeClient, messageStoreChan)
 	go store.RunMessageStore()
 
 	// start api endpoint
-	endpoint := apiEndpoint.NewEndpoint(messageStoreChan, DynamoDBStore)
+	endpoint := apiEndpoint.NewEndpoint(messageStoreChan, storeClient)
 	endpoint.StartEndpoint()
 }

@@ -34,7 +34,7 @@ type ClientHandler struct {
 
 func NewWebSocketClientHandler(conn *websocket.Conn, databaseChan chan objects.MsgObj) *ClientHandler {
 	c, err := kafka.NewConsumer((&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092,localhost:9092",
+		"bootstrap.servers": "172.19.67.237:9092,172.19.67.237:9092",
 		"group.id":          "foo",
 		"auto.offset.reset": "smallest"}))
 
@@ -44,7 +44,7 @@ func NewWebSocketClientHandler(conn *websocket.Conn, databaseChan chan objects.M
 	}
 
 	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092,localhost:9092",
+		"bootstrap.servers": "172.19.67.237:9092,172.19.67.237:9092",
 		"client.id":         "boo",
 		"acks":              "all"})
 
