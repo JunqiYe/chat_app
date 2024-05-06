@@ -4,7 +4,11 @@ go 1.20
 
 require github.com/aws/aws-sdk-go v1.49.5
 
-require github.com/juliangruber/go-intersect v1.1.0 // indirect
+require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2 // indirect
+	github.com/juliangruber/go-intersect v1.1.0 // indirect
+	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.8.2 // indirect
+)
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect

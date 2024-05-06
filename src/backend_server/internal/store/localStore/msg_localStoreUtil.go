@@ -133,13 +133,13 @@ const getAllConvIDs string = `
 	where senderID = ? or recipientID = ?;
 `
 
-func (s *LocalMsgStore) GetAllConvIDsFromUserID(userID string) []objects.ConverstationInfo {
+func (s *LocalMsgStore) GetAllConvIDsFromUserID(userID string) ([]objects.ConverstationInfo, error) {
 	userIDs := make([]objects.ConverstationInfo, 0)
 
 	rows, err := s.convDB.Query(getAllConvIDs, userID, userID, userID, userID)
 	if err != nil {
-		log.Panicln(err.Error())
-		return userIDs
+		// log.Panicln(err.Error())
+		return nil, err
 	}
 
 	// var ids []objects.ConverstationInfo
@@ -151,7 +151,7 @@ func (s *LocalMsgStore) GetAllConvIDsFromUserID(userID string) []objects.Convers
 		userIDs = append(userIDs, id)
 	}
 
-	return userIDs
+	return userIDs, nil
 }
 
 const GetAllConvIDUserIDPair_query string = `
@@ -209,10 +209,11 @@ const GetHistFromConvID_V2 string = `
 	order by timestamp desc
 `
 
-func (s *LocalMsgStore) GetHistFromConvID_V2(convID string) []objects.MsgObj {
+func (s *LocalMsgStore) GetHistFromConvID_V2(convID string) ([]objects.MsgObj, error) {
 	rows, err := s.convDB.Query(GetHistFromConvID_V2, convID)
 	if err != nil {
-		log.Panicln(err.Error())
+		// log.Panicln(err.Error())
+		return nil, err
 	}
 
 	var ids []objects.MsgObj = []objects.MsgObj{}
@@ -223,5 +224,5 @@ func (s *LocalMsgStore) GetHistFromConvID_V2(convID string) []objects.MsgObj {
 		ids = append(ids, id)
 	}
 
-	return ids
+	return ids, nil
 }

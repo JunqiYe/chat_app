@@ -1,11 +1,27 @@
 package apiEndpoint
 
 import (
+	"backend_server/internal/objects"
+	"backend_server/internal/store"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 )
+
+type Endpoint struct {
+	messageStoreChan chan objects.MsgObj
+	tokens           map[string]session
+	store            store.StorageInterface
+}
+
+func NewEndpoint(messageStoreChan chan objects.MsgObj, store store.StorageInterface) *Endpoint {
+	return &Endpoint{
+		messageStoreChan: messageStoreChan,
+		tokens:           make(map[string]session),
+		store:            store,
+	}
+}
 
 // We'll need to define an Upgrader
 // this will require a Read and Write buffer size
@@ -17,7 +33,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func (e Endpoint) wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	// defer w.close()
 	// upgrade this connection to a WebSocket
 	// connection
@@ -33,36 +49,35 @@ func wsEndpoint(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client_H := NewWebSocketClientHandler(conn, hub)
+	client_H := NewWebSocketClientHandler(conn, e.messageStoreChan)
 	go client_H.handleIncommingMessages()
-	go client_H.handleOutgoingMessages()
 }
 
-func StartEndpoint(hub *Hub) {
+func (e Endpoint) StartEndpoint() {
 	log.Println("Starting WebSocket server...")
 
 	// check login information
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		httpChatIndexEndpoint(hub, w, r)
+		e.httpChatIndexEndpoint(w, r)
 	})
 
 	// check login information
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		httpChatLoginEndpoint(hub, w, r)
+		e.httpChatLoginEndpoint(w, r)
 	})
 
 	// handles the websocket connection
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		wsEndpoint(hub, w, r)
+		e.wsEndpoint(w, r)
 	})
 
 	// handles the http request
 	http.HandleFunc("/api/convID", func(w http.ResponseWriter, r *http.Request) {
-		httpConvIDAPIEndpoint(hub, w, r)
+		e.httpConvIDAPIEndpoint(w, r)
 	})
 
 	http.HandleFunc("/api/chatHist", func(w http.ResponseWriter, r *http.Request) {
-		httpChatHistAPIEndpoint(hub, w, r)
+		e.httpChatHistAPIEndpoint(w, r)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
