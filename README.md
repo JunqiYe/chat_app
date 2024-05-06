@@ -1,6 +1,9 @@
 ## Demo
 ![Screenshot 2023-12-22 223122](https://github.com/JunqiYe/chat_app/assets/29295588/37dd245b-2099-4f38-86ee-99f19997b2f5)
 ![Screenshot 2023-12-22 223336](https://github.com/JunqiYe/chat_app/assets/29295588/9a66c917-1fd2-44a3-8071-23655cf89c66)
+### backend architecture
+![Untitled Diagram drawio(3)](https://github.com/JunqiYe/chat_app/assets/29295588/05eb81d0-627b-45e1-b104-c320d57d8cc1)
+
 
 ## todos
 - [x] update front end
